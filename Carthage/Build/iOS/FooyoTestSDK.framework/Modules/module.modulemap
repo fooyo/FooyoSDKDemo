@@ -1,0 +1,10 @@
+framework module FooyoTestSDK {
+  umbrella header "FooyoTestSDK.h"
+
+  export *
+  module * { export * }
+}
+
+module FooyoTestSDK.Swift {
+    header "FooyoTestSDK-Swift.h"
+}
