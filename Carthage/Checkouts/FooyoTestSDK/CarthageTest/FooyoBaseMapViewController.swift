@@ -12,7 +12,7 @@ import AlamofireImage
 import SVProgressHUD
 
 public protocol FooyoBaseMapViewControllerDelegate: class {
-    func didTapInformationWindow(category: String, levelOneId: Int, levelTwoId: Int?)
+    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex)
 }
 //import
 public class FooyoBaseMapViewController: UIViewController {
@@ -149,11 +149,22 @@ public class FooyoBaseMapViewController: UIViewController {
     fileprivate var selectedId: Int?
     fileprivate var showOnMapMode: Bool = false
     //MARK: - Life Cycle
-    public init(category: String? = nil, levelOneId: Int? = nil) {
+//    public init(category: String? = nil, levelOneId: Int? = nil) {
+//        super.init(nibName: nil, bundle: nil)
+//        self.selectedCategory = category
+//        self.selectedId = levelOneId
+//        if category != nil {
+//            self.showOnMapMode = true
+//        } else {
+//            self.showOnMapMode = false
+//        }
+//    }
+    
+    public init(index: FooyoIndex? = nil) {
         super.init(nibName: nil, bundle: nil)
-        self.selectedCategory = category
-        self.selectedId = levelOneId
-        if category != nil {
+        self.selectedCategory = index?.category
+        self.selectedId = index?.levelOneId
+        if selectedCategory != nil {
             self.showOnMapMode = true
         } else {
             self.showOnMapMode = false
@@ -581,7 +592,8 @@ extension FooyoBaseMapViewController: MGLMapViewDelegate {
             if let item = anno.item {
                 let category = (item.category?.name)!
                 let levelOneId = (item.ospId)!
-                self.delegate?.didTapInformationWindow(category: category, levelOneId: levelOneId, levelTwoId: nil)
+                let index = FooyoIndex(category: category, levelOneId: levelOneId)
+                self.delegate?.fooyoBaseMapViewController(didSelectInformationWindow: index)
             }
             debugPrint("taped on the cell")
         }

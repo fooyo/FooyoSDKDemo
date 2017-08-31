@@ -19,8 +19,10 @@ public class FooyoCreatePlanViewController: UIViewController {
     
     override public func viewDidLoad() {
         super.viewDidLoad()
-
         // Do any additional setup after loading the view.
+        
+        let leftBtn = UIBarButtonItem.init(title: "Cancel", style: .plain, target: self, action: #selector(cancelHandler))
+        self.navigationItem.leftBarButtonItem = leftBtn
         self.applyGeneralVCSettings(vc: self)
         NotificationCenter.default.addObserver(self, selector: #selector(displayAlert(notification:)), name: Constants.notifications.FooyoDisplayAlert, object: nil)
 
@@ -44,6 +46,9 @@ public class FooyoCreatePlanViewController: UIViewController {
     
     func viewHandler() {
         featureUnavailable()
+    }
+    func cancelHandler() {
+        _ = dismiss(animated: true, completion: nil)
     }
     func displayAlert(notification: Notification) {
         if let info = notification.object as? [String: String] {

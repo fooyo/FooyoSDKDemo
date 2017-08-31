@@ -14,7 +14,7 @@ class MainTabViewController: UITabBarController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         prepareTabs()
-        selectedIndex = 0
+        selectedIndex = 2
     }
     
     override func didReceiveMemoryWarning() {
@@ -59,10 +59,9 @@ class MainTabViewController: UITabBarController {
 }
 
 extension MainTabViewController: FooyoBaseMapViewControllerDelegate {
-    func didTapInformationWindow(category: String, levelOneId: Int, levelTwoId: Int?) {
-        debugPrint(category)
-        debugPrint(levelOneId)
-        debugPrint(levelTwoId)
-        
+    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex) {
+        debugPrint(index.category)
+        debugPrint(index.levelOneId)
+        debugPrint(index.levelTwoId)
     }
 }

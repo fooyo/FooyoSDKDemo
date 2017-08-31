@@ -88,12 +88,14 @@ class ShowOnMapInputViewController: UIViewController {
             }
             if let id = id {
                 if id == "" {
-                    let vc = FooyoBaseMapViewController(category: category, levelOneId: nil)
+                    let index = FooyoIndex(category: category)
+                    let vc = FooyoBaseMapViewController(index: index)
                     vc.delegate = self
                     self.navigationController?.pushViewController(vc, animated: true)
                 } else {
                     if let valid = Int(id) {
-                        let vc = FooyoBaseMapViewController(category: category, levelOneId: valid)
+                        let index = FooyoIndex(category: category, levelOneId: valid)
+                        let vc = FooyoBaseMapViewController(index: index)
                         vc.delegate = self
                         self.navigationController?.pushViewController(vc, animated: true)
                     } else {
@@ -101,7 +103,8 @@ class ShowOnMapInputViewController: UIViewController {
                     }
                 }
             } else {
-                let vc = FooyoBaseMapViewController(category: category, levelOneId: nil)
+                let index = FooyoIndex(category: category)
+                let vc = FooyoBaseMapViewController(index: index)
                 vc.delegate = self
                 self.navigationController?.pushViewController(vc, animated: true)
             }
@@ -120,10 +123,10 @@ class ShowOnMapInputViewController: UIViewController {
 }
 
 extension ShowOnMapInputViewController: FooyoBaseMapViewControllerDelegate {
-    func didTapInformationWindow(category: String, levelOneId: Int, levelTwoId: Int?) {
-        debugPrint(category)
-        debugPrint(levelOneId)
-        debugPrint(levelTwoId)
+    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex) {
+        debugPrint(index.category)
+        debugPrint(index.levelOneId)
+        debugPrint(index.levelTwoId)
     }
 }
 

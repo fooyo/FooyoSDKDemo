@@ -46,6 +46,8 @@
 		852037E21F1DE4C2000D2B7F /* FooyoSDK.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 852037D81F1DA6F8000D2B7F /* FooyoSDK.bundle */; };
 		8553744F1F32339F005CC168 /* AlamofireImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85AF46E21F31D05D002CC6E5 /* AlamofireImage.framework */; };
 		855374511F3233C1005CC168 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 855374501F3233C1005CC168 /* Alamofire.framework */; };
+		855DFC2A1F569D8100684194 /* FooyoIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 855DFC291F569D8100684194 /* FooyoIndex.swift */; };
+		855DFC2B1F569FF700684194 /* FooyoIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 855DFC291F569D8100684194 /* FooyoIndex.swift */; };
 		858C605F1F524F3D00750BDF /* FeatureTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 858C605E1F524F3D00750BDF /* FeatureTableViewCell.swift */; };
 		858C60621F525D0C00750BDF /* ShowOnMapInputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 858C60611F525D0C00750BDF /* ShowOnMapInputViewController.swift */; };
 		858C60651F52FBB200750BDF /* FeatureInputTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 858C60641F52FBB200750BDF /* FeatureInputTableViewCell.swift */; };
@@ -189,6 +191,7 @@
 		8520378B1F1D0E08000D2B7F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		852037D81F1DA6F8000D2B7F /* FooyoSDK.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = FooyoSDK.bundle; sourceTree = "<group>"; };
 		855374501F3233C1005CC168 /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = Carthage/Build/iOS/Alamofire.framework; sourceTree = "<group>"; };
+		855DFC291F569D8100684194 /* FooyoIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FooyoIndex.swift; sourceTree = "<group>"; };
 		858C605E1F524F3D00750BDF /* FeatureTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeatureTableViewCell.swift; sourceTree = "<group>"; };
 		858C60611F525D0C00750BDF /* ShowOnMapInputViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShowOnMapInputViewController.swift; sourceTree = "<group>"; };
 		858C60641F52FBB200750BDF /* FeatureInputTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeatureInputTableViewCell.swift; sourceTree = "<group>"; };
@@ -445,6 +448,7 @@
 		85AF46E61F31D1D7002CC6E5 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				855DFC291F569D8100684194 /* FooyoIndex.swift */,
 				858C606F1F530B3000750BDF /* Pagination.swift */,
 				858C606D1F5308F200750BDF /* Instruction.swift */,
 				858C606B1F5308CC00750BDF /* RouteTest.swift */,
@@ -676,6 +680,7 @@
 				858C60861F53802100750BDF /* CAPSPageMenu.swift in Sources */,
 				85C51D451F4B3E2200700BEF /* BaseViewController.swift in Sources */,
 				85AF46EA1F31D24B002CC6E5 /* BaseModel.swift in Sources */,
+				855DFC2A1F569D8100684194 /* FooyoIndex.swift in Sources */,
 				85C51D411F4AE0F500700BEF /* Category.swift in Sources */,
 				85C51D431F4AE61700700BEF /* UIViewController-SS.swift in Sources */,
 				858C60881F53802100750BDF /* MenuItemView.swift in Sources */,
@@ -760,6 +765,7 @@
 				85A39D2F1F514FC000BDDD9A /* ShadowButton.swift in Sources */,
 				85A39D301F514FC000BDDD9A /* MyCustomPointAnnotation.swift in Sources */,
 				85A39D311F514FC000BDDD9A /* CustomCalloutViewItinerary.swift in Sources */,
+				855DFC2B1F569FF700684194 /* FooyoIndex.swift in Sources */,
 				85A39D321F514FC000BDDD9A /* CustomCalloutView.swift in Sources */,
 				85A39D331F514FC000BDDD9A /* CustomAnnotationView.swift in Sources */,
 				85A39D341F514FC000BDDD9A /* Theme.swift in Sources */,

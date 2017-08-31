@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import FooyoTestSDK
 
 class ExploreViewController: UIViewController {
 
@@ -17,9 +18,8 @@ class ExploreViewController: UIViewController {
         t.separatorStyle = .none
         return t
     }()
-    fileprivate var featureNames = ["Show On Map", "Add To Plan", "Navigation"]
-    fileprivate var featureColors = ["1abc9c", "16a085", "27ae60"]
-    //
+    fileprivate var featureNames = ["Show On Map", "Create Plan", "Add To Plan", "Navigation"]
+    fileprivate var featureColors = ["1abc9c", "16a085", "f1c40f", "f39c12"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -79,7 +79,7 @@ class ExploreViewController: UIViewController {
 
 extension ExploreViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        return 4
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let name = featureNames[indexPath.row]
@@ -100,10 +100,14 @@ extension ExploreViewController: UITableViewDelegate, UITableViewDataSource {
             vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: true)
         case 1:
+            let vc = FooyoCreatePlanViewController()
+            let nav = UINavigationController(rootViewController: vc)
+            self.present(nav, animated: true, completion: nil)
+        case 2:
             let vc = AddToPlanInputViewController()
             vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: true)
-        case 2:
+        case 3:
             let vc = NavigationInputViewController()
             vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: true)

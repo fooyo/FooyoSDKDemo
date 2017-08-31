@@ -204,10 +204,15 @@ public class FooyoNavigationViewController: UIViewController {
 //    }()
     
     // MARK: - Life Cycle
-    public init(startCategory: String? = nil, startLevelOneId: Int? = nil, startLevelTwoId: Int? = nil, endCategory: String?, endLevelOneId: Int?, endLevelTwoId: Int? = nil ) {
+//    public init(startCategory: String? = nil, startLevelOneId: Int? = nil, startLevelTwoId: Int? = nil, endCategory: String?, endLevelOneId: Int?, endLevelTwoId: Int? = nil ) {
+//        super.init(nibName: nil, bundle: nil)
+//        
+//    }
+    
+    public init(startIndex: FooyoIndex? = nil, endIndex: FooyoIndex) {
         super.init(nibName: nil, bundle: nil)
-        
     }
+
     
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

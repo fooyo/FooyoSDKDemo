@@ -60,10 +60,9 @@ class MainTabViewController: UITabBarController {
 }
 
 extension MainTabViewController: FooyoBaseMapViewControllerDelegate {
-    func didTapInformationWindow(category: String, levelOneId: Int, levelTwoId: Int?) {
-        debugPrint(category)
-        debugPrint(levelOneId)
-        debugPrint(levelTwoId)
-        
+    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex) {
+        debugPrint(index.category)
+        debugPrint(index.levelOneId)
+        debugPrint(index.levelTwoId)
     }
 }

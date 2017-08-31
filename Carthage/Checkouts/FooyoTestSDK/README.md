@@ -45,28 +45,55 @@ import FooyoTestSDK
 
 ## General SDK Parameters
 
-- `category`: Category Name (`String Value`);
-- `levelOneId`: The id for all the categories except the `Hotspots` of `Non-linear Trails` (`Int Value`);
-- `levelTwoId`: The id for all the `Hotspots` of `Non-linear Trails` (`Int Value`)
+```swift
+public class FooyoIndex: NSObject {
+    var category: String?
+    var levelOneId: Int?
+    var levelTwoId: Int?
+}
+```
+`FooyoIndex` is designed for an easy communication between the base system and the SDK functions. For all the locations, trails and the hotspots of the trails, they would have their own `FooyoIndex` for a better reference. `FooyoIndex` incldues the following parameters:
 
-Only `Hotspots` of `Non-linear Trails` will have `levelTwoId`. Their `levelOneId` is `Non-linear Trail` Id.
+- `category`: Category Name (`String Value`);
+- `levelOneId`: The id for all the locations and trails (`Int Value`);
+- `levelTwoId`: The hotspot id for all the `Hotspots` of `Non-linear Trails` (`Int Value`)
+
+Only `Hotspots` of `Non-linear Trails` will have `levelTwoId`. Their `levelOneId` is the `Non-linear Trail` Id.
 
 ## BaseMap SDK
 
 ### Initialization
 
 ```swift
-let vc = FooyoBaseMapViewController(category: String?, levelOneId: Int?)
+let vc = FooyoBaseMapViewController(index: FooyoIndex?)
 vc.delegate = self
 ```
 
-### SDK Variables
+### Variables
 
-Both of the two variables `category` and `levelOneId` are **optional**:
+For this function, the input parameter `FooyoIndex` would only inclue `categroy` and `levelOneId`. This function won't consider the `levelTwoId`, which means it can not be used to show a specific hotspot (of a non-linear trail) on the map.
 
-- To show all the locations belong to a specific category, please specify the category name only;
-- To show a specific location, please specify the category name and the id of this location;
-- To show all the locations, please do not sepcify any of them.
+### Usage
+
+- To show all the locations belong to a specific category, please specify the category name only：
+
+```swift
+let index = FooyoIndex(category: String)
+let vc = FooyoBaseMapViewController(index: FooyoIndex?)
+```
+
+- To show a specific location/trail, please specify the category name and the id of this location/trail:
+
+```swift
+let index = FooyoIndex(category: String, levelOneId: Int)
+let vc = FooyoBaseMapViewController(index: FooyoIndex?)
+```
+
+- To show all the locations/trails, please do not sepcify the index:
+
+```swift
+let vc = FooyoBaseMapViewController()
+```
 
 ### Delegate Function
 
@@ -75,33 +102,45 @@ Delegate Prototal: `FooyoBaseMapViewControllerDelegate`.
 Delegate Function:
 
 ```swift
-func didTapInformationWindow(category: String, levelOneId: Int, levelTwoId: Int?) {
-        debugPrint(category)
-        debugPrint(levelOneId)
-        debugPrint(levelTwoId)
+func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex) {
+        debugPrint(index.category)
+        debugPrint(index.levelOneId)
+        debugPrint(index.levelTwoId)
 }
 ```
 
-This function will be called when the information window is clicked.
+This function will be called when the information window is clicked:
+
+- If the information window of a location/linear trail is clicked, the `category` and the `levelOneId` will be returned;
+- If the information window of a hotspot (of a non-linear trail) is clicked, the `category`, `levelOneId` as well as the `levelTwoId` will all be returned.
 
 ## Navigation SDK
 
 ### Initialization
 
 ```swift
-let vc = FooyoNavigationViewController(startCategory: String?, startLevelOneId: Int? startLevelTwoId: Int?, endCategory: String?, endLevelOneId: Int?, endLevelTwoId: Int?)
+let vc = FooyoNavigationViewController(startIndex: FooyoIndex?, endIndex: FooyoIndex)
 ```
 
 ### SDK Variables
 
-- `startCategory`: category name of the start location (**optional**);
-- `startLevelOneId`: level one category id of the start location (**optional**);
-- `startLevelTwoId`: level two category id of the start location (**optional**);
-- `endCategory`: category name of the end location (**compulsory**);
-- `startLevelOneId`: level one category id of the end location (**compulsory**);
-- `startLevelTwoId`: level two category id of the end location (**optional**).
+- `startIndex`: FooyoIndex of the start location (**optional**);
 
-When the starting point is unspecified, the user's current location will be considered as the starting point.
+- `endIndex`: FooyoIndex of the end location (**compulsory**);
+
+
+When the `startIndex` is unspecified, the user's current location will be considered as the starting point.
+
+
+## Create Plan SDK
+
+### Initialization
+
+```swift
+let vc = FooyoCreatePlanViewController()
+let nav = UINavigationController(rootViewController: vc)
+self.present(nav, animated: true, completion: nil)
+```
 
 ## My Plans SDK
 
@@ -116,11 +155,10 @@ let vc = FooyoBaseMapViewController()
 ### Initialization
 
 ```swift
-let vc = FooyoAddToPlanViewController(category: String, levelOneId: Int)
+let vc = FooyoAddToPlanViewController(index: FooyoIndex)
 ```
 
 ### SDK Variables
 
-- `category`: category name of the location (**compulsory**);
-- `levelOneId`: level one category id of the location (**compulsory**);
+- `index`: FooyoIndex of the location/trail intended to add to a specific plan (**compulsory**);
 

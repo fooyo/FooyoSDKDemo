@@ -77,7 +77,8 @@ class NavigationInputViewController: UIViewController {
     
     func btnHandler() {
         //        debugDescription
-        let vc = FooyoNavigationViewController(endCategory: "Events", endLevelOneId: 11)
+        let endIndex = FooyoIndex(category: "Events", levelOneId: 11)
+        let vc = FooyoNavigationViewController(endIndex: endIndex)
         self.navigationController?.pushViewController(vc, animated: true)
     }
 //    func categoryChanged(sender: UITextField) {
