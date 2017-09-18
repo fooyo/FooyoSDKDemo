@@ -24,7 +24,7 @@ class SetUserViewController: UIViewController {
         let t = UIButton()
         t.backgroundColor = .black
         t.setTitleColor(.white, for: .normal)
-        t.setTitle("Show On Map", for: .normal)
+        t.setTitle("Set", for: .normal)
         return t
     }()
     

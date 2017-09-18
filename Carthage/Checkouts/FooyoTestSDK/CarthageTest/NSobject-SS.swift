@@ -58,6 +58,16 @@ extension NSObject {
         vc.view.backgroundColor = .white
     }
     
+    func fetchMyPlans() {
+        HttpClient.sharedInstance.getItineraries { (itineraries, isSuccess) in
+            if isSuccess {
+                if let itineraries = itineraries {
+                    FooyoItinerary.myItineraries = itineraries
+                    FooyoItinerary.sort()
+                }
+            }
+        }
+    }
     
     func PostAlertNotification(title: String, message: String) {
         let info = [

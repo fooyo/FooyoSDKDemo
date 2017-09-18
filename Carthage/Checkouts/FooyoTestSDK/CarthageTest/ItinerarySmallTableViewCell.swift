@@ -1,42 +1,37 @@
 //
-//  ItineraryTableViewCell.swift
-//  SmartSentosa
+//  ItinerarySmallTableViewCell.swift
+//  FooyoSDKExample
 //
-//  Created by Yangfan Liu on 20/4/17.
+//  Created by Yangfan Liu on 18/9/17.
 //  Copyright © 2017 Yangfan Liu. All rights reserved.
 //
 
 import UIKit
-//protocol ItineraryTableViewCellDelegate: class {
-//    func displayTickets(itinerary: Itinerary)
-//}
 
-class ItineraryTableViewCell: UITableViewCell {
-    static let reuseIdentifier = "itineraryTableViewCell"
-//    weak var delegate: ItineraryTableViewCellDelegate?
-    
+class ItinerarySmallTableViewCell: UITableViewCell {
+    static let reuseIdentifier = "ItinerarySmallTableViewCell"
     fileprivate var itinerary: FooyoItinerary?
     
     fileprivate var nameLabel: UILabel! = {
         let t = UILabel()
-        t.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 18))
+        t.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 14))
         t.textColor = UIColor.black
         t.numberOfLines = 0
         return t
     }()
     fileprivate var tagLabel: UILabel! = {
         let t = UILabel()
-        t.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 12))
+        t.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 11))
         t.textColor = UIColor.ospGrey
         t.numberOfLines = 0
         return t
     }()
     fileprivate var collectionView: UICollectionView! = {
         let layout = UICollectionViewFlowLayout()
-        layout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        layout.itemSize = CGSize(width: Scale.scaleY(y: 110), height: Scale.scaleY(y: 110))
-        layout.minimumInteritemSpacing = 10
-        layout.minimumLineSpacing = 10
+        layout.sectionInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        layout.itemSize = CGSize(width: Scale.scaleY(y: 75), height: Scale.scaleY(y: 75))
+        layout.minimumInteritemSpacing = 8
+        layout.minimumLineSpacing = 8
         layout.scrollDirection = .horizontal
         let t = UICollectionView(frame: CGRect(x: 0, y: 0, width: 0, height: 0), collectionViewLayout: layout)
         t.register(ItinerarySummaryCollectionViewCell.self, forCellWithReuseIdentifier: ItinerarySummaryCollectionViewCell.reuseIdentifier)
@@ -73,30 +68,29 @@ class ItineraryTableViewCell: UITableViewCell {
     
     func setConstraints() {
         nameLabel.snp.remakeConstraints { (make) in
-            make.top.equalTo(Scale.scaleY(y: 10))
-            make.leading.equalTo(Scale.scaleX(x: 10))
-            make.trailing.equalTo(Scale.scaleX(x: -10))
+            make.top.equalTo(Scale.scaleY(y: 5))
+            make.leading.equalTo(Scale.scaleX(x: 8))
+            make.trailing.equalTo(Scale.scaleX(x: -8))
         }
         tagLabel.snp.remakeConstraints { (make) in
             make.leading.equalTo(nameLabel)
             make.trailing.equalTo(nameLabel)
-            make.top.equalTo(nameLabel.snp.bottom).offset(Scale.scaleY(y: 5))
+            make.top.equalTo(nameLabel.snp.bottom).offset(Scale.scaleY(y: 2))
         }
         collectionView.snp.remakeConstraints { (make) in
             make.leading.equalToSuperview()
             make.trailing.equalToSuperview()
-            make.bottom.equalToSuperview().offset(Scale.scaleY(y: -4))
-            make.top.equalTo(tagLabel.snp.bottom).offset(Scale.scaleY(y: 3))
+            make.bottom.equalToSuperview().offset(Scale.scaleY(y: -1))
+            make.top.equalTo(tagLabel.snp.bottom).offset(Scale.scaleY(y: 1))
         }
     }
 }
 
 
-extension ItineraryTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource {
+extension ItinerarySmallTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
-    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if let items = itinerary?.items {
             return items.count + 1
@@ -114,4 +108,5 @@ extension ItineraryTableViewCell: UICollectionViewDelegate, UICollectionViewData
         cell.configureWith(item: item)
         return cell
     }
+    
 }

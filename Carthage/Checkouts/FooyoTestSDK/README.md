@@ -31,6 +31,7 @@ Run `carthage update` to build the framework and drag the following built
 `TGPControls.framework`
 `CoreActionSheetPicker`
 `JVFloatLabeledText`
+`TPKeyboardAvoidingKit`
 `FooyoTestSDK.framework`
 as well as the bundle file `FooyoSDK.bundle` inside `FooyoTestSDK.framework`
 into your Xcode project.

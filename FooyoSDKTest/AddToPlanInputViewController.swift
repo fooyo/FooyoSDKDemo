@@ -100,7 +100,7 @@ class AddToPlanInputViewController: UIViewController {
         }
         
         let index = FooyoIndex(category: category!, levelOneId: id!)
-        let vc = FooyoAddToPlanViewController(index: index)
+        let vc = FooyoAddToPlanViewController(index: index, userId: "test")
         let nav = UINavigationController(rootViewController: vc)
         nav.navigationBar.isHidden = true
         nav.modalPresentationStyle = .overFullScreen

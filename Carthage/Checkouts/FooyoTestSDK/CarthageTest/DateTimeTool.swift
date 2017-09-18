@@ -16,7 +16,7 @@ class DateTimeTool: NSObject {
     static var formatFour = "HH:mm a"
     static var formatFive = "yyyy-MM-dd"
     static var formatSix = "HH:mm a, yyyy-MM-dd"
-    static var formatSeven = "dd MM yyyy"
+    static var formatSeven = "dd MMM yyyy"
 
     // MARK: - Date to String
     class func fromDateToFormatOne(date: Date) -> String {

@@ -1,7 +1,7 @@
 binary "https://www.mapbox.com/ios-sdk/Mapbox-iOS-SDK.json" "3.6.3"
 github "Alamofire/Alamofire" "4.5.1"
 github "Alamofire/AlamofireImage" "3.3.0"
-github "Pushian/FooyoTestSDK" "1.2.2"
+github "Pushian/FooyoTestSDK" "1.2.3"
 github "SVProgressHUD/SVProgressHUD" "2.2.1"
 github "SnapKit/SnapKit" "3.2.0"
 github "SwiftArchitect/TGPControls" "v4.0.0"

@@ -12,7 +12,13 @@ class FooyoUser: BaseModel, NSCoding {
 
     static var currentUser = FooyoUser()
     
-    var userId: String?
+    var userId: String? {
+        didSet {
+            if FooyoItinerary.myItineraries == nil {
+                fetchMyPlans()
+            }
+        }
+    }
     var searchHistory: [Int]?
     //
 //    init(json: JSON) {

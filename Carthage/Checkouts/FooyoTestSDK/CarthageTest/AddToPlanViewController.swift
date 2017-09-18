@@ -7,9 +7,11 @@
 //
 
 import UIKit
+import SVProgressHUD
 
 public class FooyoAddToPlanViewController: UIViewController {
     
+    fileprivate var index: FooyoIndex?
     fileprivate var overlay: UIView! = {
         let t = UIView()
         t.backgroundColor = UIColor.ospOverlay
@@ -17,18 +19,23 @@ public class FooyoAddToPlanViewController: UIViewController {
     }()
     fileprivate var container: UIView! = {
         let t = UIView()
-        t.backgroundColor = .white
+        t.backgroundColor = UIColor.white
         t.layer.cornerRadius = 5
         t.clipsToBounds = true
+        t.isUserInteractionEnabled = true
+        return t
+    }()
+    fileprivate var containerOverlay: UIView! = {
+        let t = UIView()
+        t.backgroundColor = UIColor.ospGrey10
         t.isUserInteractionEnabled = true
         return t
     }()
     
     fileprivate var inforLabel: UILabel! = {
         let t = UILabel()
-        t.text = "Choose An Existing Plan"
-//        t.numberOfLines = 0
-        t.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 12))
+        t.text = "Add To An Existing Plan"
+        t.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 16))
         t.textColor = UIColor.ospSentosaBlue
         t.textAlignment = .center
         return t
@@ -52,19 +59,14 @@ public class FooyoAddToPlanViewController: UIViewController {
         t.separatorColor = UIColor.ospGrey50
         t.separatorInset = UIEdgeInsets.zero
         t.tableFooterView = UIView()
-        t.register(FakeTableViewCell.self, forCellReuseIdentifier: FakeTableViewCell.reuseIdentifier)
+        t.register(ItinerarySmallTableViewCell.self, forCellReuseIdentifier: ItinerarySmallTableViewCell.reuseIdentifier)
         return t
     }()
     
-    public init(index: FooyoIndex) {
+    public init(index: FooyoIndex, userId: String) {
         super.init(nibName: nil, bundle: nil)
-//        self.selectedCategory = category
-//        self.selectedId = levelOneId
-//        if category != nil {
-//            self.showOnMapMode = true
-//        } else {
-//            self.showOnMapMode = false
-//        }
+        self.index = index
+        FooyoUser.currentUser.userId = userId
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -79,6 +81,7 @@ public class FooyoAddToPlanViewController: UIViewController {
         view.backgroundColor = .clear
         view.addSubview(overlay)
         view.addSubview(container)
+        container.addSubview(containerOverlay)
         container.addSubview(newBtn)
         container.addSubview(inforLabel)
         container.addSubview(tableView)
@@ -88,22 +91,47 @@ public class FooyoAddToPlanViewController: UIViewController {
         view.addGestureRecognizer(gesture)
         newBtn.addTarget(self, action: #selector(newHandler), for: .touchUpInside)
         setConstraint()
+        loadData()
     }
-
+    
     override public func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
 
+    func loadData() {
+        if let _ = FooyoUser.currentUser.userId {
+            if FooyoItinerary.myItineraries == nil {
+                SVProgressHUD.show()
+                HttpClient.sharedInstance.getItineraries { (itineraries, isSuccess) in
+                    debugPrint("getItineraries")
+                    SVProgressHUD.dismiss()
+                    if isSuccess {
+                        if let itineraries = itineraries {
+                            FooyoItinerary.myItineraries = itineraries
+                            FooyoItinerary.sort()
+                            self.tableView.reloadData()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     func setConstraint() {
         overlay.snp.makeConstraints { (make) in
             make.edges.equalToSuperview()
         }
         container.snp.makeConstraints { (make) in
-            make.center.equalToSuperview()
+//            make.center.equalToSuperview()
             make.leading.equalTo(Scale.scaleX(x: 30))
             make.trailing.equalTo(Scale.scaleX(x: -30))
-            make.height.equalTo(400)
+//            make.height.equalTo(400)
+            make.top.equalTo(Scale.scaleY(y: 100))
+            make.bottom.equalTo(Scale.scaleY(y: -150))
+        }
+        containerOverlay.snp.makeConstraints { (make) in
+            make.edges.equalToSuperview()
         }
         inforLabel.snp.makeConstraints { (make) in
             make.top.equalTo(10)
@@ -111,8 +139,8 @@ public class FooyoAddToPlanViewController: UIViewController {
             make.trailing.equalToSuperview()
         }
         tableView.snp.makeConstraints { (make) in
-            make.top.equalTo(inforLabel.snp.bottom).offset(5)
-            make.bottom.equalTo(newBtn.snp.top).offset(-20)
+            make.top.equalTo(inforLabel.snp.bottom).offset(10)
+            make.bottom.equalTo(newBtn.snp.top).offset(-10)
             make.leading.equalToSuperview()
             make.trailing.equalToSuperview()
         }
@@ -132,33 +160,27 @@ public class FooyoAddToPlanViewController: UIViewController {
 }
 
 extension FooyoAddToPlanViewController: UITableViewDelegate, UITableViewDataSource {
-    //    func numberOfSections(in tableView: UITableView) -> Int {
-    //        return 2
-    //    }
     
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        return FooyoItinerary.todayAndFuture.count
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        //        if itineraries.count == 0 {
-        //            let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier, for: indexPath) as! EmptyTableViewCell
-        //            cell.configureWith("The list is empty")
-        //            return cell
-        //        } else {
-        let cell = tableView.dequeueReusableCell(withIdentifier: FakeTableViewCell.reuseIdentifier, for: indexPath)  as! FakeTableViewCell
-        //            let itinerary = itineraries[indexPath.row]
-        //            debugPrint(itinerary.tickets)
-        ////            let gesture = UITapGestureRecognizer(target: self, action: #selector())
-        //            cell.delegate = self
-        //            cell.configureWith(itinerary: itinerary)
-        //
-        return cell
-        //        }
+        if FooyoItinerary.todayAndFuture.count == 0 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier, for: indexPath) as! EmptyTableViewCell
+            cell.configureWith("There is no existing plan.\nCreate a new plan to enjoy your visit.")
+            return cell
+        } else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: ItinerarySmallTableViewCell.reuseIdentifier, for: indexPath)  as! ItinerarySmallTableViewCell
+            let plan = FooyoItinerary.todayAndFuture[indexPath.row]
+            cell.configureWith(itinerary: plan)
+            //
+            return cell
+            }
     }
     
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return Scale.scaleY(y: 80)
+        return Scale.scaleY(y: 130)
     }
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

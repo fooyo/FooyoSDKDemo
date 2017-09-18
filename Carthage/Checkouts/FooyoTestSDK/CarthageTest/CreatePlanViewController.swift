@@ -300,6 +300,7 @@ public class FooyoCreatePlanViewController: UIViewController {
     }
     
     func dateHandler() {
+        view.endEditing(true)
         let startDate = Date()
         let datePicker = ActionSheetDatePicker(title: "Arrival Date", datePickerMode: .date, selectedDate: startDate, doneBlock: {
             picker, value, index in
@@ -326,6 +327,7 @@ public class FooyoCreatePlanViewController: UIViewController {
     }
     
     func budgetHandler() {
+        view.endEditing(true)
         let picker = ActionSheetStringPicker(title: "Select Budget", rows: ["Less than $50", "$50-$150", "$150 and above"], initialSelection: 0, doneBlock: { (picker, index, value) in
             debugPrint(value)
             debugPrint(index)
