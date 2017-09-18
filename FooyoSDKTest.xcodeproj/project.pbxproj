@@ -28,6 +28,10 @@
 		858C60B31F53E5BB00750BDF /* ShowOnMapInputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 858C60AD1F53E5BB00750BDF /* ShowOnMapInputViewController.swift */; };
 		858C60B41F53E5BB00750BDF /* NavigationInputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 858C60AE1F53E5BB00750BDF /* NavigationInputViewController.swift */; };
 		858C60B51F53E5BB00750BDF /* AddToPlanInputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 858C60AF1F53E5BB00750BDF /* AddToPlanInputViewController.swift */; };
+		85CDE1B81F6FD5C500DEC6AE /* CoreActionSheetPicker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85CDE1B61F6FD5C500DEC6AE /* CoreActionSheetPicker.framework */; };
+		85CDE1B91F6FD5C500DEC6AE /* JVFloatLabeledText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85CDE1B71F6FD5C500DEC6AE /* JVFloatLabeledText.framework */; };
+		85CDE1D41F700B2D00DEC6AE /* SetUserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85CDE1D31F700B2D00DEC6AE /* SetUserViewController.swift */; };
+		85CDE1D61F700CBD00DEC6AE /* TPKeyboardAvoidingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85CDE1D51F700CBD00DEC6AE /* TPKeyboardAvoidingKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +58,10 @@
 		858C60AD1F53E5BB00750BDF /* ShowOnMapInputViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShowOnMapInputViewController.swift; sourceTree = "<group>"; };
 		858C60AE1F53E5BB00750BDF /* NavigationInputViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationInputViewController.swift; sourceTree = "<group>"; };
 		858C60AF1F53E5BB00750BDF /* AddToPlanInputViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddToPlanInputViewController.swift; sourceTree = "<group>"; };
+		85CDE1B61F6FD5C500DEC6AE /* CoreActionSheetPicker.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreActionSheetPicker.framework; path = Carthage/Build/iOS/CoreActionSheetPicker.framework; sourceTree = "<group>"; };
+		85CDE1B71F6FD5C500DEC6AE /* JVFloatLabeledText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JVFloatLabeledText.framework; path = Carthage/Build/iOS/JVFloatLabeledText.framework; sourceTree = "<group>"; };
+		85CDE1D31F700B2D00DEC6AE /* SetUserViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetUserViewController.swift; sourceTree = "<group>"; };
+		85CDE1D51F700CBD00DEC6AE /* TPKeyboardAvoidingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TPKeyboardAvoidingKit.framework; path = Carthage/Build/iOS/TPKeyboardAvoidingKit.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +69,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				85CDE1D61F700CBD00DEC6AE /* TPKeyboardAvoidingKit.framework in Frameworks */,
+				85CDE1B81F6FD5C500DEC6AE /* CoreActionSheetPicker.framework in Frameworks */,
+				85CDE1B91F6FD5C500DEC6AE /* JVFloatLabeledText.framework in Frameworks */,
 				856EC4811F516EDA007E1C87 /* Alamofire.framework in Frameworks */,
 				856EC4821F516EDA007E1C87 /* AlamofireImage.framework in Frameworks */,
 				856EC4831F516EDA007E1C87 /* FooyoTestSDK.framework in Frameworks */,
@@ -96,6 +107,7 @@
 		856EC4651F516A1C007E1C87 /* FooyoSDKTest */ = {
 			isa = PBXGroup;
 			children = (
+				85CDE1D31F700B2D00DEC6AE /* SetUserViewController.swift */,
 				8530F7F21F53E6680094EB49 /* FeatureTableViewCell.swift */,
 				8530F7F31F53E6680094EB49 /* FeatureInputTableViewCell.swift */,
 				858C60AA1F53E5BB00750BDF /* AppDelegate.swift */,
@@ -116,6 +128,9 @@
 		856EC4781F516EDA007E1C87 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				85CDE1D51F700CBD00DEC6AE /* TPKeyboardAvoidingKit.framework */,
+				85CDE1B61F6FD5C500DEC6AE /* CoreActionSheetPicker.framework */,
+				85CDE1B71F6FD5C500DEC6AE /* JVFloatLabeledText.framework */,
 				856EC4791F516EDA007E1C87 /* Alamofire.framework */,
 				856EC47A1F516EDA007E1C87 /* AlamofireImage.framework */,
 				856EC47B1F516EDA007E1C87 /* FooyoTestSDK.framework */,
@@ -213,6 +228,9 @@
 				"$(SRCROOT)/Carthage/Build/iOS/TGPControls.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/FooyoTestSDK.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/SnapKit.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/CoreActionSheetPicker.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/JVFloatLabeledText.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/TPKeyboardAvoidingKit.framework",
 			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Alamofire.framework",
@@ -223,6 +241,9 @@
 				"$(DERIVED_FILE_DIR)/TGPControls.framework",
 				"$(DERIVED_FILE_DIR)/FooyoTestSDK.framework",
 				"$(DERIVED_FILE_DIR)/SnapKit.framework",
+				"$(DERIVED_FILE_DIR)/CoreActionSheetPicker.framework",
+				"$(DERIVED_FILE_DIR)/JVFloatLabeledText.framework",
+				"$(DERIVED_FILE_DIR)/TPKeyboardAvoidingKit.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -239,6 +260,7 @@
 				8530F7F71F53ED570094EB49 /* Extension.swift in Sources */,
 				8530F7F51F53E6680094EB49 /* FeatureInputTableViewCell.swift in Sources */,
 				858C60B51F53E5BB00750BDF /* AddToPlanInputViewController.swift in Sources */,
+				85CDE1D41F700B2D00DEC6AE /* SetUserViewController.swift in Sources */,
 				858C60B01F53E5BB00750BDF /* AppDelegate.swift in Sources */,
 				858C60B41F53E5BB00750BDF /* NavigationInputViewController.swift in Sources */,
 				858C60B11F53E5BB00750BDF /* MainTabViewController.swift in Sources */,

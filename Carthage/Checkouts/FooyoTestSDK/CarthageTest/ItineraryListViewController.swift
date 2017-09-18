@@ -20,20 +20,20 @@ class ItineraryListViewController: BaseViewController {
         t.separatorColor = UIColor.ospGrey50
         t.separatorInset = UIEdgeInsets.zero
         t.register(ItineraryTableViewCell.self, forCellReuseIdentifier: ItineraryTableViewCell.reuseIdentifier)
-//        t.register(EmptyTableViewCell.self, forCellReuseIdentifier: EmptyTableViewCell.reuseIdentifier)
+        t.register(EmptyTableViewCell.self, forCellReuseIdentifier: EmptyTableViewCell.reuseIdentifier)
         t.backgroundColor = UIColor.ospGrey10
         return t
     }()
     
     // MARK: - Life Cycle
-//    init(itineraries: [FooyoItinerary]) {
-//        super.init(nibName: nil, bundle: nil)
-//        self.itineraries = itineraries
-//    }
-//    
-//    required init?(coder aDecoder: NSCoder) {
-//        fatalError("init(coder:) has not been implemented")
-//    }
+    init(itineraries: [FooyoItinerary]) {
+        super.init(nibName: nil, bundle: nil)
+        self.itineraries = itineraries
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,7 +47,6 @@ class ItineraryListViewController: BaseViewController {
             make.top.equalTo(Scale.scaleY(y: 10))
             make.leading.equalToSuperview()
             make.trailing.equalToSuperview()
-//            make.bottom.equalToSuperview()
             make.bottom.equalTo(bottomLayoutGuide.snp.top)
         }
     }
@@ -59,33 +58,40 @@ class ItineraryListViewController: BaseViewController {
 }
 
 extension ItineraryListViewController: UITableViewDelegate, UITableViewDataSource {
-//    func numberOfSections(in tableView: UITableView) -> Int {
-//        return 2
-//    }
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
+        if itineraries.count == 0 {
+            return 1
+        } else {
+            return itineraries.count
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        if itineraries.count == 0 {
-//            let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier, for: indexPath) as! EmptyTableViewCell
-//            cell.configureWith("The list is empty")
-//            return cell
-//        } else {
-            let cell = tableView.dequeueReusableCell(withIdentifier: ItineraryTableViewCell.reuseIdentifier, for: indexPath)  as! ItineraryTableViewCell
-//            let itinerary = itineraries[indexPath.row]
-//            debugPrint(itinerary.tickets)
-////            let gesture = UITapGestureRecognizer(target: self, action: #selector())
-//            cell.delegate = self
-//            cell.configureWith(itinerary: itinerary)
-//            
+        if itineraries.count == 0 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier, for: indexPath) as! EmptyTableViewCell
+            if FooyoUser.currentUser.userId == nil {
+                cell.configureWith("Log in is required to view the plans.")
+            } else {
+                cell.configureWith("The list is empty.")
+            }
             return cell
-//        }
+        } else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: ItineraryTableViewCell.reuseIdentifier, for: indexPath)  as! ItineraryTableViewCell
+            let itinerary = itineraries[indexPath.row]
+//            let gesture = UITapGestureRecognizer(target: self, action: #selector())
+//            cell.delegate = self
+            cell.configureWith(itinerary: itinerary)
+//
+            return cell
+        }
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return Scale.scaleY(y: 190)
+        if itineraries.count == 0 {
+            return tableView.frame.height
+        } else {
+            return Scale.scaleY(y: 190)
+        }
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

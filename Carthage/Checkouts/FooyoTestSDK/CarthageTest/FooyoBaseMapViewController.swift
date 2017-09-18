@@ -21,30 +21,16 @@ public class FooyoBaseMapViewController: UIViewController {
 //    var filters: [Constants.FilterType]? = [.Attraction, .Event, .FB, .Shop, .Hotel, .LinearTrail, .NonLinearTrail, .RestRoom,
 //                                            .PrayerRoom, .TickingCounter, .BusStop, .TramStop, .ExpressStop, .CableStop]
     
-    var sourcePage = Constants.PageSource.FromHomeMap
+    var hideBar = true
+    var sourcePage = FooyoConstants.PageSource.FromHomeMap
     //MARK: - Variables for MapView
     var mapView: MGLMapView!
     var mapCenter: CLLocationCoordinate2D?
     
     var allAnnotations = [MyCustomPointAnnotation]()
-//    var attractionAnnotations = [MyCustomPointAnnotation]()
-//    var eventAnnotations = [MyCustomPointAnnotation]()
-//    var fbAnnotations = [MyCustomPointAnnotation]()
-//    var shopAnnotations = [MyCustomPointAnnotation]()
-//    var hotelAnnotations = [MyCustomPointAnnotation]()
-//    var trailAnnotations = [MyCustomPointAnnotation]()
-//    var nonTrailAnnotations = [MyCustomPointAnnotation]()
-//
-//    var restAnnotations = [MyCustomPointAnnotation]()
-//    var prayerAnnotations = [MyCustomPointAnnotation]()
-//    var ticketingAnnotations = [MyCustomPointAnnotation]()
-//    var busAnnotations = [MyCustomPointAnnotation]()
-//    var tramAnnotations = [MyCustomPointAnnotation]()
-//    var expressAnnotations = [MyCustomPointAnnotation]()
-//    var cableAnnotations = [MyCustomPointAnnotation]()
-    
+    var searchItem: FooyoItem?
     var searchAnnotation: MyCustomPointAnnotation?
-    
+
     //MARK: - Variables for MapView
     var searchView: UIView! = {
         let t = UIView()
@@ -67,16 +53,16 @@ public class FooyoBaseMapViewController: UIViewController {
         t.applyBundleImage(name: "basemap_markersmall")
         return t
     }()
-//    var crossIconOne: UIImageView! = {
-//        let t = UIImageView()
-//        t.backgroundColor = .clear
-//        t.contentMode = .scaleAspectFit
-//        t.clipsToBounds = true
-//        t.image = #imageLiteral(resourceName: "plus").imageByReplacingContentWithColor(color: UIColor.sntGreyish)
-//        t.isHidden = true
-//        t.isUserInteractionEnabled = true
-//        return t
-//    }()
+    var crossIcon: UIImageView! = {
+        let t = UIImageView()
+        t.backgroundColor = .clear
+        t.contentMode = .scaleAspectFit
+        t.clipsToBounds = true
+        t.isHidden = true
+        t.isUserInteractionEnabled = true
+        t.applyBundleImage(name: "basemap_cross")
+        return t
+    }()
     var searchLabel: UILabel! = {
         let t = UILabel()
         t.text = "Where would you like to go?"
@@ -91,6 +77,7 @@ public class FooyoBaseMapViewController: UIViewController {
         let t = ShadowView()
         t.backgroundColor = .white
         t.layer.cornerRadius = Scale.scaleY(y: 40) / 2
+        t.isUserInteractionEnabled = true
         return t
     }()
     
@@ -143,11 +130,74 @@ public class FooyoBaseMapViewController: UIViewController {
         return t
     }()
     
+    fileprivate var filterView: UIView! = {
+        let t = UIView()
+        t.backgroundColor = .clear
+        return t
+    }()
     
+    fileprivate var overLay: UIView! = {
+        let t = UIView()
+        t.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+        t.isUserInteractionEnabled = true
+        return t
+    }()
+    fileprivate var categoryTable: UITableView! = {
+        let t = UITableView()
+        t.backgroundColor = .clear
+        t.separatorInset = UIEdgeInsets.zero
+        t.separatorColor = .clear
+        t.separatorStyle = .singleLine
+        t.clipsToBounds = true
+        t.layer.cornerRadius = 12
+        t.isScrollEnabled = false
+        t.register(CategoryTableViewCell.self, forCellReuseIdentifier: CategoryTableViewCell.reuseIdentifier)
+        return t
+    }()
+    fileprivate var amenityTable: UITableView! = {
+        let t = UITableView()
+        t.backgroundColor = .clear
+        t.separatorInset = UIEdgeInsets.zero
+        t.separatorColor = .clear
+        t.separatorStyle = .singleLine
+        t.clipsToBounds = true
+        t.layer.cornerRadius = 12
+        t.isScrollEnabled = false
+        t.register(CategoryTableViewCell.self, forCellReuseIdentifier: CategoryTableViewCell.reuseIdentifier)
+        return t
+    }()
+    fileprivate var transportationTable: UITableView! = {
+        let t = UITableView()
+        t.backgroundColor = .clear
+        t.separatorInset = UIEdgeInsets.zero
+        t.separatorColor = .clear
+        t.separatorStyle = .singleLine
+        t.clipsToBounds = true
+        t.layer.cornerRadius = 12
+        t.isScrollEnabled = false
+        t.register(CategoryTableViewCell.self, forCellReuseIdentifier: CategoryTableViewCell.reuseIdentifier)
+        return t
+    }()
+    fileprivate var cancelBtn: UILabel! = {
+        let t = UILabel()
+        t.backgroundColor = UIColor.white.withAlphaComponent(0.9)
+        t.clipsToBounds = true
+        t.layer.cornerRadius = 12
+        t.text = "Cancel"
+        t.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 18))
+        t.textColor = UIColor.ospIoSblue
+        t.textAlignment = .center
+        t.isUserInteractionEnabled = true
+        return t
+    }()
+    
+//    fileprivate var 
     //for show on map
-    fileprivate var selectedCategory: String?
-    fileprivate var selectedId: Int?
-    fileprivate var showOnMapMode: Bool = false
+    fileprivate var index: FooyoIndex?
+    fileprivate var selectedCategory: FooyoCategory?
+//    fileprivate var selectedCategory: String?
+//    fileprivate var selectedId: Int?
+//    fileprivate var showOnMapMode: Bool = false
     //MARK: - Life Cycle
 //    public init(category: String? = nil, levelOneId: Int? = nil) {
 //        super.init(nibName: nil, bundle: nil)
@@ -160,15 +210,19 @@ public class FooyoBaseMapViewController: UIViewController {
 //        }
 //    }
     
-    public init(index: FooyoIndex? = nil) {
+    public init(index: FooyoIndex? = nil, hideTheDefaultNavigationBar: Bool) {
         super.init(nibName: nil, bundle: nil)
-        self.selectedCategory = index?.category
-        self.selectedId = index?.levelOneId
-        if selectedCategory != nil {
-            self.showOnMapMode = true
-        } else {
-            self.showOnMapMode = false
-        }
+        self.index = index
+        self.hideBar = hideTheDefaultNavigationBar
+        debugPrint(self.index?.category)
+        debugPrint(self.index?.levelOneId)
+//        self.selectedCategory = index?.category
+//        self.selectedId = index?.levelOneId
+//        if selectedCategory != nil {
+//            self.showOnMapMode = true
+//        } else {
+//            self.showOnMapMode = false
+//        }
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -180,33 +234,70 @@ public class FooyoBaseMapViewController: UIViewController {
         
         // Do any additional setup after loading the view.
         applyGeneralVCSettings(vc: self)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(displayAlert(notification:)), name: FooyoConstants.notifications.FooyoDisplayAlert, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(highlightSearch(notification:)), name: FooyoConstants.notifications.FooyoSearch, object: nil)
 
-        NotificationCenter.default.addObserver(self, selector: #selector(displayAlert(notification:)), name: Constants.notifications.FooyoDisplayAlert, object: nil)
         setupMapView()
         setupSearchView()
         setupOtherViews()
+        setupCategoryListView()
         checkBundle()
         
         loadPlaces()
         loadCategries(withLoading: false)
     }
     
-//    override public func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
+    override public func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let anno = searchAnnotation {
+            debugPrint("i am going to center")
+            
+            //                self.mapView.setCenter((searchItem?.getCoor())!, zoomLevel: 15, animated: true)
+            //                self.mapView.selectAnnotation(anno, animated: true)
+            
+            mapView.setCenter((searchItem?.getCoor())!, zoomLevel: 15, direction: 0, animated: true) {
+                //                    debugPrint("i am going to select")
+                self.mapView.selectAnnotation(anno, animated: true)
+                //                    debugPrint("i am done with select")
+            }
+        }
+
 //        if self.navigationController?.navigationBar.isHidden == false {
 //            UIView.animate(withDuration: 0.3, animations: { 
 //                self.navigationController?.navigationBar.isHidden = true
 //            })
 //        }
-//    }
+    }
+    
+    override public func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if hideBar {
+            if self.navigationController?.isNavigationBarHidden == false {
+                UIView.animate(withDuration: 0.3, animations: {
+                    self.navigationController?.isNavigationBarHidden = true
+                })
+            }
+        } else {
+            if self.navigationController?.isNavigationBarHidden == true {
+                UIView.animate(withDuration: 0.3, animations: {
+                    self.navigationController?.isNavigationBarHidden = false
+                })
+            }
+        }
+    }
     
     
+
     //MARK: - Setup Views
     func setupSearchView() {
         view.addSubview(searchView)
         //        searchView.addSubview(searchIconOne)
         searchView.addSubview(searchLabel)
         searchView.addSubview(searchIcon)
+        searchView.addSubview(crossIcon)
+        let crossGesture = UITapGestureRecognizer(target: self, action: #selector(crossHandler))
+        crossIcon.addGestureRecognizer(crossGesture)
         //        searchView.addSubview(crossIconOne)
         //        crossIconOne.transform = CGAffineTransform.init(rotationAngle: CGFloat(M_PI_4))
         //        let crossGesture = UITapGestureRecognizer(target: self, action: #selector(crossHandler))
@@ -214,32 +305,35 @@ public class FooyoBaseMapViewController: UIViewController {
         let searchGesture = UITapGestureRecognizer(target: self, action: #selector(searchHandler))
         searchView.addGestureRecognizer(searchGesture)
         searchViewConstraints()
-        if showOnMapMode {
-            searchView.isHidden = true
-        }
     }
     
     func setupMapView() {
-        mapView = MGLMapView(frame: view.bounds)
+//        mapView = MGLMapView(frame: view.bounds)
+        mapView = MGLMapView()
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
         // Set the map’s center coordinate and zoom level.
-        mapCenter = CLLocationCoordinate2D(latitude: Constants.mapCenterLat, longitude: Constants.mapCenterLong)
-        mapView.setCenter(mapCenter!, zoomLevel: Constants.initZoomLevel, animated: false)
+        mapCenter = CLLocationCoordinate2D(latitude: FooyoConstants.mapCenterLat, longitude: FooyoConstants.mapCenterLong)
+        mapView.setCenter(mapCenter!, zoomLevel: FooyoConstants.initZoomLevel, animated: false)
         mapView.showsUserLocation = true
         mapView.delegate = self
         view.addSubview(mapView)
-//        mapView.snp.makeConstraints { (make) in
-//            make.leading.equalToSuperview()
-//            make.trailing.equalToSuperview()
-//            make.top.equalTo(topLayoutGuide.snp.bottom)
+        mapView.snp.makeConstraints { (make) in
+            make.leading.equalToSuperview()
+            make.trailing.equalToSuperview()
+            make.top.equalToSuperview()
+            make.bottom.equalToSuperview()
+            //            make.top.equalTo(topLayoutGuide.snp.bottom)
 //            make.bottom.equalTo(bottomLayoutGuide.snp.top)
-//        }
+        }
     }
     
     func setupOtherViews() {
         view.addSubview(filterBtn)
         filterBtn.addSubview(filterBtnInside)
+        let filterGesture = UITapGestureRecognizer(target: self, action: #selector(filterHandler))
+        filterBtn.addGestureRecognizer(filterGesture)
+        
         view.addSubview(gpsBtn)
         gpsBtn.addSubview(gpsBtnInside)
         let locateGesture = UITapGestureRecognizer(target: self, action: #selector(locateHandler))
@@ -249,11 +343,74 @@ public class FooyoBaseMapViewController: UIViewController {
         goBtn.addSubview(goBtnInsideLabel)
         let gesture = UITapGestureRecognizer(target: self, action: #selector(goBtnHandler))
         goBtn.addGestureRecognizer(gesture)
-        if showOnMapMode {
-            filterBtn.isHidden = true
-        }
-
+//        if showOnMapMode {
+//            filterBtn.isHidden = true
+//        }
+        
         otherViewsConstraints()
+    }
+    
+    func setupCategoryListView() {
+        if let vc = self.tabBarController {
+            vc.view.addSubview(filterView)
+        } else if let vc = self.navigationController {
+            vc.view.addSubview(filterView)
+        }
+        filterView.addSubview(overLay)
+        let overLayGesture = UITapGestureRecognizer(target: self, action: #selector(dismissFilter))
+        overLay.addGestureRecognizer(overLayGesture)
+        let cancelGesture = UITapGestureRecognizer(target: self, action: #selector(dismissFilter))
+        cancelBtn.addGestureRecognizer(cancelGesture)
+        
+        filterView.addSubview(categoryTable)
+        filterView.addSubview(amenityTable)
+        filterView.addSubview(transportationTable)
+        filterView.addSubview(cancelBtn)
+        categoryTable.delegate = self
+        categoryTable.dataSource = self
+        amenityTable.delegate = self
+        amenityTable.dataSource = self
+        transportationTable.delegate = self
+        transportationTable.dataSource = self
+        categoryListConstraints()
+    }
+    
+    func categoryListConstraints() {
+        
+        filterView.snp.remakeConstraints { (make) in
+//            make.edges.equalToSuperview()
+            make.leading.equalToSuperview()
+            make.trailing.equalToSuperview()
+            make.height.equalTo(FooyoConstants.mainHeight)
+            make.top.equalTo((filterView.superview?.snp.bottom)!)
+        }
+        overLay.snp.remakeConstraints { (make) in
+            make.edges.equalToSuperview()
+        }
+        cancelBtn.snp.remakeConstraints { (make) in
+            make.height.equalTo(Scale.scaleY(y: 48))
+            make.leading.equalTo(Scale.scaleX(x: 8))
+            make.trailing.equalTo(Scale.scaleX(x: -8))
+            make.bottom.equalTo(Scale.scaleY(y: -10))
+        }
+        categoryTable.snp.remakeConstraints { (make) in
+            make.bottom.equalTo(cancelBtn.snp.top).offset(Scale.scaleY(y: -8))
+            make.leading.equalTo(Scale.scaleX(x: 8))
+            make.trailing.equalTo(Scale.scaleX(x: -8))
+            make.height.equalTo(CGFloat(FooyoCategory.others.count + 3) * (Scale.scaleY(y: 47.5)))
+        }
+        amenityTable.snp.remakeConstraints { (make) in
+            make.bottom.equalTo(categoryTable)
+            make.leading.equalTo(filterView.snp.trailing).offset(Scale.scaleX(x: 8))
+            make.width.equalTo(categoryTable)
+            make.height.equalTo(CGFloat(FooyoCategory.amenities.count + 1) * (Scale.scaleY(y: 47.5)))
+        }
+        transportationTable.snp.remakeConstraints { (make) in
+            make.bottom.equalTo(categoryTable)
+            make.leading.equalTo(filterView.snp.trailing).offset(Scale.scaleX(x: 8))
+            make.width.equalTo(categoryTable)
+            make.height.equalTo(CGFloat(FooyoCategory.transportations.count + 1) * (Scale.scaleY(y: 47.5)))
+        }
     }
     
     func searchViewConstraints() {
@@ -273,6 +430,9 @@ public class FooyoBaseMapViewController: UIViewController {
             make.width.equalTo(Scale.scaleX(x: 9.8))
             make.centerY.equalToSuperview()
             make.trailing.equalTo(Scale.scaleX(x: -12.2))
+        }
+        crossIcon.snp.makeConstraints { (make) in
+            make.edges.equalTo(searchIcon)
         }
     }
     
@@ -323,6 +483,10 @@ public class FooyoBaseMapViewController: UIViewController {
                 SVProgressHUD.dismiss()
                 if isSuccess {
                     debugPrint("success")
+                    self.categoryListConstraints()
+                    self.categoryTable.reloadData()
+                    self.amenityTable.reloadData()
+                    self.transportationTable.reloadData()
                 } else {
                     debugPrint("fail")
                 }
@@ -338,6 +502,7 @@ public class FooyoBaseMapViewController: UIViewController {
                 if isSuccess {
                     debugPrint("success")
                     self.items = places
+                    debugPrint("in total has \(self.items?.count) items")
                     self.reloadData()
                 } else {
                     debugPrint("fail")
@@ -350,23 +515,73 @@ public class FooyoBaseMapViewController: UIViewController {
     }
     
     //MARK: Handler
+    func filterHandler() {
+        UIView.animate(withDuration: 0.3) {
+            self.filterView.transform = CGAffineTransform.init(translationX: 0, y: -FooyoConstants.mainHeight)
+        }
+    }
+    
+    func dismissFilter() {
+        UIView.animate(withDuration: 0.3) {
+            self.categoryTable.transform = CGAffineTransform.init(translationX: 0, y: 0)
+            self.transportationTable.transform = CGAffineTransform.init(translationX: 0, y: 0)
+            self.amenityTable.transform = CGAffineTransform.init(translationX: 0, y: 0)
+            self.filterView.transform = CGAffineTransform.init(translationX: 0, y: 0)
+        }
+    }
+    
+    func displayAmenities() {
+        UIView.animate(withDuration: 0.3) {
+            self.categoryTable.transform = CGAffineTransform.init(translationX: -FooyoConstants.mainWidth, y: 0)
+            self.amenityTable.transform = CGAffineTransform.init(translationX: -FooyoConstants.mainWidth, y: 0)
+        }
+    }
+    
+    
+    func displayTransportations() {
+        UIView.animate(withDuration: 0.3) {
+            self.categoryTable.transform = CGAffineTransform.init(translationX: -FooyoConstants.mainWidth, y: 0)
+            self.transportationTable.transform = CGAffineTransform.init(translationX: -FooyoConstants.mainWidth, y: 0)
+        }
+    }
+    
+    func displayCategories() {
+        UIView.animate(withDuration: 0.3) {
+            self.categoryTable.transform = CGAffineTransform.init(translationX: 0, y: 0)
+            self.transportationTable.transform = CGAffineTransform.init(translationX: 0, y: 0)
+            self.amenityTable.transform = CGAffineTransform.init(translationX: 0, y: 0)
+        }
+    }
+    
     func locateHandler() {
+//        self.mapView.setCenter((allAnnotations[0].item?.getCoor())!, zoomLevel: 15, direction: 0, animated: true) {
+//            self.mapView.selectAnnotation(self.allAnnotations[0], animated: true)
+//        }
         mapView.userTrackingMode = .followWithHeading
     }
     func goBtnHandler() {
-        featureUnavailable()
+//        featureUnavailable()
+        let vc = FooyoNavigationViewController(startIndex: nil, endIndex: nil)
+        vc.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(vc, animated: true)
     }
+    
     func crossHandler() {
-        //        searchAnnotation?.reuseId = searchAnnotation?.item?.category
-        searchAnnotation?.reuseIdHigher = nil
-        searchAnnotation = nil
-//        crossIcon.isHidden = true
+        searchItem = nil
+        crossIcon.isHidden = true
+        searchIcon.isHidden = false
         searchLabel.text = "Where would you like to go?"
-//        reloadMapIcons()
+        if let anno = searchAnnotation {
+            reloadAnnotation(annotation: anno)
+        }
+        searchAnnotation = nil
     }
-
+    
     func searchHandler() {
-        featureUnavailable()
+//        featureUnavailable()
+        gotoSearchPage(source: .FromHomeMap, sourceVC: self)
+//        let vc = SearchHistoryViewController(source: .FromHomeMap)
+//        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     //MAKR: Data Handler
@@ -390,126 +605,60 @@ public class FooyoBaseMapViewController: UIViewController {
                 point.reuseId = each.category?.name
                 point.reuseIdOriginal = each.category?.name
                 allAnnotations.append(point)
-//                switch (each.category?.name)! {
-//                case "Ticketing Counters":
-//                    ticketingAnnotations.append(point)
-//                case "Events":
-//                    eventAnnotations.append(point)
-//                case "Prayer Rooms":
-//                    prayerAnnotations.append(point)
-//                case "Attractions":
-//                    attractionAnnotations.append(point)
-//                case "F&B":
-//                    fbAnnotations.append(point)
-//                case "Hotels & Spas":
-//                    hotelAnnotations.append(point)
-//                case "Retail & Other Services":
-//                    shopAnnotations.append(point)
-//                case "Linear Trails":
-//                    trailAnnotations.append(point)
-//                case "Non-Linear Trails":
-//                    nonTrailAnnotations.append(point)
-//                case "Rest Rooms":
-//                    eventAnnotations.append(point)
-//                case "Bus Stops":
-//                    prayerAnnotations.append(point)
-//                case "Tram Stops":
-//                    tramAnnotations.append(point)
-//                case "Express Stations":
-//                    expressAnnotations.append(point)
-//                case "Cable Car Stations":
-//                    cableAnnotations.append(point)
-//                default:
-//                    break
-//                }
             }
         }
     }
     
+    
     func reloadMapIcons() {
+        clearMapView()
         var allAnno = [MyCustomPointAnnotation]()
-        if showOnMapMode {
-            if let category = selectedCategory {
-                if let id = selectedId {
-                    var selected = allAnnotations[0]
-                    for each in allAnnotations {
-                        let item = each.item
-                        if item?.category?.name == category && item?.ospId == id {
-                            selected = each
-                            break
-                        }
+        if let index = index {
+            searchView.isHidden = true
+            filterBtn.isHidden = true
+            goBtn.isHidden = true
+            if index.isLocation() {
+                allAnno = allAnnotations.filter({ (annotation) -> Bool in
+                    if (annotation.item?.category?.name)!.lowercased() == (index.category)!.lowercased() && annotation.item?.levelOneId == index.levelOneId {
+                        return true
                     }
-                    allAnno.append(selected)
-                } else {
-                    for each in allAnnotations {
-                        let item = each.item
-                        if item?.category?.name == category {
-                            allAnno.append(each)
-                        }
+                    return false
+                })
+            } else if index.isCategory() {
+                allAnno = allAnnotations.filter({ (annotation) -> Bool in
+                    if (annotation.item?.category?.name)!.lowercased() == (index.category)!.lowercased() {
+                        return true
                     }
-                    if allAnno.isEmpty {
-                        allAnno = allAnnotations.filter({ (anno) -> Bool in
-                            return anno.item?.category?.name == "Events"
-                        })
-                    }
-                }
+                    return false
+                })
+                debugPrint(allAnno.count)
             }
         } else {
-            allAnno = allAnnotations
+            if let selected = selectedCategory {
+                allAnno = allAnnotations.filter({ (annotation) -> Bool in
+                    if let search = searchItem {
+                        if annotation.item?.id == search.id {
+                            return true
+                        }
+                    }
+                    return annotation.item?.category?.id == selected.id
+                })
+                debugPrint(allAnno.count)
+            } else {
+                allAnno = allAnnotations
+            }
         }
-//        clearMapView()
-//        if let filters = filters {
-//            if filters.contains(.Attraction) {
-//                allAnno.append(contentsOf: attractionAnnotations)
-//            }
-//            if filters.contains(.BusStop) {
-//                allAnno.append(contentsOf: busAnnotations)
-//            }
-//            if filters.contains(.CableStop) {
-//                allAnno.append(contentsOf: cableAnnotations)
-//            }
-//            if filters.contains(.Event) {
-//                allAnno.append(contentsOf: eventAnnotations)
-//            }
-//            if filters.contains(.ExpressStop) {
-//                allAnno.append(contentsOf: expressAnnotations)
-//            }
-//            if filters.contains(.FB) {
-//                allAnno.append(contentsOf: fbAnnotations)
-//            }
-//            if filters.contains(.Hotel) {
-//                allAnno.append(contentsOf: hotelAnnotations)
-//            }
-//            if filters.contains(.PrayerRoom) {
-//                allAnno.append(contentsOf: prayerAnnotations)
-//            }
-//            if filters.contains(.RestRoom) {
-//                allAnno.append(contentsOf: restAnnotations)
-//            }
-//            if filters.contains(.Shop) {
-//                allAnno.append(contentsOf: shopAnnotations)
-//            }
-//            if filters.contains(.TickingCounter) {
-//                allAnno.append(contentsOf: ticketingAnnotations)
-//            }
-//            if filters.contains(.LinearTrail) {
-//                allAnno.append(contentsOf: trailAnnotations)
-//            }
-//            if filters.contains(.NonLinearTrail) {
-//                allAnno.append(contentsOf: nonTrailAnnotations)
-//            }
-//            if filters.contains(.TramStop) {
-//                allAnno.append(contentsOf: tramAnnotations)
-//            }
-//        }
         mapView.addAnnotations(allAnno)
-//        if showOnMapMode {
-//            for each in allAnno {
-//                debugPrint("i am going to reload")
-//                mapView.deselectAnnotation(each, animated: false)
-//                mapView.selectAnnotation(each, animated: true)
-//            }
-//        }
+    }
+    
+    func clearMapView() {
+        mapView.removeAnnotations(allAnnotations)
+//        mapView.annotatio
+//        mapView.removeAnnotations(linesHome)
+    }
+    func reloadAnnotation(annotation: MyCustomPointAnnotation) {
+        mapView.removeAnnotation(annotation)
+        mapView.addAnnotation(annotation)
     }
     
     func checkBundle() {
@@ -528,6 +677,43 @@ public class FooyoBaseMapViewController: UIViewController {
             displayAlert(title: title, message: msg, complete: nil)
         }
     }
+    
+    func highlightSearch(notification: Notification) {
+        if let item = notification.object as? FooyoItem {
+            searchItem = item
+            searchLabel.text = item.name
+            crossIcon.isHidden = false
+            searchIcon.isHidden = true
+            if let anno = searchAnnotation {
+                searchItem = nil
+                reloadAnnotation(annotation: anno)
+            }
+            searchItem = item
+            searchAnnotation = allAnnotations.first(where: { (anno) -> Bool in
+                return anno.item?.id == searchItem?.id
+            })
+            if let anno = searchAnnotation {
+                reloadAnnotation(annotation: anno)
+            }
+            //            reloadMapIcons()
+//            mapView.annotation
+//            mapView.
+           
+//            if let anno = searchAnnotation {
+//                debugPrint("i am going to center")
+//
+////                self.mapView.setCenter((searchItem?.getCoor())!, zoomLevel: 15, animated: true)
+////                self.mapView.selectAnnotation(anno, animated: true)
+//
+//                mapView.setCenter((searchItem?.getCoor())!, zoomLevel: 15, direction: 0, animated: true) {
+////                    debugPrint("i am going to select")
+////                    self.mapView.selectAnnotation(anno, animated: true)
+////                    debugPrint("i am done with select")
+//                }
+//            }
+        }
+    }
+    
 }
 
 //MARK: - MAP delegate
@@ -535,27 +721,27 @@ extension FooyoBaseMapViewController: MGLMapViewDelegate {
     public func mapView(_ mapView: MGLMapView, viewFor annotation: MGLAnnotation) -> MGLAnnotationView? {
         //        return MGLAnnotationView()
         // This example is only concerned with point annotations.
+        debugPrint("i am anding annotation")
         if let annotation = annotation as? MyCustomPointAnnotation {
             // Use the point annotation’s longitude value (as a string) as the reuse identifier for its view.
             var reuseIdentifier = ""
-            if let id = annotation.reuseIdHigher {
-                reuseIdentifier = id
-            } else {
-                reuseIdentifier = (annotation.reuseId)!
+            reuseIdentifier = (annotation.reuseId)!
+            if annotation.item?.id == searchItem?.id {
+                reuseIdentifier = FooyoConstants.AnnotationId.UserMarker.rawValue
             }
-            debugPrint(reuseIdentifier)
+
             // For better performance, always try to reuse existing annotations.
             if let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier) as? CustomAnnotationView {
-                annotationView.applyColor(annotation: annotation)
+//                annotationView.applyColor(annotation: annotation)
                 return annotationView
             } else {
                 var annotationView = CustomAnnotationView(reuseIdentifier: reuseIdentifier)
-                if reuseIdentifier == Constants.AnnotationId.UserMarker.rawValue {
-                    annotationView.frame = CGRect(x: 0, y: 0, width: Scale.scaleY(y: 35), height: Scale.scaleY(y: 100))
+                if reuseIdentifier == FooyoConstants.AnnotationId.UserMarker.rawValue {
+                    annotationView.frame = CGRect(x: 0, y: 0, width: Scale.scaleY(y: 17), height: Scale.scaleY(y: 48))
                 } else {
                     annotationView.frame = CGRect(x: 0, y: 0, width: Scale.scaleY(y: 12), height: Scale.scaleY(y: 12))
                 }
-                annotationView.applyColor(annotation: annotation)
+//                annotationView.applyColor(annotation: annotation)
                 return annotationView
             }
             // If there’s no reusable annotation view available, initialize a new one.
@@ -591,14 +777,14 @@ extension FooyoBaseMapViewController: MGLMapViewDelegate {
 //            }
             if let item = anno.item {
                 let category = (item.category?.name)!
-                let levelOneId = (item.ospId)!
+                let levelOneId = (item.levelOneId)!
                 let index = FooyoIndex(category: category, levelOneId: levelOneId)
                 self.delegate?.fooyoBaseMapViewController(didSelectInformationWindow: index)
             }
             debugPrint("taped on the cell")
         }
     }
-//    func mapView(_ mapView: MGLMapView, strokeColorForShapeAnnotation annotation: MGLShape) -> UIColor {
+    //    func mapView(_ mapView: MGLMapView, strokeColorForShapeAnnotation annotation: MGLShape) -> UIColor {
 //        // Give our polyline a unique color by checking for its `title` property
 //        if (annotation is MGLPolyline) {
 //            // Mapbox cyan
@@ -610,4 +796,102 @@ extension FooyoBaseMapViewController: MGLMapViewDelegate {
 //            return .red
 //        }
 //    }
+}
+
+extension FooyoBaseMapViewController: UITableViewDelegate, UITableViewDataSource {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        switch tableView {
+        case categoryTable:
+            return FooyoCategory.others.count + 3
+        case amenityTable:
+            return FooyoCategory.amenities.count + 1
+        case transportationTable:
+            return FooyoCategory.transportations.count + 1
+        default:
+            return 0
+        }
+    }
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: CategoryTableViewCell.reuseIdentifier) as! CategoryTableViewCell
+        switch tableView {
+        case categoryTable:
+            switch indexPath.row {
+            case 0:
+                cell.configureWith(leftIcon: UIImage.getBundleImage(name: "basemap_all"), title: "Show All")
+            case FooyoCategory.others.count + 1:
+                cell.configureWith(leftIcon: UIImage.getBundleImage(name: "basemap_all"), title: "Amenities", rightIcon: UIImage.getBundleImage(name: "general_rightarrow"))
+            case FooyoCategory.others.count + 2:
+                cell.configureWith(leftIcon: UIImage.getBundleImage(name: "basemap_all"), title: "Transportations", rightIcon: UIImage.getBundleImage(name: "general_rightarrow"))
+            default:
+                let category = FooyoCategory.others[indexPath.row - 1]
+                cell.configureWith(leftIcon: category.icon, title: category.name, rightIcon: nil)
+            }
+        case amenityTable:
+            switch indexPath.row {
+            case 0:
+                cell.configureWith(leftIcon: UIImage.getBundleImage(name: "general_leftarrow"), title: "Amenities", boldTitle: true)
+            default:
+                let category = FooyoCategory.amenities[indexPath.row - 1]
+                cell.configureWith(leftIcon: category.icon, title: category.name, rightIcon: nil)
+            }
+        case transportationTable:
+            switch indexPath.row {
+            case 0:
+                cell.configureWith(leftIcon: UIImage.getBundleImage(name: "general_leftarrow"), title: "Transportations", boldTitle: true)
+            default:
+                let category = FooyoCategory.transportations[indexPath.row - 1]
+                cell.configureWith(leftIcon: category.icon, title: category.name, rightIcon: nil)
+            }
+        default:
+            return cell
+        }
+        return cell
+    }
+    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return Scale.scaleY(y: 47.5)
+    }
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: false)
+        switch tableView {
+        case categoryTable:
+            switch indexPath.row {
+            case 0:
+                selectedCategory = nil
+                reloadMapIcons()
+                dismissFilter()
+            case FooyoCategory.others.count + 1:
+                displayAmenities()
+            case FooyoCategory.others.count + 2:
+                displayTransportations()
+            default:
+                let category = FooyoCategory.others[indexPath.row - 1]
+                selectedCategory = category
+                reloadMapIcons()
+                dismissFilter()
+//                break
+            }
+        case amenityTable:
+            switch indexPath.row {
+            case 0:
+                displayCategories()
+            default:
+                let category = FooyoCategory.amenities[indexPath.row - 1]
+                selectedCategory = category
+                reloadMapIcons()
+                dismissFilter()
+            }
+        case transportationTable:
+            switch indexPath.row {
+            case 0:
+                displayCategories()
+            default:
+                let category = FooyoCategory.transportations[indexPath.row - 1]
+                selectedCategory = category
+                reloadMapIcons()
+                dismissFilter()
+            }
+        default:
+            break
+        }
+    }
 }

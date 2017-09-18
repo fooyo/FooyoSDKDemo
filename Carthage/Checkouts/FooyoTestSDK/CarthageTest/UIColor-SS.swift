@@ -50,6 +50,29 @@ extension UIColor {
 }
 
 extension UIColor {
+    
+    class var busA: UIColor {
+        return UIColor.ospSentosaGreenLightest
+    }
+    
+    class var busB: UIColor {
+        return UIColor.ospSentosaPinkDark
+    }
+    class var express: UIColor {
+        return UIColor.ospSentosaPurpleDark
+    }
+    
+    class var drive: UIColor {
+        return UIColor.ospSentosaBlueDarkest
+    }
+    class var tram: UIColor {
+        return UIColor.ospSentosaRedLightest
+    }
+    
+    class var walk: UIColor {
+        return UIColor.ospSentosaDarkGrey
+    }
+    
     class var ospSentosaBlue: UIColor {
         return UIColor(red: 0.0, green: 174.0 / 255.0, blue: 239.0 / 255.0, alpha: 1.0)
     }
@@ -88,7 +111,9 @@ extension UIColor {
     class var ospDarkGrey: UIColor {
         return UIColor(red: 86.0 / 255.0, green: 100.0 / 255.0, blue: 106.0 / 255.0, alpha: 1.0)
     }
-    
+    class var ospDarkGreyTwo: UIColor {
+        return UIColor(red: 80.0 / 255.0, green: 80.0 / 255.0, blue: 80.0 / 255.0, alpha: 0.8)
+    }
     class var ospSentosaBlueLightest: UIColor {
         return UIColor(red: 109.0 / 255.0, green: 207.0 / 255.0, blue: 246.0 / 255.0, alpha: 1.0)
     }

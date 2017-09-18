@@ -31,7 +31,6 @@ class MainTabViewController: UITabBarController {
         for index in 0..<nameArr.count {
             let rootVc = viewControllerAtIndex(index: index)
             let nav = UINavigationController(rootViewController: rootVc)
-            nav.navigationBar.isHidden = true
             let tabItem = UITabBarItem(title: nameArr[index], image: UIImage(named: "tab\(index + 1)_off"), selectedImage: UIImage(named: "tab\(index + 1)_on"))
             //            tabItem.imageInsets = UIEdgeInsetsMake(6, 0, -6, 0)
             nav.tabBarItem = tabItem
@@ -45,9 +44,9 @@ class MainTabViewController: UITabBarController {
         case 0:
             return ExploreViewController()
         case 1:
-            return FooyoMyPlanViewController()
+            return FooyoMyPlanViewController(userId: nil)
         case 2:
-            let vc = FooyoBaseMapViewController()
+            let vc = FooyoBaseMapViewController(hideTheDefaultNavigationBar: true)
             vc.delegate = self
             return vc
         case 2:

@@ -28,8 +28,13 @@ class NavigationInputViewController: UIViewController {
         return t
     }()
     
-    var category: String?
-    var id: String?
+    var startCategory: String?
+    var startLvlOneID: String?
+    var startLvlTwoID: String?
+    
+    var endCategory: String?
+    var endLvlOneID: String?
+    var endLvlTwoID: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -76,9 +81,47 @@ class NavigationInputViewController: UIViewController {
     
     func btnHandler() {
         //        debugDescription
-        let endIndex = FooyoIndex(category: "Events", levelOneId: 11)
-        let vc = FooyoNavigationViewController(endIndex: endIndex)
+        var startIndex: FooyoIndex?
+        var endIndex: FooyoIndex?
+        
+        if let start = startCategory, let one = startLvlOneID {
+            if let two = startLvlTwoID {
+                startIndex = FooyoIndex(category: start, levelOneId: one, levelTwoId: two)
+            } else {
+                startIndex = FooyoIndex(category: start, levelOneId: one)
+            }
+        }
+        
+        if let end = endCategory, let one = endLvlOneID {
+            if let two = endLvlTwoID {
+                endIndex = FooyoIndex(category: end, levelOneId: one, levelTwoId: two)
+            } else {
+                endIndex = FooyoIndex(category: end, levelOneId: one)
+            }
+        }
+        let vc = FooyoNavigationViewController(startIndex: startIndex, endIndex: endIndex)
         self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func fieldHandler(sender: UITextField) {
+        let tag = sender.tag
+        let text = sender.text!
+        switch tag {
+        case 0:
+            startCategory = text
+        case 1:
+            startLvlOneID = text
+        case 2:
+            startLvlTwoID = text
+        case 3:
+            endCategory = text
+        case 4:
+            endLvlOneID = text
+        case 5:
+            endLvlTwoID = text
+        default:
+            break
+        }
     }
 //    func categoryChanged(sender: UITextField) {
 //        self.category = sender.text
@@ -104,12 +147,9 @@ extension NavigationInputViewController: UITableViewDelegate, UITableViewDataSou
         let title = titles[indexPath.row]
         let holder = holders[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: FeatureInputTableViewCell.reuseIdentifier) as! FeatureInputTableViewCell
-        switch indexPath.row {
-        case 0, 1, 2, 5:
-            cell.configureWith(title: title, placeHold: holder, isCompulsory: false)
-        default:
-            cell.configureWith(title: title, placeHold: holder, isCompulsory: true)
-        }
+        cell.configureWith(title: title, placeHold: holder, isCompulsory: false)
+        cell.inputField.tag = indexPath.row
+        cell.inputField.addTarget(self, action: #selector(fieldHandler(sender:)), for: .editingChanged)
 //        switch indexPath.row {
 //        case 0:
 //            cell.inputField.addTarget(self, action: #selector(categoryChanged), for: .editingChanged)

@@ -26,7 +26,7 @@ class BaseViewController: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        NotificationCenter.default.addObserver(self, selector: #selector(displayAlert(notification:)), name: Constants.notifications.FooyoDisplayAlert, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(displayAlert(notification:)), name: FooyoConstants.notifications.FooyoDisplayAlert, object: nil)
 
         applyGeneralVCSettings(vc: self)
         HttpClient.sharedInstance.delegate = self
@@ -38,6 +38,9 @@ class BaseViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
     
     func displayAlert(notification: Notification) {
         if let info = notification.object as? [String: String] {

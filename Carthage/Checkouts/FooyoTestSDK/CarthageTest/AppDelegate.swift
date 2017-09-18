@@ -21,7 +21,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
 //        Alamofire.DataRequest.addAcceptableImageContentTypes(["image/*"])
 //        Alamofire.DataRequest.addAcceptableImageContentTypes(["image/jpg"])
-        
+        UITabBar.appearance().isTranslucent = false
+
         window = UIWindow(frame: UIScreen.main.bounds)
 //        let vc = ViewController()
 //        let nav = UINavigationController(rootViewController: vc)

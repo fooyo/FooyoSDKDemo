@@ -14,12 +14,16 @@ import Mapbox
 public class FooyoCategory: BaseModel {
     
     static var categories = [FooyoCategory]()
-    
+    static var others = [FooyoCategory]()
+    static var amenities = [FooyoCategory]()
+    static var transportations = [FooyoCategory]()
+
     var name: String?
     var color: String?
     var icon: String?
-    var isAmenity: Bool?
-    
+    var isAmenity: Bool?// = false
+    var isTransportation: Bool?// = false
+
     //    var cat
     public init(json: JSON) {
         super.init()
@@ -28,6 +32,14 @@ public class FooyoCategory: BaseModel {
         color = json["color"].string
         icon = json["icon"].string
         isAmenity = json["is_amenity"].bool
+        isTransportation = json["is_transportation"].bool
+        if isTransportation == nil {
+            if (name?.lowercased().contains("stop"))! || (name?.lowercased().contains("station"))! {
+                isTransportation = true
+            } else {
+                isTransportation = false
+            }
+        }
     }
     
     override public init() {
@@ -35,7 +47,6 @@ public class FooyoCategory: BaseModel {
     }
     
     func getColor() -> UIColor {
-        debugPrint("0x" + (self.color)!)
 //        return UIColor(rgb: Int!)
         if (self.color)! == "ffffff" {
             return UIColor.ospGrey

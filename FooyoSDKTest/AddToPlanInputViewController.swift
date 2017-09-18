@@ -99,7 +99,7 @@ class AddToPlanInputViewController: UIViewController {
             return
         }
         
-        let index = FooyoIndex(category: category!, levelOneId: Int(id!)!)
+        let index = FooyoIndex(category: category!, levelOneId: id!)
         let vc = FooyoAddToPlanViewController(index: index)
         let nav = UINavigationController(rootViewController: vc)
         nav.navigationBar.isHidden = true

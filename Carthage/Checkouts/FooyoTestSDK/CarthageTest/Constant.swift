@@ -7,8 +7,9 @@
 //
 
 import UIKit
+import Mapbox
 
-struct Constants {
+struct FooyoConstants {
     
     struct EndPoint {
         #if DEBUG
@@ -30,23 +31,49 @@ struct Constants {
     static let mapCenterLat: Double = 1.254585
     static let mapCenterLong: Double = 103.822706
     static let initZoomLevel: Double = 13
+    static let mapBound = [CLLocationCoordinate2DMake(1.265713, 103.819852),
+                           CLLocationCoordinate2DMake(1.260715, 103.819691),
+                           CLLocationCoordinate2DMake(1.260704, 103.805111),
+                           CLLocationCoordinate2DMake(1.236098, 103.804682),
+                           CLLocationCoordinate2DMake(1.236357, 103.852152),
+                           CLLocationCoordinate2DMake(1.267034, 103.851047)]
+    static let vivoLocation = CLLocationCoordinate2DMake(1.264032, 103.822292)
     
     
     struct notifications {
         static let FooyoDisplayAlert = Notification.Name("FooyoDisplayAlert")
-
+        static let FooyoUpdateHistory = Notification.Name("FooyoUpdateHistory")
+        static let FooyoSearch = Notification.Name("FooyoSearch")
+        static let FooyoUpdateNavigationPoint = Notification.Name("FooyoUpdateNavigationPoint")
+        static let FooyoSavedItinerary = Notification.Name("FooyoSavedItinerary")
+        
         static let call = Notification.Name("call")
         static let message = Notification.Name("message")
         static let direction = Notification.Name("direction")
         static let modeSwitch = Notification.Name("mode_switch")
         
     }
-//
-//    enum Notification: String {
-//        case FooyoDisplayAlert = "FooyoDisplayAlert"        
-//    }
     
+    enum PathType: String {
+        case Sheltered = "sheltered"
+        case Fastest = "fastest"
+    }
+    enum TransportationType: String {
+        case Foot = "Walk"
+        case Express = "Express"
+        case Tram = "Tram"
+        case BusA = "Bus A"
+        case BusB = "Bus B"
+        case Drive = "Drive"
+    }
     
+    enum RouteType: String {
+        case Walking = "walking"
+        case PSV = "psv"
+    }
+    static let transportationTypes: [FooyoConstants.TransportationType] = [.Foot, .BusA, .BusB, .Drive, .Express, .Tram]
+    static let transportationColors: [UIColor] = [UIColor.walk, UIColor.busA, UIColor.busB, UIColor.drive, UIColor.express, UIColor.tram]
+
     static let coverImageRatio: CGFloat = 0.64
     static let generalErrorMessage: String = "Sorry, there is unexpected error.\nPlease try again later"
     static let routeNames = [" Walking ", " Bus1 ", " Bus2 ", " Bus3 ", " Express ", " Tram "]
@@ -54,8 +81,16 @@ struct Constants {
     static let tripTimeSource = ["Morning", "Afternoon"]
     static let tripDurationSource = ["Half Day", "One Full Day"]
     
-    static let themes = [Constants.ThemeName.Culture, Constants.ThemeName.Thrill, Constants.ThemeName.Family, Constants.ThemeName.Hip, Constants.ThemeName.Nature]
-    static let interest: [Constants.InterestName] = [Constants.InterestName.Culture, .Outdoors, .Relaxing, .Romantic, .Historical, .Museums, .Kids, .Shopping, .Food, .Night]
+    enum ThemeName: String {
+        case Culture = "Culture & Heritage"
+        case Family = "Family Fun"
+        case Hip = "Hip Hangouts"
+        case Nature = "Nature & Wildlife"
+        case Thrill = "Thrills & Adventures"
+    }
+    
+    static let themes = [FooyoConstants.ThemeName.Culture, FooyoConstants.ThemeName.Thrill, FooyoConstants.ThemeName.Family, FooyoConstants.ThemeName.Hip, FooyoConstants.ThemeName.Nature]
+    static let interest: [FooyoConstants.InterestName] = [FooyoConstants.InterestName.Culture, .Outdoors, .Relaxing, .Romantic, .Historical, .Museums, .Kids, .Shopping, .Food, .Night]
 
 ////    static let themesImage = ["https://s-media-cache-ak0.pinimg.com/564x/27/14/20/2714208ca62eacb8e95a258acbf3c4f8.jpg",
 //                              "http://xleventsblog.com/wp-content/uploads/2015/07/iStock_000061691486_Medium.jpg",
@@ -132,21 +167,9 @@ struct Constants {
         case CableStop = "cable_stop"
     }
     
-    enum RouteType: String {
-        case Walking = "walking"
-        case PSV = "psv"
-    }
-    
     enum AuthType {
         case SignIn
         case SignUp
-    }
-    enum ThemeName: String {
-        case Culture = "Culture & Heritage"
-        case Family = "Family Fun"
-        case Hip = "Hip Hangouts"
-        case Nature = "Nature & Wildlife"
-        case Thrill = "Thrills & Adventures"
     }
 
     enum InterestName: String {

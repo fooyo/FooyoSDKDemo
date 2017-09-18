@@ -30,5 +30,20 @@ extension UIViewController: HttpClientDelegte {
     func featureUnavailable() {
         PostAlertNotification(title: "Reminder", message: "Sorry, this feature is currently unavailable.\nBut coming soon!😀")
     }
+    
+    func gotoSearchPage(source: FooyoConstants.PageSource, sourceVC: UIViewController) {
+        let vc = SearchHistoryViewController(source: source)
+        vc.sourceVC = sourceVC
+        vc.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func gotoSearchResult(key: String, source: FooyoConstants.PageSource, sourceVC: UIViewController) {
+        let vc = SearchResultViewController(key: key, searchSource: source)
+        vc.sourceVC = sourceVC
+        vc.hidesBottomBarWhenPushed = true
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+
 
 }

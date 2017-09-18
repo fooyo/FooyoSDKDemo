@@ -89,27 +89,23 @@ class ShowOnMapInputViewController: UIViewController {
             if let id = id {
                 if id == "" {
                     let index = FooyoIndex(category: category)
-                    let vc = FooyoBaseMapViewController(index: index)
+                    let vc = FooyoBaseMapViewController(index: index, hideTheDefaultNavigationBar: false)
                     vc.delegate = self
                     self.navigationController?.pushViewController(vc, animated: true)
                 } else {
-                    if let valid = Int(id) {
-                        let index = FooyoIndex(category: category, levelOneId: valid)
-                        let vc = FooyoBaseMapViewController(index: index)
-                        vc.delegate = self
-                        self.navigationController?.pushViewController(vc, animated: true)
-                    } else {
-                        displayAlert(title: "Reminder", message: "Please give a valid id.", complete: nil)
-                    }
+                    let index = FooyoIndex(category: category, levelOneId: id)
+                    let vc = FooyoBaseMapViewController(index: index, hideTheDefaultNavigationBar: false)
+                    vc.delegate = self
+                    self.navigationController?.pushViewController(vc, animated: true)
                 }
             } else {
                 let index = FooyoIndex(category: category)
-                let vc = FooyoBaseMapViewController(index: index)
+                let vc = FooyoBaseMapViewController(index: index, hideTheDefaultNavigationBar: false)
                 vc.delegate = self
                 self.navigationController?.pushViewController(vc, animated: true)
             }
         } else {
-            let vc = FooyoBaseMapViewController()
+            let vc = FooyoBaseMapViewController(hideTheDefaultNavigationBar: false)
             vc.delegate = self
             self.navigationController?.pushViewController(vc, animated: true)
         }

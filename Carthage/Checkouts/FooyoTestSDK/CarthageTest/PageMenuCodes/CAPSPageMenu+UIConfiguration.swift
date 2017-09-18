@@ -90,7 +90,7 @@ extension CAPSPageMenu {
         
         // Set up menu scroll view
         menuScrollView.translatesAutoresizingMaskIntoConstraints = false
-        
+//        menuScrollView.backgroundColor = .red
         menuScrollView.frame = CGRect(x: 0.0, y: 0.0, width: self.view.frame.width, height: configuration.menuHeight)
         
         self.view.addSubview(menuScrollView)
@@ -147,6 +147,8 @@ extension CAPSPageMenu {
         menuScrollView.scrollsToTop = false;
         controllerScrollView.scrollsToTop = false;
         
+        controllerScrollView.isScrollEnabled = false
+        
         // Configure menu scroll view
         if configuration.useMenuLikeSegmentedControl {
             menuScrollView.isScrollEnabled = false
@@ -187,12 +189,15 @@ extension CAPSPageMenu {
                 
                 let titleText : String = controllerTitle != nil ? controllerTitle! : "Menu \(Int(index) + 1)"
                 let itemWidthRect : CGRect = (titleText as NSString).boundingRect(with: CGSize(width: 1000, height: 1000), options: NSStringDrawingOptions.usesLineFragmentOrigin, attributes: [NSFontAttributeName:configuration.menuItemFont], context: nil)
-                configuration.menuItemWidth = itemWidthRect.width
+                configuration.menuItemWidth = itemWidthRect.width + 30
                 
                 menuItemFrame = CGRect(x: totalMenuItemWidthIfDifferentWidths + configuration.menuMargin + (configuration.menuMargin * index), y: 0.0, width: configuration.menuItemWidth, height: configuration.menuHeight)
                 
-                totalMenuItemWidthIfDifferentWidths += itemWidthRect.width
-                menuItemWidths.append(itemWidthRect.width)
+//                totalMenuItemWidthIfDifferentWidths += itemWidthRect.width
+//                menuItemWidths.append(itemWidthRect.width)
+                
+                totalMenuItemWidthIfDifferentWidths += configuration.menuItemWidth
+                menuItemWidths.append(configuration.menuItemWidth)
             } else {
                 if configuration.centerMenuItems && index == 0.0  {
                     startingMenuMargin = ((self.view.frame.width - ((CGFloat(controllerArray.count) * configuration.menuItemWidth) + (CGFloat(controllerArray.count - 1) * configuration.menuMargin))) / 2.0) -  configuration.menuMargin

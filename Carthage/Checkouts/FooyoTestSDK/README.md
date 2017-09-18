@@ -29,6 +29,8 @@ Run `carthage update` to build the framework and drag the following built
 `SVProgressHUD.framework`
 `SnapKit.framework`
 `TGPControls.framework`
+`CoreActionSheetPicker`
+`JVFloatLabeledText`
 `FooyoTestSDK.framework`
 as well as the bundle file `FooyoSDK.bundle` inside `FooyoTestSDK.framework`
 into your Xcode project.
@@ -48,8 +50,8 @@ import FooyoTestSDK
 ```swift
 public class FooyoIndex: NSObject {
     var category: String?
-    var levelOneId: Int?
-    var levelTwoId: Int?
+    var levelOneId: String?
+    var levelTwoId: String?
 }
 ```
 `FooyoIndex` is designed for an easy communication between the base system and the SDK functions. For all the locations, trails and the hotspots of the trails, they would have their own `FooyoIndex` for a better reference. `FooyoIndex` incldues the following parameters:
@@ -60,18 +62,26 @@ public class FooyoIndex: NSObject {
 
 Only `Hotspots` of `Non-linear Trails` will have `levelTwoId`. Their `levelOneId` is the `Non-linear Trail` Id.
 
+## General SDK Functions
+
+```swift
+FooyoSDKSetUserId(userId: id)
+```
+
 ## BaseMap SDK
 
 ### Initialization
 
 ```swift
-let vc = FooyoBaseMapViewController(index: FooyoIndex?)
+let vc = FooyoBaseMapViewController(index: FooyoIndex?, hideTheDefaultNavigationBar: Bool)
 vc.delegate = self
 ```
 
 ### Variables
 
-For this function, the input parameter `FooyoIndex` would only inclue `categroy` and `levelOneId`. This function won't consider the `levelTwoId`, which means it can not be used to show a specific hotspot (of a non-linear trail) on the map.
+- For this function, the input parameter `FooyoIndex` would only inclue `categroy` and `levelOneId`. This function won't consider the `levelTwoId`, which means it can not be used to show a specific hotspot (of a non-linear trail) on the map.
+
+- `hideTheDefaultNavigationBar` is used to define whether the navigation bar should be hidden or not for the map view.
 
 ### Usage
 
@@ -119,14 +129,14 @@ This function will be called when the information window is clicked:
 ### Initialization
 
 ```swift
-let vc = FooyoNavigationViewController(startIndex: FooyoIndex?, endIndex: FooyoIndex)
+let vc = FooyoNavigationViewController(startIndex: FooyoIndex?, endIndex: FooyoIndex?)
 ```
 
 ### SDK Variables
 
 - `startIndex`: FooyoIndex of the start location (**optional**);
 
-- `endIndex`: FooyoIndex of the end location (**compulsory**);
+- `endIndex`: FooyoIndex of the end location (**optional**);
 
 
 When the `startIndex` is unspecified, the user's current location will be considered as the starting point.
@@ -137,9 +147,30 @@ When the `startIndex` is unspecified, the user's current location will be consid
 ### Initialization
 
 ```swift
-let vc = FooyoCreatePlanViewController()
+let vc = FooyoCreatePlanViewController(userId: String)
+vc.delegate = self
 let nav = UINavigationController(rootViewController: vc)
 self.present(nav, animated: true, completion: nil)
+```
+
+### SDK Variables
+
+- `userId`: The unique ID for each user (**compulsory**);
+
+### Delegate Function
+
+Delegate Prototal: `FooyoCreatePlanViewControllerDelegate`.
+
+Delegate Function:
+
+```swift
+func fooyoCreatePlanViewController(didCanceled success: Bool) {
+    debugPrint(success)
+}
+
+func fooyoCreatePlanViewController(didSaved success: Bool) {
+    debugPrint(success)
+}
 ```
 
 ## My Plans SDK
@@ -147,10 +178,12 @@ self.present(nav, animated: true, completion: nil)
 ### Initialization
 
 ```swift
-let vc = FooyoBaseMapViewController()
+let vc = FooyoBaseMapViewController(userId: String?)
 ```
 
 ## Add To Plan SDK
+
+### Currently Unavailable
 
 ### Initialization
 
@@ -160,5 +193,5 @@ let vc = FooyoAddToPlanViewController(index: FooyoIndex)
 
 ### SDK Variables
 
-- `index`: FooyoIndex of the location/trail intended to add to a specific plan (**compulsory**);
+- `index`: FooyoIndex of the location/trail intended to be added to a specific plan (**compulsory**);
 

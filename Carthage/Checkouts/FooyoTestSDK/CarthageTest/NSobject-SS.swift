@@ -10,8 +10,21 @@ import UIKit
 import Mapbox
 import Alamofire
 import AlamofireImage
+import SVProgressHUD
 
 extension NSObject {
+    
+    public func FooyoSDKSetUserId(userId: String) {
+        FooyoUser.currentUser.userId = userId
+    }
+    
+    func parseOptionalString(input: String?, defaultValue: String = "") -> String {
+        if let input = input {
+            return input
+        }
+        return defaultValue
+    }
+        
     func findMatchingStr(input: String, regex: String) -> String? {
         guard let regex = try? NSRegularExpression(pattern: regex, options: []) else { return nil }
         
@@ -36,7 +49,9 @@ extension NSObject {
         
         Alamofire.DataRequest.addAcceptableImageContentTypes(["image/*"])
         Alamofire.DataRequest.addAcceptableImageContentTypes(["image/jpg"])
-        MGLAccountManager.setAccessToken("pk.eyJ1IjoicHVzaGlhbiIsImEiOiJjaXdyaXptNDAweG1rMm90YmRnZHl0dDFpIn0.9kBN2eXNRe3uZ9VMoMhfhg")
+        SVProgressHUD.setDefaultMaskType(.black)
+        SVProgressHUD.setMinimumDismissTimeInterval(0.5)
+    MGLAccountManager.setAccessToken("pk.eyJ1IjoicHVzaGlhbiIsImEiOiJjaXdyaXptNDAweG1rMm90YmRnZHl0dDFpIn0.9kBN2eXNRe3uZ9VMoMhfhg")
         let backButton = UIBarButtonItem()
         backButton.title = ""
         vc.navigationItem.backBarButtonItem = backButton
@@ -49,8 +64,30 @@ extension NSObject {
             "title": title,
             "message": message
         ]
-        let notification = Notification(name: Constants.notifications.FooyoDisplayAlert, object: info, userInfo: nil)
+        let notification = Notification(name: FooyoConstants.notifications.FooyoDisplayAlert, object: info, userInfo: nil)
         NotificationCenter.default.post(notification)
     }
-
+    
+    func PostUpdateHistoryNotification() {
+        let notification = Notification(name: FooyoConstants.notifications.FooyoUpdateHistory, object: nil, userInfo: nil)
+        NotificationCenter.default.post(notification)
+    }
+    
+    func PostSearchNotification(item: FooyoItem) {
+        let notification = Notification(name: FooyoConstants.notifications.FooyoSearch, object: item, userInfo: nil)
+        NotificationCenter.default.post(notification)
+    }
+    
+    func PostUpdateNavigationPointNotification(item: FooyoItem) {
+        let notification = Notification(name: FooyoConstants.notifications.FooyoUpdateNavigationPoint, object: item, userInfo: nil)
+        NotificationCenter.default.post(notification)
+    }
+    func PostItinerarySavedNotification(plan: FooyoItinerary) {
+        let notification = Notification(name: FooyoConstants.notifications.FooyoSavedItinerary, object: plan, userInfo: nil)
+        NotificationCenter.default.post(notification)
+    }
+//    func PostItinerarySavedNotification() {
+//        let notification = Notification(name: FooyoConstants.notifications.FooyoSavedItinerary, object: nil, userInfo: nil)
+//        NotificationCenter.default.post(notification)
+//    }
 }

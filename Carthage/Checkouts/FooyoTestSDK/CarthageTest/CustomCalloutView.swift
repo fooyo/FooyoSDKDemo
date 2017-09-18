@@ -18,7 +18,7 @@ class CustomCalloutView: UIView, MGLCalloutView {
     weak var userDelegate: CustomCalloutViewDelegate?
     
     var representedObject: MGLAnnotation
-    var fromSource = Constants.PageSource.FromHomeMap
+    var fromSource = FooyoConstants.PageSource.FromHomeMap
     
     // Lazy initialization of optional vars for protocols causes segmentation fault: 11s in Swift 3.0. https://bugs.swift.org/browse/SR-1825
     
@@ -55,7 +55,6 @@ class CustomCalloutView: UIView, MGLCalloutView {
         let t = UILabel()
         t.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 12))
         t.textColor = UIColor.ospGrey
-        t.text = "Waterfront Station • Hotel"
         return t
     }()
     fileprivate var reviewView: UIImageView! = {
@@ -67,7 +66,6 @@ class CustomCalloutView: UIView, MGLCalloutView {
         let t = UILabel()
         t.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 12))
         t.textColor = UIColor.black
-        t.text = "5/5 (76)"
         t.contentMode = .scaleAspectFit
         return t
     }()
@@ -123,17 +121,18 @@ class CustomCalloutView: UIView, MGLCalloutView {
                 let width = Scale.scaleY(y: 70)
                 let height = Scale.scaleY(y: 70)
                 let size = CGSize(width: width, height: height)
-                debugPrint(image)
                 coverView.af_setImage(
                     withURL: NSURL(string: image)! as URL,
                     placeholderImage: UIImage(),
                     filter: AspectScaledToFillSizeFilter(size: size),
-                    imageTransition: .crossDissolve(Constants.imageLoadTime)
+                    imageTransition: .crossDissolve(FooyoConstants.imageLoadTime)
                 )
             }
             if let name = rep.item?.name {
                 nameLabel.text = name
             }
+            tagLabel.text = rep.item?.getTag()
+            reviewLabel.text = parseOptionalString(input: rep.item?.rating, defaultValue: "Pending")
 //            if let state = rep.item?.getState() {
 //                stateLabel.text = state
 //            }

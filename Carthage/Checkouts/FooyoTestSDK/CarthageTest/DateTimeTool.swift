@@ -16,7 +16,8 @@ class DateTimeTool: NSObject {
     static var formatFour = "HH:mm a"
     static var formatFive = "yyyy-MM-dd"
     static var formatSix = "HH:mm a, yyyy-MM-dd"
-    
+    static var formatSeven = "dd MM yyyy"
+
     // MARK: - Date to String
     class func fromDateToFormatOne(date: Date) -> String {
         let format = DateFormatter()
@@ -49,6 +50,12 @@ class DateTimeTool: NSObject {
         format.dateFormat = formatSix
         return format.string(from: date)
     }
+    class func fromDateToFormatSeven(date: Date) -> String {
+        let format = DateFormatter()
+        format.dateFormat = formatSeven
+        return format.string(from: date)
+    }
+    
     
     // MARK: - String to Date
     class func fromFormatOneToDate(_ date: String) -> Date {
@@ -68,6 +75,11 @@ class DateTimeTool: NSObject {
         return format.date(from: date)!
     }
     // MARK: - String to String
+    class func fromFormatThreeToFormatSeven(date: String) -> String {
+        let date = fromFormatThreeToDate(date)
+        let str = fromDateToFormatSeven(date: date)
+        return str
+    }
     class func fromFormatThreeToFormatSix(date: String) -> String {
         let date = fromFormatThreeToDate(date)
         let str = fromDateToFormatSix(date: date)
@@ -100,4 +112,19 @@ class DateTimeTool: NSObject {
         return date!
     }
     
+    // MARK: Compare date
+    class func compare(date: Date, dateString: String) -> Int {
+        let dateStrOne = fromFormatThreeToFormatFive(date: dateString)
+        let str = fromDateToFormatThree(date: date)
+        let dateStrTwo = fromFormatThreeToFormatFive(date: str)
+        let dateOne = fromFormatFiveToDate(dateStrOne)
+        let dateTwo = fromFormatFiveToDate(dateStrTwo)
+        if dateOne.isEarlier(than: dateTwo) {
+            return -1
+        } else if dateOne.isLater(than: dateTwo) {
+            return 1
+        } else {
+            return 0
+        }
+    }
 }

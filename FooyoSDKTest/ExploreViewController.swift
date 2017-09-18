@@ -18,8 +18,8 @@ class ExploreViewController: UIViewController {
         t.separatorStyle = .none
         return t
     }()
-    fileprivate var featureNames = ["Show On Map", "Create Plan", "Add To Plan", "Navigation"]
-    fileprivate var featureColors = ["1abc9c", "16a085", "f1c40f", "f39c12"]
+    fileprivate var featureNames = ["Show On Map", "Create Plan", "Add To Plan", "Navigation", "Set User Id"]
+    fileprivate var featureColors = ["1abc9c", "16a085", "f1c40f", "f39c12", "e74c3c"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -79,7 +79,7 @@ class ExploreViewController: UIViewController {
 
 extension ExploreViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 4
+        return 5
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let name = featureNames[indexPath.row]
@@ -100,7 +100,8 @@ extension ExploreViewController: UITableViewDelegate, UITableViewDataSource {
             vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: true)
         case 1:
-            let vc = FooyoCreatePlanViewController()
+            let vc = FooyoCreatePlanViewController(userId: "test")
+            vc.delegate = self
             let nav = UINavigationController(rootViewController: vc)
             self.present(nav, animated: true, completion: nil)
         case 2:
@@ -111,12 +112,25 @@ extension ExploreViewController: UITableViewDelegate, UITableViewDataSource {
             let vc = NavigationInputViewController()
             vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: true)
+        case 4:
+            let vc = SetUserViewController()
+            vc.hidesBottomBarWhenPushed = true
+            self.navigationController?.pushViewController(vc, animated: true)
         default:
         break
         }
     }
 }
 
+extension ExploreViewController: FooyoCreatePlanViewControllerDelegate {
+    
+    func fooyoCreatePlanViewController(didCanceled success: Bool) {
+        debugPrint(success)
+    }
+    func fooyoCreatePlanViewController(didSaved success: Bool) {
+        debugPrint(success)
+    }
+}
 //extension ViewController: FooyoBaseMapViewControllerDelegate {
 //    func didTapInformationWindow(category: String, levelOneId: Int, levelTwoId: Int?) {
 //        debugPrint(category)
