@@ -95,13 +95,16 @@ extension ItineraryListViewController: UITableViewDelegate, UITableViewDataSourc
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        if itineraries.count > 0 {
-//            tableView.deselectRow(at: indexPath, animated: false)
-//            let itinerary = itineraries[indexPath.row]
-//            gotoDisplayItinerary(itinerary: itinerary, parentVC: parentVC!)
-//        }
         tableView.deselectRow(at: indexPath, animated: false)
-        featureUnavailable()
+        if itineraries.count > 0 {
+            tableView.deselectRow(at: indexPath, animated: false)
+            let itinerary = itineraries[indexPath.row]
+            debugPrint(itinerary)
+            gotoDisplayItinerary(itinerary: itinerary, parentVC: parentVC)
+//            let vc = EditItineraryViewController(itinerary: itinerary)
+//            vc.hidesBottomBarWhenPushed = true
+//            self.parentVC?.navigationController?.pushViewController(vc, animated: true)
+        }
     }
 }
 

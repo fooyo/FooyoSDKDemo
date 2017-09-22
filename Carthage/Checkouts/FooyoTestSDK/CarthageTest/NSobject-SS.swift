@@ -38,12 +38,6 @@ extension NSObject {
         }
         return strs.first?[1]
     }
-    func fetchDataAtBackground() {
-        debugPrint("fetchDataAtBackground")
-        getItineraries()
-    }
-    func getItineraries() {
-    }
     
     func applyGeneralVCSettings(vc: UIViewController) {
         
@@ -64,6 +58,7 @@ extension NSObject {
                 if let itineraries = itineraries {
                     FooyoItinerary.myItineraries = itineraries
                     FooyoItinerary.sort()
+                    self.PostItineraryDownloadedNotification()
                 }
             }
         }
@@ -96,8 +91,14 @@ extension NSObject {
         let notification = Notification(name: FooyoConstants.notifications.FooyoSavedItinerary, object: plan, userInfo: nil)
         NotificationCenter.default.post(notification)
     }
-//    func PostItinerarySavedNotification() {
-//        let notification = Notification(name: FooyoConstants.notifications.FooyoSavedItinerary, object: nil, userInfo: nil)
-//        NotificationCenter.default.post(notification)
-//    }
+    func PostItineraryDownloadedNotification() {
+        let notification = Notification(name: FooyoConstants.notifications.FooyoItineraryDownloaded, object: nil, userInfo: nil)
+        NotificationCenter.default.post(notification)
+    }
+    
+    
+    func PostItineraryAddItemNotification(item: FooyoItem) {
+        let notification = Notification(name: FooyoConstants.notifications.FooyoItineraryAddItem, object: item, userInfo: nil)
+        NotificationCenter.default.post(notification)
+    }
 }

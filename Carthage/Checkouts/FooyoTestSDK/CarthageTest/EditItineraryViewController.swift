@@ -9,7 +9,7 @@
 import UIKit
 import Mapbox
 import AlamofireImage
-//import LXReorderableCollectionViewFlowLayout
+//import RAReorderableLayout
 import SVProgressHUD
 //import DateToolsSwift
 
@@ -18,11 +18,12 @@ import SVProgressHUD
 //}
 
 class EditItineraryViewController: FooyoBaseMapViewController {
-    fileprivate var itinerary: FooyoItinerary?
     var startItem = FooyoItem()
     var timeNow = Date()
     var ignoreBudget = false
     var ignoreTime = false
+    
+    var viewMode = FooyoConstants.ViewMode.Map
     
     var plotted = false
     var lines = [MGLPolylineFeature]()
@@ -91,14 +92,13 @@ class EditItineraryViewController: FooyoBaseMapViewController {
     
     var collectionView: UICollectionView! = {
         let layout = UICollectionViewFlowLayout()
-        layout.sectionInset = UIEdgeInsets(top: Scale.scaleY(y: 39), left: 0, bottom: Scale.scaleY(y: 16), right: Scale.scaleX(x: 16))
-        //        layout.itemSize = CGSize(width: Scale.scaleX(x: 330), height: Scale.scaleY(y: 106))
+        layout.sectionInset = UIEdgeInsets(top: Scale.scaleY(y: 34), left: 0, bottom: Scale.scaleY(y: 16), right: Scale.scaleX(x: 16))
         layout.itemSize = CGSize(width: UIScreen.main.bounds.width - Scale.scaleX(x: 20), height: Scale.scaleY(y: 106))
         
         layout.minimumInteritemSpacing = 0
         layout.minimumLineSpacing = 0
         layout.scrollDirection = .horizontal
-        let t = UICollectionView(frame: CGRect(x: 0, y: 0, width: 0, height: 0), collectionViewLayout: layout)
+        let t = UICollectionView(frame: CGRect(x: 0, y: 0, width: 0, height: Scale.scaleY(y: 150)), collectionViewLayout: layout)
         t.register(ItineraryMapCollectionViewCell.self, forCellWithReuseIdentifier: ItineraryMapCollectionViewCell.reuseIdentifier)
         t.backgroundColor = UIColor.white.withAlphaComponent(0.85)
         t.alwaysBounceHorizontal = true
@@ -106,21 +106,27 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         return t
     }()
     
-//    var collectionViewTwo: UICollectionView! = {
-//        let layout = LXReorderableCollectionViewFlowLayout()
-//        layout.sectionInset = UIEdgeInsets(top: Scale.scaleY(y: 39), left: Scale.scaleX(x: 24), bottom: Scale.scaleY(y: 24), right: Scale.scaleX(x: 24))
-//        let space = (FooyoConstants.mainWidth - 2 * Scale.scaleX(x: 24) - 3 * Scale.scaleX(x: 98)) / 2
-//        layout.itemSize = CGSize(width: Scale.scaleX(x: 98), height: Scale.scaleY(y: 92))
-//        layout.minimumInteritemSpacing = space
-//        layout.minimumLineSpacing = space
-//        let t = UICollectionView(frame: CGRect(x: 0, y: 0, width: 0, height: 0), collectionViewLayout: layout)
-//        t.register(ItineraryEditViewTwoCollectionViewCell.self, forCellWithReuseIdentifier: ItineraryEditViewTwoCollectionViewCell.reuseIdentifier)
-//        t.backgroundColor = UIColor.white.withAlphaComponent(0.85)
-//        t.alwaysBounceHorizontal = false
-//        t.alwaysBounceVertical = true
-//        return t
-//    }()
+    var collectionViewTwo: UICollectionView! = {
+        let layout = RAReorderableLayout()
+        layout.sectionInset = UIEdgeInsets(top: 0, left: Scale.scaleX(x: 15), bottom: Scale.scaleY(y: 15), right: Scale.scaleX(x: 15))
+        let size = (FooyoConstants.mainWidth - 4 * Scale.scaleX(x: 15)) / 3
+        layout.itemSize = CGSize(width: size, height: size)
+        layout.minimumInteritemSpacing = Scale.scaleX(x: 15)
+        layout.minimumLineSpacing = Scale.scaleX(x: 15)
+        let t = UICollectionView(frame: CGRect(x: 0, y: 0, width: 0, height: Scale.scaleY(y: 292)), collectionViewLayout: layout)
+        t.register(ItineraryEditViewTwoCollectionViewCell.self, forCellWithReuseIdentifier: ItineraryEditViewTwoCollectionViewCell.reuseIdentifier)
+
+        t.backgroundColor = UIColor.white.withAlphaComponent(0.85)
+        t.alwaysBounceHorizontal = false
+        t.alwaysBounceVertical = true
+        return t
+    }()
     
+    var collectionViewTwoUpper: UIView! = {
+        let t = UIView()
+        t.backgroundColor = UIColor.white.withAlphaComponent(0.85)
+        return t
+    }()
     // Item View
     var displayedItem: FooyoItem?
 
@@ -198,7 +204,7 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         t.clipsToBounds = true
         t.isUserInteractionEnabled = true
         t.contentMode = .scaleAspectFit
-        t.applyBundleImage(name: "general_uparrow")
+        t.applyBundleImage(name: "general_uparrow", replaceColor: UIColor.ospSentosaBlue)
         return t
     }()
     
@@ -217,8 +223,11 @@ class EditItineraryViewController: FooyoBaseMapViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        if self.itinerary?.items != nil && self.itinerary?.routes == nil {
+            updateNavigationInformation(fromAdd: true)
+        }
+        NotificationCenter.default.addObserver(self, selector: #selector(addItem(notification:)), name: FooyoConstants.notifications.FooyoItineraryAddItem, object: nil)
         
-        searchView.isUserInteractionEnabled = false
         addToHistory()
         if itinerary?.tripType == FooyoConstants.tripType.HalfDayAfternoon.rawValue {
             timeNow = DateTimeTool.fromFormatOneToDate("12:30")
@@ -242,6 +251,9 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         itemView.addSubview(playLabel)
         view.addSubview(budgetLabel)
         view.addSubview(collectionView)
+        view.addSubview(collectionViewTwo)
+        view.addSubview(collectionViewTwoUpper)
+
         view.addSubview(autoButton)
         autoButton.addSubview(autoButtonInside)
         view.addSubview(redoBtn)
@@ -249,7 +261,11 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         view.addSubview(undoBtn)
         undoBtn.addSubview(undoBtnInside)
         view.addSubview(expandBtn)
-        
+        let expandGesture = UITapGestureRecognizer(target: self, action: #selector(expandHandler))
+        expandBtn.addGestureRecognizer(expandGesture)
+
+        let listGesture = UITapGestureRecognizer(target: self, action: #selector(listHandler))
+        listBtn.addGestureRecognizer(listGesture)
         let redoGesture = UITapGestureRecognizer(target: self, action: #selector(redoHandler))
         redoBtn.addGestureRecognizer(redoGesture)
         let undoGesture = UITapGestureRecognizer(target: self, action: #selector(undoHandler))
@@ -260,7 +276,20 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         
         collectionView.delegate = self
         collectionView.dataSource = self
+        collectionViewTwo.delegate = self
+        collectionViewTwo.dataSource = self
         setConstraints()
+        
+//        if itinerary?.items?.count > 0 {
+//            showCollection()
+//        } else {
+//            
+//        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        reloadEditData()
     }
     
     func setupNavigationBar() {
@@ -361,7 +390,6 @@ class EditItineraryViewController: FooyoBaseMapViewController {
             make.width.height.equalTo(autoButton)
             make.leading.equalTo(Scale.scaleX(x: 16))
         }
-        
         undoBtnInside.snp.makeConstraints { (make) in
             make.center.equalToSuperview()
             make.width.height.equalTo(Scale.scaleY(y: 15))
@@ -369,13 +397,26 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         collectionView.snp.makeConstraints { (make) in
             make.leading.equalToSuperview()
             make.trailing.equalToSuperview()
-            make.height.equalTo(Scale.scaleY(y: 39) + Scale.scaleY(y: 16) + Scale.scaleY(y: 106))
+            make.height.equalTo(Scale.scaleY(y: 150))
             make.top.equalTo(autoButton.snp.centerY)
         }
+        collectionViewTwoUpper.snp.makeConstraints { (make) in
+            make.leading.equalToSuperview()
+            make.trailing.equalToSuperview()
+            make.top.equalTo(autoButton.snp.centerY)
+            make.bottom.equalTo(collectionViewTwo.snp.top)
+        }
+        collectionViewTwo.snp.makeConstraints { (make) in
+            make.leading.equalToSuperview()
+            make.trailing.equalToSuperview()
+            make.height.equalTo(Scale.scaleY(y: 292))
+            make.top.equalTo(autoButton.snp.centerY).offset(Scale.scaleY(y: 34))
+        }
+
         expandBtn.snp.makeConstraints { (make) in
             make.centerX.equalToSuperview()
-            make.width.equalTo(Scale.scaleX(x: 23))
-            make.height.equalTo(Scale.scaleY(y: 25))
+            make.width.equalTo(Scale.scaleX(x: 30))
+            make.height.equalTo(Scale.scaleY(y: 30))
             make.top.equalTo(collectionView)//.offset(Scale.scaleY(y: 16))
         }
         
@@ -399,18 +440,25 @@ class EditItineraryViewController: FooyoBaseMapViewController {
     func redoHandler() {
         currentIndex += 1
         itinerary = history[currentIndex].makeCopy()
-        debugPrint("the number of routes: \(itinerary?.routes?.count)")
-        reloadData()
+        reloadEditData()
         checkHistory()
         updateBudget()
     }
+    
     func undoHandler() {
         currentIndex -= 1
         itinerary = history[currentIndex].makeCopy()
-        debugPrint("the number of routes: \(itinerary?.routes?.count)")
-        reloadData()
+        reloadEditData()
         checkHistory()
         updateBudget()
+    }
+    
+    func listHandler() {
+        if let itinerary = itinerary {
+            let vc = EditItineraryListViewController(plan: itinerary)
+            vc.sourceVC = self
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
     }
     
     func checkHistory() {
@@ -438,8 +486,24 @@ class EditItineraryViewController: FooyoBaseMapViewController {
             }
         }
     }
-
+    
     //MARK: Handler
+    func addItem(notification: Notification) {
+        if let item = notification.object as? FooyoItem {
+            let anno = allAnnotations.first(where: { (anno) -> Bool in
+                return anno.item?.id == item.id
+            })
+            if itinerary?.items?.contains(item) == true {
+                if anno != nil {
+//                    mapView.selectAnnotation(anno!, animated: true)
+                }
+            } else {
+                if anno != nil {
+                    didTapAdd(item: item, annotation: anno!)
+                }
+            }
+        }
+    }
     func autoButtonHandler() {
         if (self.itinerary?.items)!.count > 2 {
             var start = Int()
@@ -470,7 +534,7 @@ class EditItineraryViewController: FooyoBaseMapViewController {
                     self.reloadEditData()
                     self.addToHistory()
                     self.collectionView.reloadData()
-//                    self.collectionViewTwo.reloadData()
+                    self.collectionViewTwo.reloadData()
                 }
             })
         }
@@ -499,20 +563,17 @@ class EditItineraryViewController: FooyoBaseMapViewController {
             })
             SVProgressHUD.show()
             if let id = self.itinerary?.id {
-//                HttpClient.sharedInstance.updateItinerary(id: id, allId: allId, name: (self.itinerary?.name)!, type: (self.itinerary?.tripType)!, completion: { (itinerary, isSuccess) in
-//                    SVProgressHUD.dismiss()
-//                    if isSuccess {
-//                        if let itinerary = itinerary {
-//                            Itinerary.update(itineraty: itinerary)
+                HttpClient.sharedInstance.updateItinerary(id: id, allId: allId, name: (self.itinerary?.name)!, type: (self.itinerary?.tripType)!, completion: { (itinerary, isSuccess) in
+                    SVProgressHUD.dismiss()
+                    if isSuccess {
+                        if let itinerary = itinerary {
+                            FooyoItinerary.update(itineraty: itinerary)
 //                            Itinerary.sort()
-//                            NotificationCenter.default.post(name:   NSNotification.Name(rawValue: Constants.Notification.updateItinerary.rawValue), object: itinerary)
-//                            
-//                            //                            self.navigationController?.popToRootViewController(animated: true)
-//                            _ = self.navigationController?.popViewController(animated: true)
-//                            //                            self.delegate?.editUpdateItinerary(itinerary: itinerary)
-//                        }
-//                    }
-//                })
+//                            NotificationCenter.default.post(name:   NSNotification.Name(rawValue: FooyoConstants.Notification.updateItinerary.rawValue), object: itinerary)
+                            _ = self.navigationController?.popViewController(animated: true)
+                        }
+                    }
+                })
             } else {
                 HttpClient.sharedInstance.createItinerary(startId: startId, allId: allId, start: (self.itinerary?.time)!, name: (self.itinerary?.name)!, budget: (self.itinerary?.budget)!, type: (self.itinerary?.tripType)!, completion: { (itinerary, isSuccess) in
                     SVProgressHUD.dismiss()
@@ -538,45 +599,47 @@ class EditItineraryViewController: FooyoBaseMapViewController {
     }
     
     func showCollection() {
+        dismissItem()
         UIView.animate(withDuration: 0.3, animations: {
-            let height = -(Scale.scaleY(y: 40) / 2 + Scale.scaleY(y: 39) + Scale.scaleY(y: 16) + Scale.scaleY(y: 106))
+            let height = -(Scale.scaleY(y: 40) / 2 + Scale.scaleY(y: 150))
             self.collectionView.transform = CGAffineTransform(translationX: 0, y: height)
             self.redoBtn.transform = CGAffineTransform(translationX: 0, y: height)
             self.undoBtn.transform = CGAffineTransform(translationX: 0, y: height)
             self.autoButton.transform = CGAffineTransform(translationX: 0, y: height)
             self.expandBtn.transform = CGAffineTransform(translationX: 0, y: height)
+            
+            self.collectionViewTwo.transform = CGAffineTransform(translationX: 0, y: 0)
+            self.collectionViewTwoUpper.transform = CGAffineTransform(translationX: 0, y: 0)
         })
-    }
-    
-    func dismissCollection() {
-        self.collectionView.transform = CGAffineTransform(translationX: 0, y: 0)
-        self.redoBtn.transform = CGAffineTransform(translationX: 0, y: 0)
-        self.undoBtn.transform = CGAffineTransform(translationX: 0, y: 0)
-        self.autoButton.transform = CGAffineTransform(translationX: 0, y: 0)
-        self.expandBtn.transform = CGAffineTransform(translationX: 0, y: 0)
     }
     
     func showCollectionTwo() {
+        dismissItem()
         UIView.animate(withDuration: 0.3, animations: {
-            let height = -(Scale.scaleY(y: 44) / 2 + Scale.scaleY(y: 292))
-//            self.collectionViewTwo.transform = CGAffineTransform(translationX: 0, y: height)
-//            self.redoBtn.transform = CGAffineTransform(translationX: 0, y: height)
-//            self.undoBtn.transform = CGAffineTransform(translationX: 0, y: height)
-//            self.autoButton.transform = CGAffineTransform(translationX: 0, y: height)
-//            self.filterBtn.transform = CGAffineTransform(translationX: 0, y: height)
-//            self.listBtn.transform = CGAffineTransform(translationX: 0, y: height)
-//            self.expandBtn.transform = CGAffineTransform(translationX: 0, y: height).rotated(by: CGFloat.pi)
+            let height = -(Scale.scaleY(y: 40) / 2 + Scale.scaleY(y: 292))
+            self.collectionViewTwo.transform = CGAffineTransform(translationX: 0, y: height)
+            self.collectionViewTwoUpper.transform = CGAffineTransform(translationX: 0, y: height)
+            self.redoBtn.transform = CGAffineTransform(translationX: 0, y: height)
+            self.undoBtn.transform = CGAffineTransform(translationX: 0, y: height)
+            self.autoButton.transform = CGAffineTransform(translationX: 0, y: height)
+            self.expandBtn.transform = CGAffineTransform(translationX: 0, y: height).rotated(by: CGFloat.pi)
+            
+            self.collectionView.transform = CGAffineTransform(translationX: 0, y: 0)
         })
     }
     
-    func dismissCollectionTwo() {
-//        self.collectionViewTwo.transform = CGAffineTransform(translationX: 0, y: 0)
-//        self.redoBtn.transform = CGAffineTransform(translationX: 0, y: 0)
-//        self.undoBtn.transform = CGAffineTransform(translationX: 0, y: 0)
-//        self.autoButton.transform = CGAffineTransform(translationX: 0, y: 0)
-//        self.filterBtn.transform = CGAffineTransform(translationX: 0, y: 0)
-//        self.expandBtn.transform = CGAffineTransform(translationX: 0, y: 0)
+    func dismissBothCollection() {
+        UIView.animate(withDuration: 0.3, animations: {
+            self.collectionViewTwo.transform = CGAffineTransform(translationX: 0, y: 0)
+            self.collectionViewTwoUpper.transform = CGAffineTransform(translationX: 0, y: 0)
+            self.collectionView.transform = CGAffineTransform(translationX: 0, y: 0)
+            self.redoBtn.transform = CGAffineTransform(translationX: 0, y: 0)
+            self.undoBtn.transform = CGAffineTransform(translationX: 0, y: 0)
+            self.autoButton.transform = CGAffineTransform(translationX: 0, y: 0)
+            self.expandBtn.transform = CGAffineTransform(translationX: 0, y: 0)
+        })
     }
+    
     func dismissItem() {
         self.itemView.transform = CGAffineTransform(translationX: 0, y: 0)
 //        self.gpsBtn.transform = CGAffineTransform(translationX: 0, y: 0)
@@ -598,22 +661,38 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         playLabel.text = "Play time: " + item.getVisitingTime()
         reviewLabel.text = item.rating
         dismissItem()
+        dismissBothCollection()
         UIView.animate(withDuration: 0.3) {
             self.itemView.transform = CGAffineTransform(translationX: 0, y: -Scale.scaleY(y: 122))
 //            self.gpsBtn.transform = CGAffineTransform(translationX: 0, y: -Scale.scaleY(y: 54))
 //            self.listBtn.transform = CGAffineTransform(translationX: 0, y: -Scale.scaleY(y: 122))
         }
+        
     }
     
     func reloadEditData() {
-//        super.reloadData()
-        showCollection()
         reloadMapIcons()
-        self.collectionView.reloadData()
-//        self.collectionViewTwo.reloadData()
+        if expanded {
+            if itinerary?.items != nil {
+                showCollectionTwo()
+            }
+        } else {
+            if itinerary?.items != nil {
+                showCollection()
+            }
+        }
+        reloadCollections()
     }
     
+    func reloadCollections() {
+        self.collectionView.reloadData()
+        self.collectionViewTwo.reloadData()
+    }
     //MARK: - Override
+    override func searchHandler() {
+        gotoSearchPage(source: .FromItineraryEditMap, sourceVC: self)
+    }
+    
     override func clearMapView() {
         super.clearMapView()
         mapView.removeAnnotations(lines)
@@ -627,6 +706,7 @@ class EditItineraryViewController: FooyoBaseMapViewController {
             if items.count > 1 {
                 if expanded {
                     mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 320, 60), animated: true)
+//                    mapView.setvis
                 } else {
                     mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 190, 60), animated: true)
                 }
@@ -643,107 +723,15 @@ class EditItineraryViewController: FooyoBaseMapViewController {
 }
 
 extension EditItineraryViewController {
-    override func mapView(_ mapView: MGLMapView, viewFor annotation: MGLAnnotation) -> MGLAnnotationView? {
-        // This example is only concerned with point annotations.
-        if let annotation = annotation as? MyCustomPointAnnotation {
-            // Use the point annotation’s longitude value (as a string) as the reuse identifier for its view.
-            //            let reuseIdentifier = (annotation.item?.category)!
-            var reuseIdentifier = ""
-            reuseIdentifier = (annotation.reuseId)!
-            if annotation.item?.id == searchItem?.id {
-                reuseIdentifier = FooyoConstants.AnnotationId.UserMarker.rawValue
-            }
-            if let items = self.itinerary?.items {
-                for each in items {
-                    if annotation.item?.id == each.id {
-                        reuseIdentifier = FooyoConstants.AnnotationId.ItineraryItem.rawValue
-                        break
-                    }
-                }
-            }
-            // For better performance, always try to reuse existing annotations.
-            // If there’s no reusable annotation view available, initialize a new one.
-            
-            if let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier) as? CustomAnnotationView {
-//                annotationView.applyColor(annotation: annotation)
-                return annotationView
-            } else {
-                var annotationView = CustomAnnotationView(reuseIdentifier: reuseIdentifier)
-                if reuseIdentifier == FooyoConstants.AnnotationId.ItineraryItem.rawValue {
-                    annotationView.frame = CGRect(x: 0, y: 0, width: Scale.scaleY(y: 25), height: Scale.scaleY(y: 25))
-                    if let index = self.itinerary?.items?.index(of: annotation.item!) {
-                        annotationView.indexLabel.text = "\(index)"
-                    }
-                } else if reuseIdentifier == FooyoConstants.AnnotationId.UserMarker.rawValue {
-                    annotationView.frame = CGRect(x: 0, y: 0, width: Scale.scaleY(y: 17), height: Scale.scaleY(y: 48))
-                } else {
-                    if (annotation.item?.belongsToTheme(theme: itinerary?.theme))! {
-                        annotationView.frame = CGRect(x: 0, y: 0, width: Scale.scaleY(y: 20), height: Scale.scaleY(y: 20))
-                    } else {
-                        annotationView.frame = CGRect(x: 0, y: 0, width: Scale.scaleY(y: 12), height: Scale.scaleY(y: 12))
-                    }
-                    annotationView.alpha = 0.6
-                }
-//                annotationView.applyColor(annotation: annotation)
-                return annotationView
-            }
-        }
-        return nil
-    }
-    
-//    func mapViewDidFinishRenderingFrame(_ mapView: MGLMapView, fullyRendered: Bool) {
-//        if let annotations = mapView.annotations {
-//            if mapView.zoomLevel > 16 {
-//                for annotation in annotations {
-//                    if let annotation = annotation as? MyCustomPointAnnotation {
-//                        if let view = mapView.view(for: annotation) as? CustomAnnotationView {
-//                            var reuseIdentifier = ""
-//                            if let id = annotation.reuseIdHigher {
-//                                reuseIdentifier = id
-//                            } else {
-//                                reuseIdentifier = (annotation.reuseId)!
-//                            }
-//                            
-//                            if reuseIdentifier == FooyoConstants.AnnotationId.ItineraryItem.rawValue || reuseIdentifier == Constants.AnnotationId.UserMarker.rawValue {
-//                            } else {
-//                                UIView.animate(withDuration: 0.5, animations: {
-//                                    view.frame.size = CGSize(width: Scale.scaleY(y: 28), height: Scale.scaleY(y: 28))
-//                                    view.alpha = 0.8
-//                                })
-//                            }
-//                        }
-//                    }
-//                }
-//            } else {
-//                for annotation in annotations {
-//                    if let annotation = annotation as? MyCustomPointAnnotation {
-//                        if let view = mapView.view(for: annotation) as? CustomAnnotationView {
-//                            var reuseIdentifier = ""
-//                            if let id = annotation.reuseIdHigher {
-//                                reuseIdentifier = id
-//                            } else {
-//                                reuseIdentifier = (annotation.reuseId)!
-//                            }
-//                            
-//                            if reuseIdentifier == Constants.AnnotationId.ItineraryItem.rawValue || reuseIdentifier == Constants.AnnotationId.UserMarker.rawValue {
-//                            } else {
-//                                UIView.animate(withDuration: 0.5, animations: {
-//                                    if (annotation.item?.belongsToTheme(theme: self.itinerary?.theme))! {
-//                                        view.frame.size = CGSize(width: Scale.scaleY(y: 20), height: Scale.scaleY(y: 20))
-//                                    } else {
-//                                        view.frame.size = CGSize(width: Scale.scaleY(y: 15), height: Scale.scaleY(y: 15))
-//                                    }
-//                                    view.alpha = 0.8
-//                                })
-//                            }
-//                        }
-//                    }
-//                }
-//                
+//    override func mapviewcallout
+//    override func mapView(_ mapView: MGLMapView, annotationCanShowCallout annotation: MGLAnnotation) -> Bool {
+//        if let anno = annotation as? MyCustomPointAnnotation {
+//            if anno.item?.isEssential() == true {
+//                return true
 //            }
 //        }
+//        return false
 //    }
-    
     override func mapView(_ mapView: MGLMapView, calloutViewFor annotation: MGLAnnotation) -> MGLCalloutView? {
         // Only show callouts for `Hello world!` annotation
         if annotation.responds(to: #selector(getter: UIPreviewActionItem.title)) {
@@ -776,7 +764,6 @@ extension EditItineraryViewController {
             if let item = anno.item {
                 if let items = itinerary?.items {
                     if items.contains(item) {
-                        //                        dismissItem()
                         if expanded {
                             showCollectionTwo()
                         } else {
@@ -786,19 +773,9 @@ extension EditItineraryViewController {
                             }
                         }
                     } else {
-                        if expanded {
-                            dismissCollectionTwo()
-                        } else {
-                            dismissCollection()
-                        }
                         showItem(item: item)
                     }
                 } else {
-                    if expanded {
-                        dismissCollectionTwo()
-                    } else {
-                        dismissCollection()
-                    }
                     showItem(item: item)
                 }
             }
@@ -852,7 +829,7 @@ extension EditItineraryViewController {
         return MGLPolylineFeature(coordinates: &coordinates, count: UInt(coordinates.count))
     }
 //
-    func updateNavigationInformation(fromAdd: Bool = false) {
+    func updateNavigationInformation(fromAdd: Bool = false, withSVP: Bool = false) {
         var start = Int()
         if startItem.id == nil {
             start = (self.itinerary?.items?[0].id)!
@@ -862,7 +839,11 @@ extension EditItineraryViewController {
         let all = (self.itinerary?.items)!.map({ (item) -> Int in
             return item.id!
         })
+        if withSVP {
+            SVProgressHUD.show()
+        }
         HttpClient.sharedInstance.optimizeRoute(start: start, all: all, keep: true, type: (itinerary?.tripType)!, budget: (itinerary?.budget)!, time: (itinerary?.time)!, completion: { (itinerary, isSuccess) in
+            SVProgressHUD.dismiss()
             if isSuccess {
                 if fromAdd {
                     if let warnings = itinerary?.warnings {
@@ -884,7 +865,7 @@ extension EditItineraryViewController {
                                     }))
                                     alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                                     self.present(alertController, animated: true, completion: nil)
-                                }// else
+                                }
                             }
                             
                         }
@@ -899,8 +880,17 @@ extension EditItineraryViewController {
                         self.itinerary?.items?[index].arrivingTime = items[index].arrivingTime
                     }
                 }
+//                self.itinerary?.items = itinerary?.items
+                for each in (itinerary?.items)! {
+                    debugPrint(each.arrivingTime)
+                }
+                
+                DispatchQueue.main.async {
+                    self.collectionViewTwo.reloadData()
+
+                }
                 self.collectionView.reloadData()
-//                self.collectionViewTwo.reloadData()
+                debugPrint("i am ending this")
 //                if self.newItem != nil && self.newItemFirst {
 //                    debugPrint("i am scrolling")
 //                    self.newItemFirst = false
@@ -930,12 +920,19 @@ extension EditItineraryViewController: CustomCalloutViewItineraryDelegate {
             }
         }
     }
-    func didTapAdd(item: FooyoItem) {
-        if itinerary?.items == nil {
-            itinerary?.items = [item]
-            startItem = item
+    func didTapAdd(item: FooyoItem, annotation: MyCustomPointAnnotation) {
+        var items = [FooyoItem]()
+        if item.isNonLinearHotspot() {
+            items = item.findBrothers()
         } else {
-            itinerary?.items?.append(item)
+            items = [item]
+        }
+        if itinerary?.items == nil {
+            itinerary?.items = items
+            startItem = items[0]
+        } else {
+            itinerary?.items?.append(contentsOf: items)
+//            itinerary?.items?.append(item)
         }
         let count = (itinerary?.items?.count)!
         if count == 1 {
@@ -948,9 +945,10 @@ extension EditItineraryViewController: CustomCalloutViewItineraryDelegate {
             addToHistory()
         }
         updateBudget()
+//        mapView.selectAnnotation(annotation, animated: true)
         
     }
-    func didTapRemove(item: FooyoItem) {
+    func didTapRemove(item: FooyoItem, annotation: MyCustomPointAnnotation) {
         let index = itinerary?.items?.index(of: item)
         itinerary?.items?.remove(at: index!)
         if (itinerary?.items?.isEmpty)! {
@@ -963,41 +961,42 @@ extension EditItineraryViewController: CustomCalloutViewItineraryDelegate {
                 item.arrivingTime = DateTimeTool.fromDateToFormatThree(date: timeNow)
             }
         }
-        reloadMapIcons()
-//        if let count = itinerary?.items?.count {
-//            if count > 1 {
+        reloadEditData()
+        if let count = itinerary?.items?.count {
+            if count > 1 {
 //                autoButtonHandler()
-//                //                updateNavigationInformation()
-//            } else {
-//                addToHistory()
-//            }
-//        } else {
-//            addToHistory()
-//        }
+                updateNavigationInformation()
+            } else {
+                addToHistory()
+            }
+        } else {
+            addToHistory()
+        }
         updateBudget()
         
     }
-    func didTapStart(item: FooyoItem) {
-//        if itinerary?.items == nil {
-//            itinerary?.items = [item]
-//        } else {
-//            if (itinerary?.items)!.contains(item) {
-//            } else {
-//                itinerary?.items?.append(item)
-//            }
-//        }
-//        let count = (itinerary?.items?.count)!
-//        if count == 1 {
-//            item.arrivingTime = DateTimeTool.fromDateToFormatThree(date: timeNow)
-//        }
-//        startItem = item
-//        reloadData()
-//        if count > 1 {
-//            autoButtonHandler()
-//        } else {
-//            addToHistory()
-//        }
-//        //        addToHistory()
+    func didTapStart(item: FooyoItem, annotation: MyCustomPointAnnotation) {
+        if itinerary?.items == nil {
+            itinerary?.items = [item]
+        } else {
+            if (itinerary?.items)!.contains(item) {
+            } else {
+                itinerary?.items?.append(item)
+            }
+        }
+        let count = (itinerary?.items?.count)!
+        if count == 1 {
+            item.arrivingTime = DateTimeTool.fromDateToFormatThree(date: timeNow)
+        }
+        startItem = item
+        reloadEditData()
+        if count > 1 {
+            autoButtonHandler()
+        } else {
+            addToHistory()
+        }
+        
+//        mapView.selectAnnotation(annotation, animated: true)
     }
     
     
@@ -1007,9 +1006,20 @@ extension EditItineraryViewController: CustomCalloutViewItineraryDelegate {
             self.itemView.transform = CGAffineTransform(translationX: 0, y: 0)
         }
     }
+    
+    func expandHandler() {
+        expanded = !expanded
+        if expanded == false {
+            mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 190, 60), animated: true)
+            self.showCollection()
+        } else {
+            mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 320, 60), animated: true)
+            self.showCollectionTwo()
+        }
+    }
 }
 
-extension EditItineraryViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+extension EditItineraryViewController: RAReorderableLayoutDataSource, RAReorderableLayoutDelegate {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
@@ -1022,7 +1032,10 @@ extension EditItineraryViewController: UICollectionViewDelegate, UICollectionVie
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        debugPrint("i am loading a collectionView")
+
         if collectionView == self.collectionView {
+            debugPrint("i am loading a collectionView cell")
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ItineraryMapCollectionViewCell.reuseIdentifier, for: indexPath) as! ItineraryMapCollectionViewCell
 //            cell.delegate = self
             let item = (itinerary?.items)![indexPath.row]
@@ -1038,10 +1051,12 @@ extension EditItineraryViewController: UICollectionViewDelegate, UICollectionVie
             cell.configureWith(item: item, isLowBudgetVisiting: ((itinerary?.budget)! <= 100 && (itinerary?.tripType)! == FooyoConstants.tripType.FullDay.rawValue))
             return cell
         } else {
+            debugPrint("i am loading a collectionViewTwo cell")
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ItineraryEditViewTwoCollectionViewCell.reuseIdentifier, for: indexPath) as! ItineraryEditViewTwoCollectionViewCell
             let item = (itinerary?.items)![indexPath.row]
+            debugPrint(item.arrivingTime)
             cell.configureWith(item: item, isLowBudgetVisiting: ((itinerary?.budget)! <= 100 && (itinerary?.tripType)! == FooyoConstants.tripType.FullDay.rawValue))
-            cell.deHighlight()
+//            cell.deHighlight()
             //            if indexPath.row == (itinerary?.items?.count)! - 1 {
             //                if newItemFirst {
             //                    newItemFirst = false
@@ -1063,51 +1078,65 @@ extension EditItineraryViewController: UICollectionViewDelegate, UICollectionVie
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
     }
-    //    func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-    //        debugPrint("go ahead")
-    //    }
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-//        if !decelerate {
-//            if viewMode == Constants.ViewMode.Map && expanded == false {
-//                let x = collectionView.contentOffset.x
-//                var num = floor(x / (Scale.scaleX(x: 330) + Scale.scaleX(x: 16)))
-//                let reminder = x - num * (Scale.scaleX(x: 330) + Scale.scaleX(x: 16))
-//                if reminder >= (Scale.scaleX(x: 330) + Scale.scaleX(x: 16)) / 2 {
-//                    num += 1
-//                }
-//                
-//                let selectedItem = Int(num)
-//                collectionView.scrollToItem(at: IndexPath(item: selectedItem, section: 0), at: .left, animated: true)
-//                for each in itineraryAnnotations {
-//                    if each.index == selectedItem {
-//                        mapView.selectAnnotation(each, animated: true)
-//                        return
-//                    }
-//                }
-//            }
-//        }
+        if !decelerate {
+            if viewMode == FooyoConstants.ViewMode.Map && expanded == false {
+                let x = collectionView.contentOffset.x
+                var num = floor(x / (Scale.scaleX(x: 330) + Scale.scaleX(x: 16)))
+                let reminder = x - num * (Scale.scaleX(x: 330) + Scale.scaleX(x: 16))
+                if reminder >= (Scale.scaleX(x: 330) + Scale.scaleX(x: 16)) / 2 {
+                    num += 1
+                }
+                
+                let selectedItem = Int(num)
+                collectionView.scrollToItem(at: IndexPath(item: selectedItem, section: 0), at: .left, animated: true)
+                if let item = itinerary?.items?[selectedItem] {
+                    for each in allAnnotations {
+                        if each.item?.id == item.id {
+                            mapView.selectAnnotation(each, animated: true)
+                            return
+                        }
+                    }
+                }
+            }
+        }
     }
+    
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-//        debugPrint("scrollViewDidEndDecelerating")
-//        if viewMode == Constants.ViewMode.Map && expanded == false  {
-//            let x = collectionView.contentOffset.x
-//            var num = floor(x / (Scale.scaleX(x: 330) + Scale.scaleX(x: 16)))
-//            let reminder = x - num * (Scale.scaleX(x: 330) + Scale.scaleX(x: 16))
-//            if reminder >= (Scale.scaleX(x: 330) + Scale.scaleX(x: 16)) / 2 {
-//                num += 1
-//            }
-//            let selectedItem = Int(num)
-//            debugPrint(x)
-//            debugPrint(reminder)
-//            debugPrint(num)
-//            debugPrint(selectedItem)
-//            collectionView.scrollToItem(at: IndexPath(item: selectedItem, section: 0), at: .left, animated: true)
-//            for each in itineraryAnnotations {
-//                if each.index == selectedItem {
-//                    mapView.selectAnnotation(each, animated: true)
-//                    return
-//                }
-//            }
-//        }
+        if viewMode == FooyoConstants.ViewMode.Map && expanded == false  {
+            let x = collectionView.contentOffset.x
+            var num = floor(x / (Scale.scaleX(x: 330) + Scale.scaleX(x: 16)))
+            let reminder = x - num * (Scale.scaleX(x: 330) + Scale.scaleX(x: 16))
+            if reminder >= (Scale.scaleX(x: 330) + Scale.scaleX(x: 16)) / 2 {
+                num += 1
+            }
+            let selectedItem = Int(num)
+            collectionView.scrollToItem(at: IndexPath(item: selectedItem, section: 0), at: .left, animated: true)
+            if let item = itinerary?.items?[selectedItem] {
+                for each in allAnnotations {
+                    if each.item?.id == item.id {
+                        mapView.selectAnnotation(each, animated: true)
+                        return
+                    }
+                }
+            }
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, at: IndexPath, willMoveTo toIndexPath: IndexPath) {
+        debugPrint("will move")
+    }
+    func collectionView(_ collectionView: UICollectionView, at: IndexPath, didMoveTo toIndexPath: IndexPath) {
+        debugPrint("did move")
+
+        if collectionView == collectionViewTwo {
+            if let items = itinerary?.items {
+                let item = items[at.item]
+                itinerary?.items?.remove(at: at.item)
+                itinerary?.items?.insert(item, at: toIndexPath.item)
+            }
+            reloadEditData()
+            updateNavigationInformation()
+        }
     }
 }

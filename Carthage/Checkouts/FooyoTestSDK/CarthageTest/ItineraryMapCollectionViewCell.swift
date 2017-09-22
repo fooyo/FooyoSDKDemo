@@ -61,19 +61,9 @@ class ItineraryMapCollectionViewCell: UICollectionViewCell {
     }()
     var navBtn: UIButton! = {
         let t = UIButton()
-//        t.backgroundColor = .white
-//        t.layer.cornerRadius = Scale.scaleY(y: 30) / 2
-//        t.alpha = 0.9
-//        t.setImage(#imageLiteral(resourceName: "walking"), for: .normal)
-        return t
-    }()
-    var addButton: UIButton! = {
-        let t = UIButton()
-//        t.backgroundColor = .clear
-//        t.layer.cornerRadius = Scale.scaleY(y: 30) / 2
-//        t.insideButton.layer.cornerRadius = Scale.scaleY(y: 30) / 2
-//        t.insideButton.setImage(#imageLiteral(resourceName: "plus"), for: .normal)
-//        t.alpha = 0.9
+        t.backgroundColor = UIColor.ospSentosaGreen
+        t.layer.cornerRadius = Scale.scaleY(y: 30) / 2
+        t.alpha = 0.9
         return t
     }()
     var timeLabel: UILabel! = {
@@ -93,7 +83,7 @@ class ItineraryMapCollectionViewCell: UICollectionViewCell {
         contentView.layer.shadowOffset = CGSize(width: 0, height: Scale.scaleY(y: 2))
         contentView.layer.shadowRadius = Scale.scaleY(y: 6)
         contentView.layer.shadowOpacity = 1
-//        contentView.alpha = 0.92
+        contentView.alpha = 0.92
         contentView.addSubview(itemContentView)
         itemContentView.addSubview(avatarView)
         itemContentView.addSubview(nameLabel)
@@ -102,10 +92,8 @@ class ItineraryMapCollectionViewCell: UICollectionViewCell {
         itemContentView.addSubview(visitLabel)
         contentView.addSubview(navView)
         navView.addSubview(navBtn)
-        navView.addSubview(addButton)
         navView.addSubview(timeLabel)
         navBtn.addTarget(self, action: #selector(navHandler), for: .touchUpInside)
-//        addButton.insideButton.addTarget(self, action: #selector(addHandler), for: .touchUpInside)
         setConstraints()
     }
     
@@ -128,7 +116,6 @@ class ItineraryMapCollectionViewCell: UICollectionViewCell {
             make.bottom.equalToSuperview()
             make.leading.equalToSuperview().offset(Scale.scaleX(x: 8))
             make.trailing.equalTo(navView.snp.leading)
-            
         }
         avatarView.snp.makeConstraints { (make) in
             make.top.equalToSuperview().offset(Scale.scaleY(y: 5))
@@ -166,9 +153,6 @@ class ItineraryMapCollectionViewCell: UICollectionViewCell {
             make.top.equalToSuperview()
             make.bottom.equalTo(timeLabel.snp.top).offset(Scale.scaleY(y: -5))
             make.trailing.equalToSuperview()
-        }
-        addButton.snp.makeConstraints { (make) in
-            make.edges.equalTo(navBtn)
         }
         timeLabel.snp.makeConstraints { (make) in
             make.centerX.equalTo(navBtn)
@@ -211,17 +195,18 @@ class ItineraryMapCollectionViewCell: UICollectionViewCell {
         visitLabel.attributedText = strOne
 
         if route == nil {
-            navBtn.isHidden = true
-            addButton.isHidden = false
+            navBtn.backgroundColor = UIColor.clear
+            navBtn.setImage(UIImage.getBundleImage(name: "basemap_marker"), for: .normal)
             timeLabel.text = "End"
+            timeLabel.textColor = UIColor.ospSentosaRed
         } else {
-            navBtn.isHidden = false
-            addButton.isHidden = true
+            timeLabel.textColor = UIColor.ospSentosaGreen
             timeLabel.text = "\(route!.getTimeInTwoLines())"
-            if route?.type == "bus" {
-                navBtn.setImage(#imageLiteral(resourceName: "bus"), for: .normal)
+            navBtn.backgroundColor = UIColor.ospSentosaGreen
+            if route?.type == FooyoConstants.RouteType.PSV.rawValue {
+                navBtn.setImage(UIImage.getBundleImage(name: "navigation_smallbus", replaceColor: .white), for: .normal)
             } else {
-                navBtn.setImage(#imageLiteral(resourceName: "walking"), for: .normal)
+                navBtn.setImage(UIImage.getBundleImage(name: "navigation_walk", replaceColor: .white), for: .normal)
             }
         }
         self.route = route

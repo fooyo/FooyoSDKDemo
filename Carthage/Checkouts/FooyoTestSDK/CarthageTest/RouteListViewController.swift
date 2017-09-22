@@ -404,7 +404,7 @@ public class FooyoNavigationViewController: UIViewController {
     }
     
 //    func configureLable() {
-//        if let end = destination {
+//        if let end = endItem {
 //            self.endLabel.text = end.name
 //        } else {
 //            self.endLabel.text = "Your Location"
@@ -595,7 +595,6 @@ public class FooyoNavigationViewController: UIViewController {
             make.centerY.equalTo(switchIcon.snp.top)
         }
         startIcon.snp.makeConstraints { (make) in
-//            make.centerY.equalTo(startLabel)
             make.height.width.equalTo(Scale.scaleY(y: 16))
             make.trailing.equalTo(startLine)
             make.bottom.equalTo(startLine.snp.top).offset(Scale.scaleY(y: -8))
@@ -685,20 +684,22 @@ public class FooyoNavigationViewController: UIViewController {
 //        busBtn.backgroundColor = UIColor.white
 //    }
     func switchHandler() {
-//        checkUserLocation()
-//        let tmp = start
-//        start = end
-//        end = tmp
-//        let item = startItem
-//        startItem = destination
-//        destination = item
+        let tmp = startCoord
+        startCoord = endCoord
+        endCoord = tmp
+        let item = startItem
+        startItem = endItem
+        endItem = item
+        let str = startLabel.text
+        startLabel.text = endLabel.text
+        endLabel.text = str
 //        configureLable()
-//        startLabel.transform = CGAffineTransform(translationX: 0, y: Scale.scaleY(y: 33) + Scale.scaleY(y: 8))
-//        endLabel.transform = CGAffineTransform(translationX: 0, y: Scale.scaleY(y: -33) - Scale.scaleY(y: 8))
-//        UIView.animate(withDuration: 0.3) { 
-//            self.startLabel.transform = CGAffineTransform(translationX: 0, y: 0)
-//            self.endLabel.transform = CGAffineTransform(translationX: 0, y: 0)
-//        }
+        startLabel.transform = CGAffineTransform(translationX: 0, y: Scale.scaleY(y: 20) + Scale.scaleY(y: 7) + 1 + Scale.scaleY(y: 23))
+        endLabel.transform = CGAffineTransform(translationX: 0, y: -(Scale.scaleY(y: 20) + Scale.scaleY(y: 7) + 1 + Scale.scaleY(y: 23)))
+        UIView.animate(withDuration: 0.3) { 
+            self.startLabel.transform = CGAffineTransform(translationX: 0, y: 0)
+            self.endLabel.transform = CGAffineTransform(translationX: 0, y: 0)
+        }
 //        pagination.reset()
 //        refreshData()
     }

@@ -30,6 +30,7 @@ public class FooyoMyPlanViewController: UIViewController {
         super.viewDidLoad()
         applyGeneralVCSettings(vc: self)
         NotificationCenter.default.addObserver(self, selector: #selector(itinerarySaved(notification:)), name: FooyoConstants.notifications.FooyoSavedItinerary, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(itineraryDownloaded), name: FooyoConstants.notifications.FooyoItineraryDownloaded, object: nil)
 
         // Do any additional setup after loading the view.
         configurePageViews()
@@ -95,7 +96,9 @@ public class FooyoMyPlanViewController: UIViewController {
     }
     
     func loadData() {
+        debugPrint(FooyoUser.currentUser.userId)
         if let id = FooyoUser.currentUser.userId {
+            debugPrint(FooyoItinerary.myItineraries)
             if FooyoItinerary.myItineraries == nil {
                 SVProgressHUD.show()
                 HttpClient.sharedInstance.getItineraries { (itineraries, isSuccess) in
@@ -122,6 +125,10 @@ public class FooyoMyPlanViewController: UIViewController {
                 self.configurePageViews()
             }
         }
+    }
+    
+    func itineraryDownloaded() {
+        self.configurePageViews()
     }
 
 }

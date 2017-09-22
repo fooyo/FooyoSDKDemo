@@ -17,12 +17,16 @@ public protocol FooyoBaseMapViewControllerDelegate: class {
 //import
 public class FooyoBaseMapViewController: UIViewController {
     public weak var delegate: FooyoBaseMapViewControllerDelegate?
-    var items: [FooyoItem]?
-//    var filters: [Constants.FilterType]? = [.Attraction, .Event, .FB, .Shop, .Hotel, .LinearTrail, .NonLinearTrail, .RestRoom,
-//                                            .PrayerRoom, .TickingCounter, .BusStop, .TramStop, .ExpressStop, .CableStop]
     
+    //MARK: - Variables for Plan Creation
+    var itinerary: FooyoItinerary?
+    
+    //MARK: - Variables for general map
     var hideBar = true
     var sourcePage = FooyoConstants.PageSource.FromHomeMap
+    
+    var items: [FooyoItem]?
+    fileprivate var scaled = false
     //MARK: - Variables for MapView
     var mapView: MGLMapView!
     var mapCenter: CLLocationCoordinate2D?
@@ -31,7 +35,7 @@ public class FooyoBaseMapViewController: UIViewController {
     var searchItem: FooyoItem?
     var searchAnnotation: MyCustomPointAnnotation?
 
-    //MARK: - Variables for MapView
+    //MARK: - Variables for SearchView
     var searchView: UIView! = {
         let t = UIView()
         t.backgroundColor = .white
@@ -41,7 +45,6 @@ public class FooyoBaseMapViewController: UIViewController {
         t.layer.shadowRadius = Scale.scaleY(y: 4)
         t.layer.shadowOpacity = 1
         t.isUserInteractionEnabled = true
-//        t.alpha = 0.9
         return t
     }()
     
@@ -71,7 +74,6 @@ public class FooyoBaseMapViewController: UIViewController {
         t.isUserInteractionEnabled = true
         return t
     }()
-    
     
     var filterBtn: ShadowView! = {
         let t = ShadowView()
@@ -195,6 +197,10 @@ public class FooyoBaseMapViewController: UIViewController {
     //for show on map
     fileprivate var index: FooyoIndex?
     fileprivate var selectedCategory: FooyoCategory?
+    fileprivate var isShowAll: Bool {
+        return selectedCategory == nil
+    }
+    
 //    fileprivate var selectedCategory: String?
 //    fileprivate var selectedId: Int?
 //    fileprivate var showOnMapMode: Bool = false
@@ -214,15 +220,6 @@ public class FooyoBaseMapViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
         self.index = index
         self.hideBar = hideTheDefaultNavigationBar
-        debugPrint(self.index?.category)
-        debugPrint(self.index?.levelOneId)
-//        self.selectedCategory = index?.category
-//        self.selectedId = index?.levelOneId
-//        if selectedCategory != nil {
-//            self.showOnMapMode = true
-//        } else {
-//            self.showOnMapMode = false
-//        }
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -257,9 +254,17 @@ public class FooyoBaseMapViewController: UIViewController {
             //                self.mapView.selectAnnotation(anno, animated: true)
             
             mapView.setCenter((searchItem?.getCoor())!, zoomLevel: 15, direction: 0, animated: true) {
-                //                    debugPrint("i am going to select")
                 self.mapView.selectAnnotation(anno, animated: true)
-                //                    debugPrint("i am done with select")
+            }
+        }
+        
+        if index != nil {
+            if let annotations = mapView.annotations as? [MyCustomPointAnnotation] {
+                let anno = annotations[0]
+                let item = anno.item
+                mapView.setCenter((item?.getCoor())!, zoomLevel: 15, direction: 0, animated: true) {
+                    self.mapView.selectAnnotation(anno, animated: true)
+                }
             }
         }
 
@@ -323,8 +328,6 @@ public class FooyoBaseMapViewController: UIViewController {
             make.trailing.equalToSuperview()
             make.top.equalToSuperview()
             make.bottom.equalToSuperview()
-            //            make.top.equalTo(topLayoutGuide.snp.bottom)
-//            make.bottom.equalTo(bottomLayoutGuide.snp.top)
         }
     }
     
@@ -351,10 +354,14 @@ public class FooyoBaseMapViewController: UIViewController {
     }
     
     func setupCategoryListView() {
+        
+//        view.addSubview(filterView)
         if let vc = self.tabBarController {
             vc.view.addSubview(filterView)
         } else if let vc = self.navigationController {
             vc.view.addSubview(filterView)
+        } else {
+            view.addSubview(filterView)
         }
         filterView.addSubview(overLay)
         let overLayGesture = UITapGestureRecognizer(target: self, action: #selector(dismissFilter))
@@ -378,7 +385,6 @@ public class FooyoBaseMapViewController: UIViewController {
     func categoryListConstraints() {
         
         filterView.snp.remakeConstraints { (make) in
-//            make.edges.equalToSuperview()
             make.leading.equalToSuperview()
             make.trailing.equalToSuperview()
             make.height.equalTo(FooyoConstants.mainHeight)
@@ -443,7 +449,7 @@ public class FooyoBaseMapViewController: UIViewController {
             make.trailing.equalTo(Scale.scaleX(x: -16))
         }
         filterBtnInside.snp.makeConstraints { (make) in
-            make.width.height.equalTo(Scale.scaleY(y: 15))
+            make.width.height.equalTo(Scale.scaleY(y: 17))
             make.center.equalToSuperview()
         }
         gpsBtn.snp.makeConstraints { (make) in
@@ -578,23 +584,16 @@ public class FooyoBaseMapViewController: UIViewController {
     }
     
     func searchHandler() {
-//        featureUnavailable()
         gotoSearchPage(source: .FromHomeMap, sourceVC: self)
-//        let vc = SearchHistoryViewController(source: .FromHomeMap)
-//        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     //MAKR: Data Handler
     func reloadData() {
         sortItems()
         reloadMapIcons()
-//        crossHandler()
     }
     
     func sortItems() {
-//        clearMapView()
-//        clearMapData()
-        
         if let items = items {
             allAnnotations = [MyCustomPointAnnotation]()
             for each in items {
@@ -603,13 +602,53 @@ public class FooyoBaseMapViewController: UIViewController {
                 point.title = each.name
                 point.item = each
                 point.reuseId = each.category?.name
-                point.reuseIdOriginal = each.category?.name
+//                if each.isEssential() {
+//                    point.isInSelectedCatrgory = true
+//                } else {
+//                    point.isInSelectedCatrgory = false
+//                }
                 allAnnotations.append(point)
             }
         }
     }
     
     
+    func reDrawMapIcons() {
+        if let annotations = mapView.annotations {
+            for annotation in annotations {
+                if let annotation = annotation as? MyCustomPointAnnotation {
+                    if selectedCategory == nil {
+                        annotation.isInSelectedCatrgory = true
+                    } else {
+                        if annotation.item?.id == searchItem?.id {
+                            annotation.isInSelectedCatrgory = true
+                        } else {
+                            if annotation.item?.category?.id == selectedCategory?.id {
+                                annotation.isInSelectedCatrgory = true
+                            } else {
+                                annotation.isInSelectedCatrgory = false
+                            }
+                        }
+                        
+                    }
+                    if let view = mapView.view(for: annotation) as? CustomAnnotationView {
+                        if annotation.isInSelectedCatrgory {
+                            view.isHidden = false
+                            view.isUserInteractionEnabled = true
+                        } else {
+                            view.isHidden = true
+                            view.isUserInteractionEnabled = false
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+//    func loadMapIcons() {
+//        clearMapView()
+//        
+//    }
     func reloadMapIcons() {
         clearMapView()
         var allAnno = [MyCustomPointAnnotation]()
@@ -634,19 +673,29 @@ public class FooyoBaseMapViewController: UIViewController {
                 debugPrint(allAnno.count)
             }
         } else {
-            if let selected = selectedCategory {
-                allAnno = allAnnotations.filter({ (annotation) -> Bool in
-                    if let search = searchItem {
-                        if annotation.item?.id == search.id {
-                            return true
-                        }
-                    }
-                    return annotation.item?.category?.id == selected.id
-                })
-                debugPrint(allAnno.count)
-            } else {
-                allAnno = allAnnotations
-            }
+            allAnno = allAnnotations
+
+//            if let selected = selectedCategory {
+//                allAnno = allAnnotations.filter({ (annotation) -> Bool in
+//                    if let search = searchItem {
+//                        if annotation.item?.id == search.id {
+//                            return true
+//                        }
+//                    }
+//                    return annotation.item?.category?.id == selected.id
+//                })
+//                debugPrint(allAnno.count)
+//            } else {
+////                allAnno = allAnnotations.filter({ (anno) -> Bool in
+////                    if let search = searchItem {
+////                        if anno.item?.id == search.id {
+////                            return true
+////                        }
+////                    }
+////                    return anno.item?.isEssential() == true
+////                })
+//                allAnno = allAnnotations
+//            }
         }
         mapView.addAnnotations(allAnno)
     }
@@ -656,6 +705,7 @@ public class FooyoBaseMapViewController: UIViewController {
 //        mapView.annotatio
 //        mapView.removeAnnotations(linesHome)
     }
+    
     func reloadAnnotation(annotation: MyCustomPointAnnotation) {
         mapView.removeAnnotation(annotation)
         mapView.addAnnotation(annotation)
@@ -695,22 +745,6 @@ public class FooyoBaseMapViewController: UIViewController {
             if let anno = searchAnnotation {
                 reloadAnnotation(annotation: anno)
             }
-            //            reloadMapIcons()
-//            mapView.annotation
-//            mapView.
-           
-//            if let anno = searchAnnotation {
-//                debugPrint("i am going to center")
-//
-////                self.mapView.setCenter((searchItem?.getCoor())!, zoomLevel: 15, animated: true)
-////                self.mapView.selectAnnotation(anno, animated: true)
-//
-//                mapView.setCenter((searchItem?.getCoor())!, zoomLevel: 15, direction: 0, animated: true) {
-////                    debugPrint("i am going to select")
-////                    self.mapView.selectAnnotation(anno, animated: true)
-////                    debugPrint("i am done with select")
-//                }
-//            }
         }
     }
     
@@ -729,27 +763,157 @@ extension FooyoBaseMapViewController: MGLMapViewDelegate {
             if annotation.item?.id == searchItem?.id {
                 reuseIdentifier = FooyoConstants.AnnotationId.UserMarker.rawValue
             }
-
+            
+            if let items = self.itinerary?.items {
+                for each in items {
+                    if annotation.item?.id == each.id {
+                        reuseIdentifier = FooyoConstants.AnnotationId.ItineraryItem.rawValue
+                        break
+                    }
+                }
+            }
+            
             // For better performance, always try to reuse existing annotations.
             if let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier) as? CustomAnnotationView {
-//                annotationView.applyColor(annotation: annotation)
                 return annotationView
             } else {
                 var annotationView = CustomAnnotationView(reuseIdentifier: reuseIdentifier)
-                if reuseIdentifier == FooyoConstants.AnnotationId.UserMarker.rawValue {
+                if reuseIdentifier == FooyoConstants.AnnotationId.ItineraryItem.rawValue {
+                    annotationView.frame = CGRect(x: 0, y: 0, width: Scale.scaleY(y: 25), height: Scale.scaleY(y: 25))
+                    if let index = self.itinerary?.items?.index(of: annotation.item!) {
+                        annotationView.indexLabel.text = "\(index + 1)"
+                    }
+                } else if reuseIdentifier == FooyoConstants.AnnotationId.UserMarker.rawValue {
                     annotationView.frame = CGRect(x: 0, y: 0, width: Scale.scaleY(y: 17), height: Scale.scaleY(y: 48))
                 } else {
                     annotationView.frame = CGRect(x: 0, y: 0, width: Scale.scaleY(y: 12), height: Scale.scaleY(y: 12))
+                    
+                    if annotation.item?.isEssential() != true {
+                        annotationView.isHidden = true
+                        annotationView.isUserInteractionEnabled = false
+                    }
+                    
                 }
-//                annotationView.applyColor(annotation: annotation)
                 return annotationView
             }
             // If there’s no reusable annotation view available, initialize a new one.
-            
         }
         return nil
     }
-    
+    public func mapViewDidFinishRenderingFrame(_ mapView: MGLMapView, fullyRendered: Bool) {
+        if let annotations = mapView.annotations {
+            if mapView.zoomLevel > 14 {
+                for annotation in annotations {
+                    if let annotation = annotation as? MyCustomPointAnnotation {
+                        if let view = mapView.view(for: annotation) as? CustomAnnotationView {
+                            var reuseIdentifier = (annotation.reuseId)!
+                            if annotation.item?.id == searchItem?.id {
+                                reuseIdentifier = FooyoConstants.AnnotationId.UserMarker.rawValue
+                            }
+                            if reuseIdentifier == FooyoConstants.AnnotationId.UserMarker.rawValue {
+                            } else {
+                                if annotation.item?.isEssential() == true {
+                                    if annotation.scaled == false {
+                                        annotation.scaled = true
+                                        view.transform = CGAffineTransform.init(scaleX: 0.5, y: 0.5)
+                                        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.3, initialSpringVelocity: 0.1, options: .beginFromCurrentState, animations: {
+                                            view.transform = CGAffineTransform.init(scaleX: 1.8, y: 1.8)
+                                        }, completion: nil)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if mapView.zoomLevel > 15 {
+                for annotation in annotations {
+                    if let annotation = annotation as? MyCustomPointAnnotation {
+                        if let view = mapView.view(for: annotation) as? CustomAnnotationView {
+                            var reuseIdentifier = (annotation.reuseId)!
+                            if annotation.item?.id == searchItem?.id {
+                                reuseIdentifier = FooyoConstants.AnnotationId.UserMarker.rawValue
+                            }
+                            if reuseIdentifier == FooyoConstants.AnnotationId.UserMarker.rawValue {
+                            } else {
+                                if annotation.item?.isEssential() != true {
+                                    if annotation.scaled == false {
+                                        annotation.scaled = true
+                                        if annotation.isInSelectedCatrgory {
+                                            view.isHidden = false
+                                            view.isUserInteractionEnabled = true
+                                        }
+                                        view.transform = CGAffineTransform.init(scaleX: 0.5, y: 0.5)
+                                        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.3, initialSpringVelocity: 0.1, options: .beginFromCurrentState, animations: {
+                                            view.transform = CGAffineTransform.init(scaleX: 1.2, y: 1.2)
+                                        }, completion: nil)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if mapView.zoomLevel <= 15 {
+                for annotation in annotations {
+                    if let annotation = annotation as? MyCustomPointAnnotation {
+                        if let view = mapView.view(for: annotation) as? CustomAnnotationView {
+                            var reuseIdentifier = (annotation.reuseId)!
+                            if annotation.item?.id == searchItem?.id {
+                                reuseIdentifier = FooyoConstants.AnnotationId.UserMarker.rawValue
+                            }
+                            if reuseIdentifier == FooyoConstants.AnnotationId.UserMarker.rawValue {
+                            } else {
+                                
+                                if annotation.item?.isEssential() != true {
+                                    if annotation.scaled == true {
+                                        annotation.scaled = false
+                                        view.transform = CGAffineTransform.init(scaleX: 1.5, y: 1.5)
+                                        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.3, initialSpringVelocity: 0.1, options: .beginFromCurrentState, animations: {
+                                            view.transform = CGAffineTransform.init(scaleX: 0.8, y: 0.8)
+                                        }, completion: { (success) in
+                                            if annotation.isInSelectedCatrgory && !self.isShowAll {
+                                                return
+                                            }
+                                            view.isHidden = true
+                                            view.isUserInteractionEnabled = false
+                                        })
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if mapView.zoomLevel <= 14 {
+                for annotation in annotations {
+                    if let annotation = annotation as? MyCustomPointAnnotation {
+                        if let view = mapView.view(for: annotation) as? CustomAnnotationView {
+                            var reuseIdentifier = (annotation.reuseId)!
+                            if annotation.item?.id == searchItem?.id {
+                                reuseIdentifier = FooyoConstants.AnnotationId.UserMarker.rawValue
+                            }
+                            
+                            if reuseIdentifier == FooyoConstants.AnnotationId.UserMarker.rawValue {
+                            } else {
+                                if annotation.item?.isEssential() == true {
+                                    if annotation.scaled == true {
+                                        annotation.scaled = false
+                                        view.transform = CGAffineTransform.init(scaleX: 2.5, y: 2.5)
+                                        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.3, initialSpringVelocity: 0.1, options: .beginFromCurrentState, animations: {
+                                            view.transform = CGAffineTransform.init(scaleX: 1, y: 1)
+                                        }, completion: nil)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+            }
+        }
+    }
     // Allow callout view to appear when an annotation is tapped.
     public func mapView(_ mapView: MGLMapView, annotationCanShowCallout annotation: MGLAnnotation) -> Bool {
         return true
@@ -796,6 +960,22 @@ extension FooyoBaseMapViewController: MGLMapViewDelegate {
 //            return .red
 //        }
 //    }
+    
+    func configureFilterIcon(icon: Any?) {
+        if let icon = icon as? UIImage {
+            filterBtnInside.image = icon
+        } else if let icon = icon as? String {
+            let width = Scale.scaleY(y: 17)
+            let height = Scale.scaleY(y: 17)
+            let size = CGSize(width: width, height: height)
+            filterBtnInside.af_setImage(
+                withURL: NSURL(string: icon)! as URL,
+                placeholderImage: UIImage(),
+                filter: AspectScaledToFitSizeFilter(size: size),
+                imageTransition: .crossDissolve(FooyoConstants.imageLoadTime)
+            )
+        }
+    }
 }
 
 extension FooyoBaseMapViewController: UITableViewDelegate, UITableViewDataSource {
@@ -857,7 +1037,10 @@ extension FooyoBaseMapViewController: UITableViewDelegate, UITableViewDataSource
             switch indexPath.row {
             case 0:
                 selectedCategory = nil
-                reloadMapIcons()
+                configureFilterIcon(icon: UIImage.getBundleImage(name: "basemap_all"))
+//                reloadMapIcons()
+                
+                reDrawMapIcons()
                 dismissFilter()
             case FooyoCategory.others.count + 1:
                 displayAmenities()
@@ -866,7 +1049,9 @@ extension FooyoBaseMapViewController: UITableViewDelegate, UITableViewDataSource
             default:
                 let category = FooyoCategory.others[indexPath.row - 1]
                 selectedCategory = category
-                reloadMapIcons()
+                configureFilterIcon(icon: category.icon)
+//                reloadMapIcons()
+                reDrawMapIcons()
                 dismissFilter()
 //                break
             }
@@ -877,7 +1062,9 @@ extension FooyoBaseMapViewController: UITableViewDelegate, UITableViewDataSource
             default:
                 let category = FooyoCategory.amenities[indexPath.row - 1]
                 selectedCategory = category
-                reloadMapIcons()
+                configureFilterIcon(icon: category.icon)
+//                reloadMapIcons()
+                reDrawMapIcons()
                 dismissFilter()
             }
         case transportationTable:
@@ -887,11 +1074,15 @@ extension FooyoBaseMapViewController: UITableViewDelegate, UITableViewDataSource
             default:
                 let category = FooyoCategory.transportations[indexPath.row - 1]
                 selectedCategory = category
-                reloadMapIcons()
+                configureFilterIcon(icon: category.icon)
+//                reloadMapIcons()
+                reDrawMapIcons()
                 dismissFilter()
             }
         default:
             break
         }
     }
+    
+    
 }

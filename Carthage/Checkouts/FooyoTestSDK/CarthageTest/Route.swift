@@ -136,6 +136,7 @@ class FooyoRoute: BaseModel {
                 var list = [[Double]]()
                 var type: Double = -1
                 let first = coordinates[0]
+                debugPrint(first)
                 type = first[2]
                 if type == 1 {
                     isWalking = false

@@ -80,6 +80,7 @@ class ThemeCollectionViewCell: UICollectionViewCell {
     
     func configureWith(theme: FooyoConstants.ThemeName) {
         nameLabel.text = theme.rawValue
+        imageView.applyBundleImage(name: "plan_defaulttheme")
 //        switch theme {
 //        case .Culture:
 //            imageView.applyBundleImage(name: "theme_1_culture_heritage")

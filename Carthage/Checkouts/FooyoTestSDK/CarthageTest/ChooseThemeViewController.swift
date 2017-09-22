@@ -80,13 +80,18 @@ import UIKit
     }
     
     func manualHandler() {
-        if let selected = selected {
-            FooyoItinerary.newItinerary.theme = FooyoConstants.themes[selected].rawValue
-            let vc = EditItineraryViewController(itinerary: FooyoItinerary.newItinerary)
-            self.navigationController?.pushViewController(vc, animated: true)
-        } else {
-            displayAlert(title: "Warning", message: "Please choose your theme.", complete: nil)
-        }
+        
+        FooyoItinerary.newItinerary.theme = FooyoConstants.themes[1].rawValue
+        let vc = EditItineraryViewController(itinerary: FooyoItinerary.newItinerary)
+        self.navigationController?.pushViewController(vc, animated: true)
+        
+//        if let selected = selected {
+//            FooyoItinerary.newItinerary.theme = FooyoConstants.themes[selected].rawValue
+//            let vc = EditItineraryViewController(itinerary: FooyoItinerary.newItinerary)
+//            self.navigationController?.pushViewController(vc, animated: true)
+//        } else {
+//            displayAlert(title: "Warning", message: "Please choose your theme.", complete: nil)
+//        }
     }
     func autoHandler() {
         featureUnavailable()

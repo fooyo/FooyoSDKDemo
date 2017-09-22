@@ -303,13 +303,6 @@ public class HttpClient: NSObject {
     }
     
     func updateItinerary(id: Int, allId: [Int], name: String, type: String, completion: @escaping (_ itinerary: FooyoItinerary?, _ isSuccess: Bool) -> Void) {
-        //        let params: [String: [String: Any]] = [
-        //            "itinerary": [
-        //                "place_ids": allId,
-        //                "name": name,
-        //                "trip_typr": type
-        //            ]
-        //        ]
         let params: [String: [String: Any]] = [
             "itinerary": [
                 "place_ids": allId,

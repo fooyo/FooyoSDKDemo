@@ -45,7 +45,6 @@ class ItinerarySummaryMapCollectionViewCell: UICollectionViewCell {
                 point.title = each.name
                 point.item = each
                 point.reuseId = each.category?.name
-                point.reuseIdOriginal = each.category?.name
                 allAnnotations.append(point)
             }
         }

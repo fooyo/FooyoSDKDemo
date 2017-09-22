@@ -11,10 +11,12 @@ import SVProgressHUD
 
 public class FooyoAddToPlanViewController: UIViewController {
     
+    fileprivate var item: FooyoItem?
     fileprivate var index: FooyoIndex?
     fileprivate var overlay: UIView! = {
         let t = UIView()
         t.backgroundColor = UIColor.ospOverlay
+        t.isUserInteractionEnabled = true
         return t
     }()
     fileprivate var container: UIView! = {
@@ -67,6 +69,8 @@ public class FooyoAddToPlanViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
         self.index = index
         FooyoUser.currentUser.userId = userId
+        item = FooyoItem.findMatch(index: index)
+//        fetchMyPlans()
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -88,7 +92,7 @@ public class FooyoAddToPlanViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         let gesture = UITapGestureRecognizer(target: self, action: #selector(viewHandler))
-        view.addGestureRecognizer(gesture)
+        overlay.addGestureRecognizer(gesture)
         newBtn.addTarget(self, action: #selector(newHandler), for: .touchUpInside)
         setConstraint()
         loadData()
@@ -98,7 +102,7 @@ public class FooyoAddToPlanViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
     func loadData() {
         if let _ = FooyoUser.currentUser.userId {
             if FooyoItinerary.myItineraries == nil {
@@ -155,7 +159,14 @@ public class FooyoAddToPlanViewController: UIViewController {
         _ = dismiss(animated: true, completion: nil)
     }
     func newHandler() {
-        featureUnavailable()
+        let vc = FooyoCreatePlanViewController(userId: FooyoUser.currentUser.userId!)
+        if item?.isNonLinearHotspot() == true {
+            vc.mustGoPlaces = item?.findBrothers()
+        } else {
+            vc.mustGoPlaces = [item!]
+        }
+        let nav = UINavigationController(rootViewController: vc)
+        self.present(nav, animated: true, completion: nil)
     }
 }
 
@@ -184,13 +195,20 @@ extension FooyoAddToPlanViewController: UITableViewDelegate, UITableViewDataSour
     }
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //        if itineraries.count > 0 {
-        //            tableView.deselectRow(at: indexPath, animated: false)
-        //            let itinerary = itineraries[indexPath.row]
-        //            gotoDisplayItinerary(itinerary: itinerary, parentVC: parentVC!)
-        //        }
+        debugPrint("i am clicking")
         tableView.deselectRow(at: indexPath, animated: false)
-        featureUnavailable()
+        debugPrint(FooyoItinerary.todayAndFuture.count)
+        if FooyoItinerary.todayAndFuture.count != 0 {
+            let plan = FooyoItinerary.todayAndFuture[indexPath.row]
+            if item?.isNonLinearHotspot() == true {
+                plan.items?.append(contentsOf: (item?.findBrothers())!)
+            } else {
+                plan.items?.append(item!)
+            }
+            debugPrint("i am inside")
+            _ = gotoEditItinerary(itinerary: plan)
+        }
+//        featureUnavailable()
     }
 }
 

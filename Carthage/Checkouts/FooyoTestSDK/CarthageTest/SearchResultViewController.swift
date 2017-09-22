@@ -188,16 +188,38 @@ extension SearchResultViewController: UITableViewDelegate, UITableViewDataSource
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let t = UIView()
         t.backgroundColor = UIColor.white
+        let upper = UIView()
+        upper.backgroundColor = .white
+        t.addSubview(upper)
+        let lower = UIView()
+        lower.backgroundColor = UIColor.ospGrey10
+        t.addSubview(lower)
         let label = UILabel()
-        label.text = "SEARCH RESULTS"
+        label.text = "SEARCH HISTORY"
         label.font = UIFont.DefaultBoldWithSize(size: Scale.scaleY(y: 12))
         label.textColor = UIColor.ospDarkGrey
         t.addSubview(label)
+        upper.snp.makeConstraints { (make) in
+            make.leading.equalToSuperview()
+            make.trailing.equalToSuperview()
+            make.top.equalToSuperview()
+            make.bottom.equalTo(Scale.scaleY(y: -10))
+        }
+        lower.snp.makeConstraints { (make) in
+            make.leading.equalToSuperview()
+            make.trailing.equalToSuperview()
+            make.bottom.equalToSuperview()
+            make.height.equalTo(Scale.scaleY(y: 10))
+        }
         label.snp.makeConstraints { (make) in
             make.leading.equalTo(Scale.scaleX(x: 9))
-            make.centerY.equalToSuperview()
+            //            make.centerY.equalToSuperview()
+            make.trailing.equalToSuperview()
+            make.top.equalToSuperview()
+            make.bottom.equalTo(Scale.scaleY(y: -10))
         }
         return t
+
     }
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return Scale.scaleY(y: 26)
@@ -227,6 +249,7 @@ extension SearchResultViewController: UITableViewDelegate, UITableViewDataSource
             if searchSource == FooyoConstants.PageSource.FromHomeMap {
                 PostSearchNotification(item: item)
             } else if searchSource == FooyoConstants.PageSource.FromItineraryEditMap {
+                PostItineraryAddItemNotification(item: item)
             } else if searchSource == FooyoConstants.PageSource.FromNavigation {
                 PostUpdateNavigationPointNotification(item: item)
             }

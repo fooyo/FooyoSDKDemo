@@ -15,17 +15,16 @@ class MyCustomPointAnnotation: MGLPointAnnotation {
 //    var id: Int?
     var item: FooyoItem?
     var reuseId: String?
-    var reuseIdHigher: String?
-    var reuseIdOriginal: String?
     var index: Int? // for itinerary
-
+    var scaled = false
+    var isInSelectedCatrgory = true
+    
     func aCopy() -> MyCustomPointAnnotation {
         let t = MyCustomPointAnnotation()
         t.index = self.index
         t.item = self.item
         t.title = self.title
         t.coordinate = self.coordinate
-        t.reuseIdHigher = self.reuseIdHigher
         // may have error
         t.reuseId = self.reuseId
         return t

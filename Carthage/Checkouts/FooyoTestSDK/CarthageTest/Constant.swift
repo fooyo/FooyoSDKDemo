@@ -28,8 +28,8 @@ struct FooyoConstants {
     static let mainWidth: CGFloat = UIScreen.main.bounds.width
     static let mainHeight: CGFloat = UIScreen.main.bounds.height
     static let imageLoadTime: Double = 0.2
-    static let mapCenterLat: Double = 1.254585
-    static let mapCenterLong: Double = 103.822706
+    static let mapCenterLat: Double = 1.251248
+    static let mapCenterLong: Double = 103.825721
     static let initZoomLevel: Double = 13
     static let mapBound = [CLLocationCoordinate2DMake(1.265713, 103.819852),
                            CLLocationCoordinate2DMake(1.260715, 103.819691),
@@ -46,7 +46,9 @@ struct FooyoConstants {
         static let FooyoSearch = Notification.Name("FooyoSearch")
         static let FooyoUpdateNavigationPoint = Notification.Name("FooyoUpdateNavigationPoint")
         static let FooyoSavedItinerary = Notification.Name("FooyoSavedItinerary")
-        
+        static let FooyoItineraryDownloaded = Notification.Name("FooyoItineraryDownloaded")
+        static let FooyoItineraryAddItem = Notification.Name("FooyoItineraryAddItem")
+
         static let call = Notification.Name("call")
         static let message = Notification.Name("message")
         static let direction = Notification.Name("direction")
@@ -68,9 +70,10 @@ struct FooyoConstants {
     }
     
     enum RouteType: String {
-        case Walking = "walking"
-        case PSV = "psv"
+        case Walking = "foot"
+        case PSV = "bus"
     }
+    
     static let transportationTypes: [FooyoConstants.TransportationType] = [.Foot, .BusA, .BusB, .Drive, .Express, .Tram]
     static let transportationColors: [UIColor] = [UIColor.walk, UIColor.busA, UIColor.busB, UIColor.drive, UIColor.express, UIColor.tram]
 
@@ -89,7 +92,21 @@ struct FooyoConstants {
         case Thrill = "Thrills & Adventures"
     }
     
+    enum ViewMode {
+        case Map
+        case List
+    }
+    
     static let themes = [FooyoConstants.ThemeName.Culture, FooyoConstants.ThemeName.Thrill, FooyoConstants.ThemeName.Family, FooyoConstants.ThemeName.Hip, FooyoConstants.ThemeName.Nature]
+    
+    
+    
+    
+    
+    
+    
+    
+    ///////=============
     static let interest: [FooyoConstants.InterestName] = [FooyoConstants.InterestName.Culture, .Outdoors, .Relaxing, .Romantic, .Historical, .Museums, .Kids, .Shopping, .Food, .Night]
 
 ////    static let themesImage = ["https://s-media-cache-ak0.pinimg.com/564x/27/14/20/2714208ca62eacb8e95a258acbf3c4f8.jpg",
@@ -100,10 +117,7 @@ struct FooyoConstants {
 
     static let interestsImage = [#imageLiteral(resourceName: "1_culture"), #imageLiteral(resourceName: "2_outdoors"), #imageLiteral(resourceName: "3_relaxing"), #imageLiteral(resourceName: "4_romantic"), #imageLiteral(resourceName: "5_historical"), #imageLiteral(resourceName: "6_museums"), #imageLiteral(resourceName: "7_kids"), #imageLiteral(resourceName: "8_shopping"), #imageLiteral(resourceName: "9_food"), #imageLiteral(resourceName: "10_nightlife")]
     
-    enum ViewMode {
-        case Map
-        case List
-    }
+    
     enum SortType {
         case Category
         case AZ
@@ -142,13 +156,14 @@ struct FooyoConstants {
     }
     
     enum AnnotationId: String {
-        case StartPoint = "start_point"
-        case EndPoint = "end_point"
-        case StartItem = "start_item"
-        case EndItem = "end_item"
-        case UserMarker = "user_marker"
-        case ItineraryItem = "itinerary_item"
-        case ThemeItem = "theme_item"
+        case StartPoint = "StartPoint"
+        case EndPoint = "EndPoint"
+        case StartItem = "StartItem"
+        case EndItem = "EndItem"
+        case UserMarker = "UserMarker"
+        case ItineraryItem = "ItineraryItem"
+        case ThemeItem = "ThemeItem"
+        case NotEssential = "NotEssential"
     }
     
     enum ItemType: String {

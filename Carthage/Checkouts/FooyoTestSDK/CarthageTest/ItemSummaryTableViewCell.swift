@@ -41,6 +41,7 @@ class ItemSummaryTableViewCell: UITableViewCell {
         let t = UIImageView()
         t.contentMode = .scaleAspectFit
         t.clipsToBounds = true
+        t.backgroundColor = .clear
         return t
     }()
     
@@ -63,14 +64,14 @@ class ItemSummaryTableViewCell: UITableViewCell {
         separatorView.snp.makeConstraints { (make) in
             make.leading.equalToSuperview()
             make.trailing.equalToSuperview()
-            make.top.equalToSuperview()
+            make.bottom.equalToSuperview()
             make.height.equalTo(Scale.scaleY(y: 10))
         }
         container.snp.makeConstraints { (make) in
             make.leading.equalToSuperview()
             make.trailing.equalToSuperview()
-            make.bottom.equalToSuperview()
-            make.top.equalTo(separatorView.snp.bottom)
+            make.bottom.equalTo(separatorView.snp.top)
+            make.top.equalToSuperview()
         }
         iconView.snp.makeConstraints { (make) in
             make.centerY.equalToSuperview()
@@ -81,17 +82,17 @@ class ItemSummaryTableViewCell: UITableViewCell {
             make.centerY.equalToSuperview()
             make.leading.equalTo(iconView.snp.trailing).offset(Scale.scaleX(x: 10))
         }
-//        rightIconView.snp.makeConstraints { (make) in
-//            make.centerY.equalToSuperview()
-//            make.width.height.equalTo(Scale.scaleY(y: 16))
-//            make.trailing.equalTo(Scale.scaleX(x: -14))
-//        }
+        rightIconView.snp.makeConstraints { (make) in
+            make.centerY.equalToSuperview()
+            make.width.height.equalTo(Scale.scaleY(y: 12))
+            make.trailing.equalTo(Scale.scaleX(x: -18))
+        }
     }
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configureWith(item: FooyoItem) {
+    func configureWith(item: FooyoItem, rightImage: UIImage? = nil) {
         titleLabel.text = item.name
         if let url = item.coverImages {
             let width = Scale.scaleY(y: 39)
@@ -104,6 +105,7 @@ class ItemSummaryTableViewCell: UITableViewCell {
                 imageTransition: .crossDissolve(FooyoConstants.imageLoadTime)
             )
         }
+        rightIconView.image = rightImage
     }
 
 }

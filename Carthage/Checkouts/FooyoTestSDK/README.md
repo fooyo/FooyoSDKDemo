@@ -184,15 +184,16 @@ let vc = FooyoBaseMapViewController(userId: String?)
 
 ## Add To Plan SDK
 
-### Currently Unavailable
-
 ### Initialization
 
 ```swift
-let vc = FooyoAddToPlanViewController(index: FooyoIndex)
+let vc = FooyoAddToPlanViewController(index: FooyoIndex, userId: String)
 ```
 
 ### SDK Variables
 
 - `index`: FooyoIndex of the location/trail intended to be added to a specific plan (**compulsory**);
+
+- `userId`: Required to fetch the existing plans (**compulsory**);
+
 

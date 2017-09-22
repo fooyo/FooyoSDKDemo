@@ -44,7 +44,7 @@ class MainTabViewController: UITabBarController {
         case 0:
             return ExploreViewController()
         case 1:
-            return FooyoMyPlanViewController(userId: nil)
+            return FooyoMyPlanViewController(userId: "test")
         case 2:
             let vc = FooyoBaseMapViewController(hideTheDefaultNavigationBar: true)
             vc.delegate = self

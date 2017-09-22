@@ -11,9 +11,9 @@ import Mapbox
 import UIKit
 
 protocol CustomCalloutViewItineraryDelegate: class {
-    func didTapStart(item: FooyoItem)
-    func didTapAdd(item: FooyoItem)
-    func didTapRemove(item: FooyoItem)
+    func didTapStart(item: FooyoItem, annotation: MyCustomPointAnnotation)
+    func didTapAdd(item: FooyoItem, annotation: MyCustomPointAnnotation)
+    func didTapRemove(item: FooyoItem, annotation: MyCustomPointAnnotation)
     func dismiss()
 }
 
@@ -30,8 +30,8 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
     
     weak var delegate: MGLCalloutViewDelegate?
     
-    let tipHeight: CGFloat = 10.0
-    let tipWidth: CGFloat = 20.0
+    var tipHeight: CGFloat = 10.0
+    var tipWidth: CGFloat = 20.0
     
     fileprivate var containerView: UIView! = {
         let t = UIView()
@@ -70,6 +70,14 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
         t.backgroundColor = .white
         return t
     }()
+    fileprivate var markerView: UIImageView! = {
+        let t = UIImageView()
+        t.applyBundleImage(name: "basemap_marker")
+        t.backgroundColor = .clear
+        t.contentMode = .scaleAspectFit
+        t.clipsToBounds = true
+        return t
+    }()
     
     required init(representedObject: MGLAnnotation) {
         self.representedObject = representedObject
@@ -81,7 +89,7 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
         containerView.addSubview(addButton)
         containerView.addSubview(lineView)
         containerView.addSubview(startButton)
-        
+        containerView.addSubview(markerView)
         removeButton.addTarget(self, action: #selector(didTapRemove), for: .touchUpInside)
         addButton.addTarget(self, action: #selector(didTapAdd), for: .touchUpInside)
         startButton.addTarget(self, action: #selector(didTapStart), for: .touchUpInside)
@@ -97,6 +105,9 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
             make.trailing.equalTo(0)
             make.top.equalTo(0)
             make.bottom.equalTo(-tipHeight)
+        }
+        markerView.snp.makeConstraints { (make) in
+            make.edges.equalToSuperview()
         }
         removeButton.snp.makeConstraints { (make) in
             make.leading.equalToSuperview()
@@ -126,13 +137,13 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
     }
     func didTapAdd() {
         debugPrint("add")
-        self.userDelegate?.didTapAdd(item: item!)
+        self.userDelegate?.didTapAdd(item: item!, annotation: self.representedObject as! MyCustomPointAnnotation)
     }
     func didTapRemove() {
-        self.userDelegate?.didTapRemove(item: item!)
+        self.userDelegate?.didTapRemove(item: item!, annotation: self.representedObject as! MyCustomPointAnnotation)
     }
     func didTapStart() {
-        self.userDelegate?.didTapStart(item: item!)
+        self.userDelegate?.didTapStart(item: item!, annotation: self.representedObject as! MyCustomPointAnnotation)
     }
     
     // MARK: - MGLCalloutView API
@@ -142,12 +153,22 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
         }
         
         view.addSubview(self)
-        if inItinerary {
-            removeButton.isHidden = false
-            addButton.isHidden = true
-        } else {
+        if item?.isEssential() == false {
+            backgroundColor = .clear
+            containerView.backgroundColor = .clear
             removeButton.isHidden = true
-            addButton.isHidden = false
+            addButton.isHidden = true
+            startButton.isHidden = true
+            lineView.isHidden = true
+        } else {
+            markerView.isHidden = true
+            if inItinerary {
+                removeButton.isHidden = false
+                addButton.isHidden = true
+            } else {
+                removeButton.isHidden = true
+                addButton.isHidden = false
+            }
         }
         if isCalloutTappable() {
             // Handle taps and eventually try to send them to the delegate (usually the map view)
@@ -159,18 +180,21 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
         }
         
         //        // Prepare our frame, adding extra space at the bottom for the tip
-        let frameWidth: CGFloat = Scale.scaleX(x: 167.0)//mainBody.bounds.size.width
-        let frameHeight: CGFloat = Scale.scaleY(y: 40.0) + tipHeight
-        let frameOriginX = rect.origin.x + (rect.size.width/2.0) - (frameWidth/2.0)
-        let frameOriginY = rect.origin.y - frameHeight
-        frame = CGRect(x: frameOriginX, y: frameOriginY, width: frameWidth, height: frameHeight)
-        //        self.snp.makeConstraints { (make) in
-        //            make.width.equalTo(Scale.scaleX(x: 283))
-        //            make.height.equalTo(Scale.scaleY(y: 180) + tipHeight)
-        ////            make.centerY.equalToSuperview()
-        //            make.centerX.equalToSuperview()
-        //            make.bottom.equalTo((superview?.snp.centerY)!)
-        //        }
+        if item?.isEssential() == false {
+            tipHeight = 0
+            let frameWidth: CGFloat = Scale.scaleX(x: 50.0)//mainBody.bounds.size.width
+            let frameHeight: CGFloat = Scale.scaleY(y: 40.0) + tipHeight
+            let frameOriginX = rect.origin.x + (rect.size.width/2.0) - (frameWidth/2.0)
+            let frameOriginY = rect.origin.y - frameHeight
+            frame = CGRect(x: frameOriginX, y: frameOriginY, width: frameWidth, height: frameHeight)
+        } else {
+            
+            let frameWidth: CGFloat = Scale.scaleX(x: 167.0)//mainBody.bounds.size.width
+            let frameHeight: CGFloat = Scale.scaleY(y: 40.0) + tipHeight
+            let frameOriginX = rect.origin.x + (rect.size.width/2.0) - (frameWidth/2.0)
+            let frameOriginY = rect.origin.y - frameHeight
+            frame = CGRect(x: frameOriginX, y: frameOriginY, width: frameWidth, height: frameHeight)
+        }
         if animated {
             alpha = 0
             UIView.animate(withDuration: 0.2) { [weak self] in
@@ -215,23 +239,26 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
         super.draw(rect)
 
         // Draw the pointed tip at the bottom
-        let fillColor : UIColor = UIColor.ospDarkGrey
-        //
-        let tipLeft = rect.origin.x + (rect.size.width / 2.0) - (tipWidth / 2.0)
-        let tipBottom = CGPoint(x: rect.origin.x + (rect.size.width / 2.0), y: rect.origin.y + rect.size.height)
-        let heightWithoutTip = rect.size.height - tipHeight
-        
-        let currentContext = UIGraphicsGetCurrentContext()!
-        
-        let tipPath = CGMutablePath()
-        tipPath.move(to: CGPoint(x: tipLeft, y: heightWithoutTip))
-        tipPath.addLine(to: CGPoint(x: tipBottom.x, y: tipBottom.y))
-        tipPath.addLine(to: CGPoint(x: tipLeft + tipWidth, y: heightWithoutTip))
-        tipPath.closeSubpath()
-        
-        fillColor.setFill()
-        currentContext.addPath(tipPath)
-        currentContext.fillPath()
+        if item?.isEssential() == true {
+            
+            let fillColor : UIColor = UIColor.ospDarkGrey
+            //
+            let tipLeft = rect.origin.x + (rect.size.width / 2.0) - (tipWidth / 2.0)
+            let tipBottom = CGPoint(x: rect.origin.x + (rect.size.width / 2.0), y: rect.origin.y + rect.size.height)
+            let heightWithoutTip = rect.size.height - tipHeight
+            
+            let currentContext = UIGraphicsGetCurrentContext()!
+            
+            let tipPath = CGMutablePath()
+            tipPath.move(to: CGPoint(x: tipLeft, y: heightWithoutTip))
+            tipPath.addLine(to: CGPoint(x: tipBottom.x, y: tipBottom.y))
+            tipPath.addLine(to: CGPoint(x: tipLeft + tipWidth, y: heightWithoutTip))
+            tipPath.closeSubpath()
+            
+            fillColor.setFill()
+            currentContext.addPath(tipPath)
+            currentContext.fillPath()
+        }
         
     }
 }

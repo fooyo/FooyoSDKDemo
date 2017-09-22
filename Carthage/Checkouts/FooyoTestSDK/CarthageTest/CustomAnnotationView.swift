@@ -31,7 +31,7 @@ class CustomAnnotationView: MGLAnnotationView {
 //
     override func layoutSubviews() {
         super.layoutSubviews()
-        clipsToBounds = true
+//        clipsToBounds = true
         // Force the annotation view to maintain a constant size when the map is tilted.
         scalesWithViewingDistance = false
         
@@ -64,7 +64,7 @@ class CustomAnnotationView: MGLAnnotationView {
             layer.borderWidth = 0
             iconView.image = UIImage.getBundleImage(name: "basemap_marker").withAlignmentRectInsets(UIEdgeInsets(top: 0, left: 0, bottom: -frame.height / 2, right: 0))
         default:
-            layer.cornerRadius = frame.width / 2
+            layer.cornerRadius = Scale.scaleY(y: 12) / 2
             layer.borderColor = UIColor.white.cgColor
             layer.borderWidth = 1
             if let anno = annotation as? MyCustomPointAnnotation {

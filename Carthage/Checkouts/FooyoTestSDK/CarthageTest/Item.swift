@@ -80,6 +80,13 @@ public class FooyoItem: BaseModel {
         return true
     }
     
+    func findBrothers() -> [FooyoItem] {
+        let items = FooyoItem.items.filter({ (a) -> Bool in
+            return self.levelOneId == a.levelOneId && self.category?.id == a.category?.id
+        })
+        return items
+    }
+    
     func getTag() -> String {
         switch (category?.name?.lowercased())! {
         case "attractions", "events":
@@ -145,5 +152,40 @@ public class FooyoItem: BaseModel {
             }
         }
         return false
+    }
+    
+    func getDuration() -> String {
+        if let time = arrivingTime {
+            return DateTimeTool.fromFormatThreeToFormatFour(date: time)
+        }
+        return ""
+    }
+    
+    class func findMatch(index: FooyoIndex) -> FooyoItem {
+        var item = FooyoItem()
+        if index.isNonLinearTrailHotspot() {
+            item = FooyoItem.items.first(where: { (a) -> Bool in
+                let checkOne = index.category == a.category?.name
+                let checkTwo = index.levelOneId == a.levelOneId
+                let checkThree = index.levelTwoId == a.levelTwoId
+                return checkOne && checkTwo && checkThree
+            })!
+        } else {
+            item = FooyoItem.items.first(where: { (a) -> Bool in
+                let checkOne = index.category == a.category?.name
+                let checkTwo = index.levelOneId == a.levelOneId
+                return checkOne && checkTwo
+            })!
+        }
+        return item
+    }
+    
+    func isEssential() -> Bool {
+        switch (category?.name)! {
+        case "Prayer Rooms", "Ticketing Counters", "Rest Rooms", "Bus Stops", "Tram Stops", "Cable Car Stations", "Express Stations", "Nursing Room", "Taxi Stand":
+            return false
+        default:
+            return true
+        }
     }
 }

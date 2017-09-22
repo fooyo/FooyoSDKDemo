@@ -42,9 +42,9 @@ class FooyoItinerary: BaseModel {
         if json["places"] != nil {
             items = json["places"].arrayValue.map{ FooyoItem(json: $0) }
         }
-//        if json["routes"] != nil {
-//            routes = json["routes"].arrayValue.map{ FooyoRoute(json: $0) }
-//        }
+        if json["routes"] != nil {
+            routes = json["routes"].arrayValue.map{ FooyoRoute(json: $0) }
+        }
         name = json["name"].string
         time = json["trip_start_time"].string
         if json["budget"].double != nil {
@@ -164,16 +164,19 @@ class FooyoItinerary: BaseModel {
         }
         return tag
     }
-//    class func update(itineraty: Itinerary) {
-//        for index in 0..<Itinerary.myItineraries.count {
-//            let iti = Itinerary.myItineraries[index]
-//            if iti.id == itineraty.id {
-//                Itinerary.myItineraries[index] = itineraty.makeCopy()
-//                return
-//            }
-//        }
-//    }
-//    
+    
+    class func update(itineraty: FooyoItinerary) {
+        if let myItineraries = FooyoItinerary.myItineraries {
+            for index in 0..<myItineraries.count {
+                let iti = myItineraries[index]
+                if iti.id == itineraty.id {
+                    FooyoItinerary.myItineraries?[index] = itineraty.makeCopy()
+                    return
+                }
+            }
+        }
+    }
+//
 //    func itemExists(item: Item) -> Bool {
 //        if let items = items {
 //            for each in items {

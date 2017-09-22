@@ -19,6 +19,14 @@ public protocol FooyoCreatePlanViewControllerDelegate: class {
 public class FooyoCreatePlanViewController: UIViewController {
 
     weak public var delegate: FooyoCreatePlanViewControllerDelegate?
+    
+    
+    var mustGoPlaces: [FooyoItem]?
+    fileprivate var planTitle: String?
+    fileprivate var planBudget: Double?
+    fileprivate var planTime: String?
+    fileprivate var planType: String?
+    
     fileprivate var container: TPKeyboardAvoidingScrollView! = {
         let t = TPKeyboardAvoidingScrollView()
         t.backgroundColor = .white
@@ -230,8 +238,11 @@ public class FooyoCreatePlanViewController: UIViewController {
     
     func titleHandler() {
         let text = titleField.text
-        debugPrint(text)
-        FooyoItinerary.newItinerary.name = text
+        if text != "" {
+            planTitle = text
+        } else {
+            planTitle = nil
+        }
     }
     
     
@@ -249,7 +260,7 @@ public class FooyoCreatePlanViewController: UIViewController {
             pillLineTwo.backgroundColor = UIColor.ospGrey
             pillThree.backgroundColor = UIColor.ospGrey20
             pillThree.setTitleColor(UIColor.ospDarkGrey, for: .normal)
-            FooyoItinerary.newItinerary.tripType = FooyoConstants.tripType.HalfDayMorning.rawValue
+            planType = FooyoConstants.tripType.HalfDayMorning.rawValue
         case 1:
             pillOne.backgroundColor = UIColor.ospGrey20
             pillOne.setTitleColor(UIColor.ospDarkGrey, for: .normal)
@@ -259,7 +270,7 @@ public class FooyoCreatePlanViewController: UIViewController {
             pillLineTwo.backgroundColor = UIColor.ospSentosaBlue
             pillThree.backgroundColor = UIColor.ospGrey20
             pillThree.setTitleColor(UIColor.ospDarkGrey, for: .normal)
-            FooyoItinerary.newItinerary.tripType = FooyoConstants.tripType.HalfDayAfternoon.rawValue
+            planType = FooyoConstants.tripType.HalfDayAfternoon.rawValue
         default:
             pillOne.backgroundColor = UIColor.ospGrey20
             pillOne.setTitleColor(UIColor.ospDarkGrey, for: .normal)
@@ -269,7 +280,7 @@ public class FooyoCreatePlanViewController: UIViewController {
             pillLineTwo.backgroundColor = UIColor.ospSentosaBlue
             pillThree.backgroundColor = UIColor.ospSentosaBlue
             pillThree.setTitleColor(UIColor.white, for: .normal)
-            FooyoItinerary.newItinerary.tripType = FooyoConstants.tripType.FullDay.rawValue
+            planType = FooyoConstants.tripType.FullDay.rawValue
         }
         
     }
@@ -283,18 +294,29 @@ public class FooyoCreatePlanViewController: UIViewController {
         _ = dismiss(animated: true, completion: nil)
     }
     func continueHandler() {
-        guard FooyoItinerary.newItinerary.name != nil else {
-            displayAlert(title: "Reminder", message: "The title cannot be empty.", complete: nil)
-            return
-        }
-        guard FooyoItinerary.newItinerary.time != nil else {
-            displayAlert(title: "Reminder", message: "The arrival date cannot be empty.", complete: nil)
-            return
-        }
-        guard FooyoItinerary.newItinerary.budget != nil else {
-            displayAlert(title: "Reminder", message: "The budget cannot be empty.", complete: nil)
-            return
-        }
+//        guard planTitle != nil else {
+//            displayAlert(title: "Reminder", message: "The title cannot be empty.", complete: nil)
+//            return
+//        }
+//        guard planTime != nil else {
+//            displayAlert(title: "Reminder", message: "The arrival date cannot be empty.", complete: nil)
+//            return
+//        }
+//        guard planBudget != nil else {
+//            displayAlert(title: "Reminder", message: "The budget cannot be empty.", complete: nil)
+//            return
+//        }
+//        FooyoItinerary.newItinerary.name = planTitle
+//        FooyoItinerary.newItinerary.budget = planBudget
+//        FooyoItinerary.newItinerary.time = planTime
+//        FooyoItinerary.newItinerary.tripType = planType
+
+        FooyoItinerary.newItinerary = FooyoItinerary()
+        FooyoItinerary.newItinerary.items = mustGoPlaces
+        FooyoItinerary.newItinerary.name = "TEST"
+        FooyoItinerary.newItinerary.budget = 50
+        FooyoItinerary.newItinerary.tripType = FooyoConstants.tripType.FullDay.rawValue
+        FooyoItinerary.newItinerary.time = DateTimeTool.fromDateToFormatThree(date: Date())
         let vc = ChooseThemeViewController()
         self.navigationController?.pushViewController(vc, animated: true)
     }
@@ -307,10 +329,7 @@ public class FooyoCreatePlanViewController: UIViewController {
             
             if let value = value as? Date {
                 self.dateField.text = DateTimeTool.fromDateToFormatFive(date: value)
-                FooyoItinerary.newItinerary.time = DateTimeTool.fromDateToFormatThree(date: value)
-                debugPrint(FooyoItinerary.newItinerary.time)
-//                self.localUser?.birthday = value
-//                self.tableView.reloadData()
+                self.planTime = DateTimeTool.fromDateToFormatThree(date: value)
             }
             return
         }, cancel: { ActionStringCancelBlock in return }, origin: view)
@@ -329,16 +348,14 @@ public class FooyoCreatePlanViewController: UIViewController {
     func budgetHandler() {
         view.endEditing(true)
         let picker = ActionSheetStringPicker(title: "Select Budget", rows: ["Less than $50", "$50-$150", "$150 and above"], initialSelection: 0, doneBlock: { (picker, index, value) in
-            debugPrint(value)
-            debugPrint(index)
             self.budgetField.text = value as? String
             switch index {
             case 0:
-                FooyoItinerary.newItinerary.budget = 50
+                self.planBudget = 50
             case 1:
-                FooyoItinerary.newItinerary.budget = 150
+                self.planBudget = 150
             default:
-                FooyoItinerary.newItinerary.budget = 10000
+                self.planBudget = 10000
             }
         }, cancel: { (picker) in
             return
@@ -436,6 +453,7 @@ public class FooyoCreatePlanViewController: UIViewController {
             make.leading.equalTo(titleField)
             make.trailing.equalTo(titleField)
             make.top.equalTo(pillView.snp.bottom).offset(Scale.scaleY(y: 35))
+            make.height.equalTo(Scale.scaleY(y: 40))
         }
         budgetFakeView.snp.makeConstraints { (make) in
             make.edges.equalTo(budgetField)

@@ -16,7 +16,7 @@ class ItineraryEditViewTwoCollectionViewCell: UICollectionViewCell {
         let t = UIView()
         t.layer.cornerRadius = 4
         t.clipsToBounds = true
-        t.backgroundColor = .clear
+        t.backgroundColor = UIColor.black.withAlphaComponent(0.2)
         return t
     }()
     
@@ -26,26 +26,25 @@ class ItineraryEditViewTwoCollectionViewCell: UICollectionViewCell {
         t.layer.cornerRadius = 4
         t.contentMode = .scaleAspectFill
         t.backgroundColor = UIColor.ospWhite
-        t.backgroundColor = .clear
         return t
     }()
     
-    fileprivate var nameLabel: UILabel! = {
+    fileprivate var arrivingLabel: UILabel! = {
         let t = UILabel()
-        t.font = UIFont.DefaultRegularWithSize(size: Scale.scaleY(y: 13))
-        t.numberOfLines = 2
+        t.font = UIFont.DefaultBoldWithSize(size: Scale.scaleY(y: 22))
         t.textColor = .white
         return t
     }()
-    fileprivate var arrivingLabel: UILabel! = {
+    fileprivate var nameLabel: UILabel! = {
         let t = UILabel()
-        t.font = UIFont.DefaultRegularWithSize(size: Scale.scaleY(y: 22))
+        t.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 13))
+        t.numberOfLines = 2
         t.textColor = .white
         return t
     }()
     fileprivate var visitingLabel: UILabel! = {
         let t = UILabel()
-        t.font = UIFont.DefaultRegularWithSize(size: Scale.scaleY(y: 11))
+        t.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 12))
         t.textColor = .white
         return t
     }()
@@ -56,7 +55,6 @@ class ItineraryEditViewTwoCollectionViewCell: UICollectionViewCell {
         backgroundColor = .clear
         contentView.backgroundColor = .clear
         contentView.layer.cornerRadius = 4
-        contentView.layer.borderWidth = 4
 
         contentView.addSubview(imageView)
         contentView.addSubview(overLay)
@@ -129,6 +127,6 @@ class ItineraryEditViewTwoCollectionViewCell: UICollectionViewCell {
     
     override func draw(_ rect: CGRect) {
         super.draw(rect)
-        overLay.applyGradient(colours: [UIColor(white: 0, alpha: 0.18), UIColor(white: 0, alpha: 0.76)])
+//        overLay.applyGradient(colours: [UIColor(white: 0, alpha: 0.18), UIColor(white: 0, alpha: 0.76)])
     }
 }
