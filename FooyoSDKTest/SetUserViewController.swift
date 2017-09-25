@@ -25,7 +25,7 @@ class SetUserViewController: UIViewController {
         let t = UIButton()
         t.backgroundColor = .black
         t.setTitleColor(.white, for: .normal)
-        t.setTitle("Set", for: .normal)
+        t.setTitle("Login", for: .normal)
         return t
     }()
     
@@ -35,7 +35,7 @@ class SetUserViewController: UIViewController {
         super.viewDidLoad()
         
         // Do any additional setup after loading the view.
-        navigationItem.title = "Set User Id"
+        navigationItem.title = "User Login"
         view.backgroundColor = .white
         view.addSubview(button)
         button.addTarget(self, action: #selector(btnHandler), for: .touchUpInside)
@@ -79,10 +79,10 @@ class SetUserViewController: UIViewController {
                 displayAlert(title: "Reminder", message: "Please give a valid User Id.", complete: nil)
                 return
             }
-            FooyoSDKSetUserId(userId: id)
+            ACCNUser.currentUser.userId = id
+            FooyoSDKSignIn(userId: id)
             //            displayAlert(title: "Done", message: "", complete: nil)
             displayAlert(title: "Done", message: "User Id is set successfully", complete: { 
-                self.navigationController?.popViewController(animated: true)
             })
         }
     }

@@ -8,6 +8,7 @@
 
 import UIKit
 import FooyoTestSDK
+
 class ShowOnMapInputViewController: UIViewController {
     fileprivate var tableView: UITableView! = {
         let t = UITableView()

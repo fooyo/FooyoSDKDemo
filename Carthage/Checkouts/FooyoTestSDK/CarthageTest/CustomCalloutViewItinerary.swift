@@ -22,6 +22,8 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
     
     var representedObject: MGLAnnotation
     var inItinerary: Bool = false
+    var isEditable: Bool = true
+
     var item: FooyoItem?
     // Lazy initialization of optional vars for protocols causes segmentation fault: 11s in Swift 3.0. https://bugs.swift.org/browse/SR-1825
     
@@ -78,6 +80,14 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
         t.clipsToBounds = true
         return t
     }()
+    fileprivate var categoryNameLabel: UILabel! = {
+        let t = UILabel()
+        t.font = UIFont.DefaultRegularWithSize(size: Scale.scaleY(y: 14))
+        t.backgroundColor = .clear
+        t.textColor = .white
+        t.textAlignment = .center
+        return t
+    }()
     
     required init(representedObject: MGLAnnotation) {
         self.representedObject = representedObject
@@ -89,7 +99,7 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
         containerView.addSubview(addButton)
         containerView.addSubview(lineView)
         containerView.addSubview(startButton)
-        containerView.addSubview(markerView)
+        containerView.addSubview(categoryNameLabel)
         removeButton.addTarget(self, action: #selector(didTapRemove), for: .touchUpInside)
         addButton.addTarget(self, action: #selector(didTapAdd), for: .touchUpInside)
         startButton.addTarget(self, action: #selector(didTapStart), for: .touchUpInside)
@@ -97,6 +107,10 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
         if let rep = self.representedObject as? MyCustomPointAnnotation {
             if let item = rep.item {
                 self.item = item
+                self.categoryNameLabel.text = self.item?.category?.name
+                if !item.isEssential() {
+//                    tipHeight = 0
+                }
             }
         }
         
@@ -106,9 +120,9 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
             make.top.equalTo(0)
             make.bottom.equalTo(-tipHeight)
         }
-        markerView.snp.makeConstraints { (make) in
-            make.edges.equalToSuperview()
-        }
+//        markerView.snp.makeConstraints { (make) in
+//            make.edges.equalToSuperview()
+//        }
         removeButton.snp.makeConstraints { (make) in
             make.leading.equalToSuperview()
             make.top.equalToSuperview()
@@ -123,6 +137,9 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
         }
         addButton.snp.makeConstraints { (make) in
             make.edges.equalTo(removeButton)
+        }
+        categoryNameLabel.snp.makeConstraints { (make) in
+            make.edges.equalToSuperview()
         }
         startButton.snp.makeConstraints { (make) in
             make.leading.equalTo(lineView.snp.trailing)
@@ -153,15 +170,17 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
         }
         
         view.addSubview(self)
-        if item?.isEssential() == false {
-            backgroundColor = .clear
-            containerView.backgroundColor = .clear
+        if isEditable == false {
+//            backgroundColor = .clear
+//            containerView.backgroundColor = .clear
             removeButton.isHidden = true
             addButton.isHidden = true
             startButton.isHidden = true
             lineView.isHidden = true
+            categoryNameLabel.isHidden = false
         } else {
-            markerView.isHidden = true
+            categoryNameLabel.isHidden = true
+//            markerView.isHidden = true
             if inItinerary {
                 removeButton.isHidden = false
                 addButton.isHidden = true
@@ -180,20 +199,22 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
         }
         
         //        // Prepare our frame, adding extra space at the bottom for the tip
-        if item?.isEssential() == false {
-            tipHeight = 0
-            let frameWidth: CGFloat = Scale.scaleX(x: 50.0)//mainBody.bounds.size.width
-            let frameHeight: CGFloat = Scale.scaleY(y: 40.0) + tipHeight
-            let frameOriginX = rect.origin.x + (rect.size.width/2.0) - (frameWidth/2.0)
-            let frameOriginY = rect.origin.y - frameHeight
-            frame = CGRect(x: frameOriginX, y: frameOriginY, width: frameWidth, height: frameHeight)
-        } else {
+        if isEditable == true {
             
             let frameWidth: CGFloat = Scale.scaleX(x: 167.0)//mainBody.bounds.size.width
             let frameHeight: CGFloat = Scale.scaleY(y: 40.0) + tipHeight
             let frameOriginX = rect.origin.x + (rect.size.width/2.0) - (frameWidth/2.0)
             let frameOriginY = rect.origin.y - frameHeight
             frame = CGRect(x: frameOriginX, y: frameOriginY, width: frameWidth, height: frameHeight)
+            
+        } else {
+            
+            let frameWidth: CGFloat = Scale.scaleX(x: 100.0)//mainBody.bounds.size.width
+            let frameHeight: CGFloat = Scale.scaleY(y: 40.0) + tipHeight
+            let frameOriginX = rect.origin.x + (rect.size.width/2.0) - (frameWidth/2.0)
+            let frameOriginY = rect.origin.y - frameHeight
+            frame = CGRect(x: frameOriginX, y: frameOriginY, width: frameWidth, height: frameHeight)
+            
         }
         if animated {
             alpha = 0
@@ -239,26 +260,25 @@ class CustomCalloutViewItinerary: UIView, MGLCalloutView {
         super.draw(rect)
 
         // Draw the pointed tip at the bottom
-        if item?.isEssential() == true {
-            
-            let fillColor : UIColor = UIColor.ospDarkGrey
-            //
-            let tipLeft = rect.origin.x + (rect.size.width / 2.0) - (tipWidth / 2.0)
-            let tipBottom = CGPoint(x: rect.origin.x + (rect.size.width / 2.0), y: rect.origin.y + rect.size.height)
-            let heightWithoutTip = rect.size.height - tipHeight
-            
-            let currentContext = UIGraphicsGetCurrentContext()!
-            
-            let tipPath = CGMutablePath()
-            tipPath.move(to: CGPoint(x: tipLeft, y: heightWithoutTip))
-            tipPath.addLine(to: CGPoint(x: tipBottom.x, y: tipBottom.y))
-            tipPath.addLine(to: CGPoint(x: tipLeft + tipWidth, y: heightWithoutTip))
-            tipPath.closeSubpath()
-            
-            fillColor.setFill()
-            currentContext.addPath(tipPath)
-            currentContext.fillPath()
-        }
+//        if item?.isEssential() == true {
+//        }
+        let fillColor : UIColor = UIColor.ospDarkGrey
+        //
+        let tipLeft = rect.origin.x + (rect.size.width / 2.0) - (tipWidth / 2.0)
+        let tipBottom = CGPoint(x: rect.origin.x + (rect.size.width / 2.0), y: rect.origin.y + rect.size.height)
+        let heightWithoutTip = rect.size.height - tipHeight
+        
+        let currentContext = UIGraphicsGetCurrentContext()!
+        
+        let tipPath = CGMutablePath()
+        tipPath.move(to: CGPoint(x: tipLeft, y: heightWithoutTip))
+        tipPath.addLine(to: CGPoint(x: tipBottom.x, y: tipBottom.y))
+        tipPath.addLine(to: CGPoint(x: tipLeft + tipWidth, y: heightWithoutTip))
+        tipPath.closeSubpath()
+        
+        fillColor.setFill()
+        currentContext.addPath(tipPath)
+        currentContext.fillPath()
         
     }
 }

@@ -173,7 +173,7 @@ class ItineraryMapCollectionViewCell: UICollectionViewCell {
         nameLabel.text = item.name
         tagLabel.text = item.getTag()
         var strOne = NSMutableAttributedString(string: "Arrival time: ", attributes: [NSFontAttributeName: UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 12)), NSForegroundColorAttributeName: UIColor.ospSentosaBlue])
-        var strTwo = NSMutableAttributedString(string: "Pending", attributes: [NSFontAttributeName: UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 12)), NSForegroundColorAttributeName: UIColor.black])
+        var strTwo = NSMutableAttributedString(string: item.getArrivalTime(), attributes: [NSFontAttributeName: UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 12)), NSForegroundColorAttributeName: UIColor.black])
         if let time = item.arrivingTime {
             let timeStr = DateTimeTool.fromFormatThreeToFormatOne(date: time)
             strTwo = NSMutableAttributedString(string: timeStr, attributes: [NSFontAttributeName: UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 12)), NSForegroundColorAttributeName: UIColor.black])
@@ -206,7 +206,7 @@ class ItineraryMapCollectionViewCell: UICollectionViewCell {
             if route?.type == FooyoConstants.RouteType.PSV.rawValue {
                 navBtn.setImage(UIImage.getBundleImage(name: "navigation_smallbus", replaceColor: .white), for: .normal)
             } else {
-                navBtn.setImage(UIImage.getBundleImage(name: "navigation_walk", replaceColor: .white), for: .normal)
+                navBtn.setImage(UIImage.getBundleImage(name: "navigation_smallwalk", replaceColor: .white), for: .normal)
             }
         }
         self.route = route

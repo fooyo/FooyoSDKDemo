@@ -75,17 +75,18 @@ extension RouteTableViewController: UITableViewDelegate, UITableViewDataSource {
         if let routes = routes {
             if routes.count == 0 {
                 let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier) as! EmptyTableViewCell
-                cell.configureWith("Reload.")
+                cell.configureWith("Sorry, this feature is currently unavailable.\nBut coming soon!😀")
                 return cell
             } else {
                 let route = routes[indexPath.row]
                 let cell = tableView.dequeueReusableCell(withIdentifier: RouteListTableViewCell.reuseIdentifier) as! RouteListTableViewCell
+                cell.delegate = self
                 cell.configureWith(route: route)
                 return cell
             }
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier) as! EmptyTableViewCell
-            cell.configureWith("Empty.")
+            cell.configureWith("Sorry, this feature is currently unavailable.\nBut coming soon!😀")
             return cell
         }
     }
@@ -112,5 +113,13 @@ extension RouteTableViewController: UITableViewDelegate, UITableViewDataSource {
                 self.parentVC?.navigationController?.pushViewController(vc, animated: true)
             }
         }
+    }
+}
+
+extension RouteTableViewController: RouteListTableViewCellDelegate {
+    func RouteListTableViewCellDelegateDidTap(route: FooyoRoute) {
+        let vc = RouteMapViewController(route: route)
+        self.parentVC?.navigationController?.pushViewController(vc, animated: true)
+        
     }
 }

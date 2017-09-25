@@ -378,9 +378,9 @@ extension EditItineraryListViewController: UITableViewDelegate, UITableViewDataS
             case 0:
                 cell.configureWith(leftIcon: UIImage.getBundleImage(name: "basemap_all"), title: "Show All")
             case FooyoCategory.others.count + 1:
-                cell.configureWith(leftIcon: UIImage.getBundleImage(name: "basemap_all"), title: "Amenities", rightIcon: UIImage.getBundleImage(name: "general_rightarrow"))
+                cell.configureWith(leftIcon: UIImage.getBundleImage(name: "basemap_amenities"), title: "Amenities", rightIcon: UIImage.getBundleImage(name: "general_rightarrow"))
             case FooyoCategory.others.count + 2:
-                cell.configureWith(leftIcon: UIImage.getBundleImage(name: "basemap_all"), title: "Transportations", rightIcon: UIImage.getBundleImage(name: "general_rightarrow"))
+                cell.configureWith(leftIcon: UIImage.getBundleImage(name: "basemap_transportation"), title: "Transportations", rightIcon: UIImage.getBundleImage(name: "general_rightarrow"))
             default:
                 let category = FooyoCategory.others[indexPath.row - 1]
                 cell.configureWith(leftIcon: category.icon, title: category.name, rightIcon: nil)

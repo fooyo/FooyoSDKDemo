@@ -8,7 +8,12 @@
 
 import UIKit
 
+protocol DisplayItineraryListViewControllerDelegate: class {
+    func displayItineraryListViewControllerUpdateTheMode()
+}
 class DisplayItineraryListViewController: BaseViewController {
+    weak var delegate: DisplayItineraryListViewControllerDelegate?
+    
     fileprivate var itinerary: FooyoItinerary?
     fileprivate var tableView: UITableView! = {
         let t = UITableView()
@@ -58,7 +63,9 @@ class DisplayItineraryListViewController: BaseViewController {
     }
     
     func editHandler() {
-        let _ = gotoEditItinerary(itinerary: itinerary!)
+        _ = self.navigationController?.popViewController(animated: true)
+        delegate?.displayItineraryListViewControllerUpdateTheMode()
+//        let _ = gotoEditItinerary(itinerary: itinerary!)
 //        vc.delegate = self
     }
     func setConstraints() {
@@ -79,17 +86,26 @@ extension DisplayItineraryListViewController: UITableViewDelegate, UITableViewDa
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ItineraryDisplayListTableViewCell.reuseIdentifier, for: indexPath) as! ItineraryDisplayListTableViewCell
 //        cell.delegate = self
+        
         let item = (itinerary?.items)![indexPath.row]
+        if itinerary?.items?.count == 1 {
+            cell.configureWith(item: item, index: indexPath.row + 1, isFirst: true, isLast: true)
+            return cell
+        }
         if let count = itinerary?.routes?.count {
             if indexPath.row < count {
                 let route = itinerary?.routes?[indexPath.row]
                 route?.startItem = itinerary?.items?[indexPath.row]
                 route?.endItem = itinerary?.items?[indexPath.row + 1]
-                cell.configureWith(item: item, route: route, index: indexPath.row + 1)
+                if indexPath.row == 0 {
+                    cell.configureWith(item: item, route: route, index: indexPath.row + 1, isFirst: true)
+                } else {
+                    cell.configureWith(item: item, route: route, index: indexPath.row + 1)
+                }
                 return cell
             }
         }
-        cell.configureWith(item: item, index: indexPath.row + 1)
+        cell.configureWith(item: item, index: indexPath.row + 1, isLast: true)
         return cell
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

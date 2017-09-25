@@ -137,7 +137,6 @@
 		858C60A81F53C87800750BDF /* AddToPlanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 858C60941F53B1A300750BDF /* AddToPlanViewController.swift */; };
 		858C60A91F53C87800750BDF /* RouteListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 858C60691F5305C000750BDF /* RouteListViewController.swift */; };
 		8592E20A1F6DE57200C5093F /* RouteMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592E2091F6DE57200C5093F /* RouteMapViewController.swift */; };
-		8592E20B1F6DE7CB00C5093F /* RouteMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592E2091F6DE57200C5093F /* RouteMapViewController.swift */; };
 		8592E21A1F6E20EB00C5093F /* AnimatedTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592E2191F6E20EB00C5093F /* AnimatedTextField.swift */; };
 		85A39D2B1F514FC000BDDD9A /* UIImageView-SDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C51D011F46E76500700BEF /* UIImageView-SDK.swift */; };
 		85A39D2C1F514FC000BDDD9A /* UILabel-SS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF47061F322746002CC6E5 /* UILabel-SS.swift */; };
@@ -156,11 +155,11 @@
 		85A39D391F514FC000BDDD9A /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C51D401F4AE0F500700BEF /* Category.swift */; };
 		85A39D3A1F514FC100BDDD9A /* BaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C51D441F4B3E2200700BEF /* BaseViewController.swift */; };
 		85A39D3B1F514FC100BDDD9A /* FooyoBaseMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF47041F32267E002CC6E5 /* FooyoBaseMapViewController.swift */; };
-		85A39D3C1F514FC100BDDD9A /* FilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF46FE1F31D9C5002CC6E5 /* FilterViewController.swift */; };
-		85AF46D91F318052002CC6E5 /* FooyoBaseMapViewControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF46D81F318052002CC6E5 /* FooyoBaseMapViewControllerTest.swift */; };
+		85A7FFD21F75E0BB0088CA4B /* FooyoBaseMapViewControllerbkup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A7FFD11F75E0BB0088CA4B /* FooyoBaseMapViewControllerbkup.swift */; };
+		85A7FFD31F75EEB50088CA4B /* RouteMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8592E2091F6DE57200C5093F /* RouteMapViewController.swift */; };
+		85A7FFD41F75EEBB0088CA4B /* FooyoBaseMapViewControllerbkup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A7FFD11F75E0BB0088CA4B /* FooyoBaseMapViewControllerbkup.swift */; };
 		85AF46DC1F31846A002CC6E5 /* Mapbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85AF46DB1F31846A002CC6E5 /* Mapbox.framework */; };
 		85AF46DD1F3184EC002CC6E5 /* Mapbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85AF46DB1F31846A002CC6E5 /* Mapbox.framework */; };
-		85AF46DE1F319B22002CC6E5 /* FooyoBaseMapViewControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF46D81F318052002CC6E5 /* FooyoBaseMapViewControllerTest.swift */; };
 		85AF46E51F31D164002CC6E5 /* SVProgressHUD.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85AF46E41F31D164002CC6E5 /* SVProgressHUD.framework */; };
 		85AF46E81F31D23D002CC6E5 /* Itinerary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF46E71F31D23D002CC6E5 /* Itinerary.swift */; };
 		85AF46EA1F31D24B002CC6E5 /* BaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF46E91F31D24B002CC6E5 /* BaseModel.swift */; };
@@ -171,7 +170,6 @@
 		85AF46F61F31D78C002CC6E5 /* CustomAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF46F21F31D78C002CC6E5 /* CustomAnnotationView.swift */; };
 		85AF46F91F31D8D4002CC6E5 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF46F81F31D8D4002CC6E5 /* HTTPClient.swift */; };
 		85AF46FB1F31D8DB002CC6E5 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF46FA1F31D8DB002CC6E5 /* Item.swift */; };
-		85AF46FF1F31D9C5002CC6E5 /* FilterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF46FE1F31D9C5002CC6E5 /* FilterViewController.swift */; };
 		85AF47021F31DD43002CC6E5 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF47001F31DD43002CC6E5 /* Theme.swift */; };
 		85AF47031F31DD43002CC6E5 /* Bus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF47011F31DD43002CC6E5 /* Bus.swift */; };
 		85AF47051F32267E002CC6E5 /* FooyoBaseMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85AF47041F32267E002CC6E5 /* FooyoBaseMapViewController.swift */; };
@@ -334,7 +332,7 @@
 		858C60961F53B6D800750BDF /* FakeTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FakeTableViewCell.swift; sourceTree = "<group>"; };
 		8592E2091F6DE57200C5093F /* RouteMapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RouteMapViewController.swift; sourceTree = "<group>"; };
 		8592E2191F6E20EB00C5093F /* AnimatedTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnimatedTextField.swift; sourceTree = "<group>"; };
-		85AF46D81F318052002CC6E5 /* FooyoBaseMapViewControllerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FooyoBaseMapViewControllerTest.swift; sourceTree = "<group>"; };
+		85A7FFD11F75E0BB0088CA4B /* FooyoBaseMapViewControllerbkup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FooyoBaseMapViewControllerbkup.swift; sourceTree = "<group>"; };
 		85AF46DB1F31846A002CC6E5 /* Mapbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Mapbox.framework; path = Carthage/Build/iOS/Mapbox.framework; sourceTree = "<group>"; };
 		85AF46E21F31D05D002CC6E5 /* AlamofireImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AlamofireImage.framework; path = Carthage/Build/iOS/AlamofireImage.framework; sourceTree = "<group>"; };
 		85AF46E41F31D164002CC6E5 /* SVProgressHUD.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SVProgressHUD.framework; path = Carthage/Build/iOS/SVProgressHUD.framework; sourceTree = "<group>"; };
@@ -347,7 +345,6 @@
 		85AF46F21F31D78C002CC6E5 /* CustomAnnotationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomAnnotationView.swift; sourceTree = "<group>"; };
 		85AF46F81F31D8D4002CC6E5 /* HTTPClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
 		85AF46FA1F31D8DB002CC6E5 /* Item.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
-		85AF46FE1F31D9C5002CC6E5 /* FilterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilterViewController.swift; sourceTree = "<group>"; };
 		85AF47001F31DD43002CC6E5 /* Theme.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		85AF47011F31DD43002CC6E5 /* Bus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bus.swift; sourceTree = "<group>"; };
 		85AF47041F32267E002CC6E5 /* FooyoBaseMapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FooyoBaseMapViewController.swift; sourceTree = "<group>"; };
@@ -614,10 +611,9 @@
 			isa = PBXGroup;
 			children = (
 				85AF47041F32267E002CC6E5 /* FooyoBaseMapViewController.swift */,
-				85AF46FE1F31D9C5002CC6E5 /* FilterViewController.swift */,
-				85AF46D81F318052002CC6E5 /* FooyoBaseMapViewControllerTest.swift */,
 				85DD04541F68242B005B36C1 /* SearchHistoryViewController.swift */,
 				856DB2CD1F68AA7A004EA0AA /* SearchResultViewController.swift */,
+				85A7FFD11F75E0BB0088CA4B /* FooyoBaseMapViewControllerbkup.swift */,
 			);
 			name = BaseMap;
 			sourceTree = "<group>";
@@ -936,6 +932,7 @@
 				858C606A1F5305C000750BDF /* RouteListViewController.swift in Sources */,
 				85839EC81F6C160400944F28 /* RouteListTableViewCell.swift in Sources */,
 				853E6F851F72471A00631A05 /* DisplayItineraryListViewController.swift in Sources */,
+				85A7FFD21F75E0BB0088CA4B /* FooyoBaseMapViewControllerbkup.swift in Sources */,
 				85AF46F51F31D78C002CC6E5 /* CustomCalloutView.swift in Sources */,
 				858C60791F537DD100750BDF /* MyItineraryViewController.swift in Sources */,
 				858C60771F537DB000750BDF /* ItineraryListViewController.swift in Sources */,
@@ -963,7 +960,6 @@
 				85839ECB1F6D490900944F28 /* NavigationItemView.swift in Sources */,
 				8520376E1F1D0405000D2B7F /* Scale.swift in Sources */,
 				858C60971F53B6D800750BDF /* FakeTableViewCell.swift in Sources */,
-				85AF46FF1F31D9C5002CC6E5 /* FilterViewController.swift in Sources */,
 				85DD04521F663C9D005B36C1 /* CategoryTableViewCell.swift in Sources */,
 				85AF47051F32267E002CC6E5 /* FooyoBaseMapViewController.swift in Sources */,
 				858C60911F53985600750BDF /* ExploreViewController.swift in Sources */,
@@ -978,7 +974,6 @@
 				85AF46F91F31D8D4002CC6E5 /* HTTPClient.swift in Sources */,
 				858C60951F53B1A300750BDF /* AddToPlanViewController.swift in Sources */,
 				85DD04571F68316C005B36C1 /* ItemSummaryTableViewCell.swift in Sources */,
-				85AF46D91F318052002CC6E5 /* FooyoBaseMapViewControllerTest.swift in Sources */,
 				85839F191F6D66EA00944F28 /* Date+Manipulations.swift in Sources */,
 				858C60701F530B3000750BDF /* Pagination.swift in Sources */,
 				85839F221F6D66EA00944F28 /* TimePeriodGroup.swift in Sources */,
@@ -1047,6 +1042,7 @@
 				85CDE1C81F6FFC7200DEC6AE /* TimeChunk.swift in Sources */,
 				85CDE1C61F6FFC6D00DEC6AE /* Enums.swift in Sources */,
 				85A39D371F514FC000BDDD9A /* BaseModel.swift in Sources */,
+				85A7FFD31F75EEB50088CA4B /* RouteMapViewController.swift in Sources */,
 				8543327C1F6F556900A15F6A /* ItineraryMapCollectionViewCell.swift in Sources */,
 				85CDE1CC1F6FFC7B00DEC6AE /* TimePeriodGroup.swift in Sources */,
 				85A39D381F514FC000BDDD9A /* Itinerary.swift in Sources */,
@@ -1058,8 +1054,6 @@
 				85A39D3B1F514FC100BDDD9A /* FooyoBaseMapViewController.swift in Sources */,
 				85CDE1C41F6FFC6700DEC6AE /* Date+TimeAgo.swift in Sources */,
 				85CDE1CB1F6FFC7900DEC6AE /* TimePeriodCollection.swift in Sources */,
-				85A39D3C1F514FC100BDDD9A /* FilterViewController.swift in Sources */,
-				85AF46DE1F319B22002CC6E5 /* FooyoBaseMapViewControllerTest.swift in Sources */,
 				852037A01F1D0E5A000D2B7F /* UIView-SS.swift in Sources */,
 				85CDE1CA1F6FFC7600DEC6AE /* TimePeriodChain.swift in Sources */,
 				8520379F1F1D0E57000D2B7F /* ChooseThemeViewController.swift in Sources */,
@@ -1072,7 +1066,7 @@
 				852037991F1D0E48000D2B7F /* UIColor-SS.swift in Sources */,
 				852037981F1D0E45000D2B7F /* UIFont-SS.swift in Sources */,
 				852037971F1D0E43000D2B7F /* DateTimeTool.swift in Sources */,
-				8592E20B1F6DE7CB00C5093F /* RouteMapViewController.swift in Sources */,
+				85A7FFD41F75EEBB0088CA4B /* FooyoBaseMapViewControllerbkup.swift in Sources */,
 				852037961F1D0E40000D2B7F /* ThemeCollectionViewCell.swift in Sources */,
 				852037951F1D0E37000D2B7F /* UIImage-SS.swift in Sources */,
 				856DB2CF1F68CBFE004EA0AA /* SearchResultViewController.swift in Sources */,

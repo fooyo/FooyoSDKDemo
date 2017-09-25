@@ -255,6 +255,9 @@ public class HttpClient: NSObject {
                     let data = JSON(json)
                     if data["itineraries"] != nil {
                         let itineraries = data["itineraries"].arrayValue.map{ FooyoItinerary(json: $0) }
+                        FooyoItinerary.myItineraries = itineraries
+                        FooyoItinerary.sort()
+                        self.PostItineraryDownloadedNotification()
                         completion(itineraries, true)
                         return
                     }

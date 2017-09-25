@@ -10,7 +10,6 @@ import UIKit
 import Mapbox
 
 class RouteMapViewController: FooyoBaseMapViewController {
-    fileprivate var route: FooyoRoute?
     
     fileprivate var lowerView: UIView! = {
         let t = UIView()
@@ -99,8 +98,7 @@ class RouteMapViewController: FooyoBaseMapViewController {
         
         // Do any additional setup after loading the view.
         navigationItem.title = route?.getName()
-        debugPrint(route!.getBounds())
-        mapView.setVisibleCoordinateBounds(route!.getBounds(), edgePadding: UIEdgeInsetsMake(80, 80, 80, 80), animated: false)
+//        mapView.setVisibleCoordinateBounds(route!.getBounds(), edgePadding: UIEdgeInsetsMake(80, 80, 80, 80), animated: false)
         goBtn.isHidden = true
         view.addSubview(lowerView)
         lowerView.addSubview(navigationIcon)
@@ -278,124 +276,12 @@ class RouteMapViewController: FooyoBaseMapViewController {
 }
 
 extension RouteMapViewController {
-//    func mapView(_ mapView: MGLMapView, viewFor annotation: MGLAnnotation) -> MGLAnnotationView? {
-//        debugPrint("loading all the annotation views")
-//        // This example is only concerned with point annotations.
-//        if let annotation = annotation as? MyCustomPointAnnotation {
-//            // Use the point annotation’s longitude value (as a string) as the reuse identifier for its view.
-////            let reuseIdentifier = (annotation.item?.category)!
-//            let reuseIdentifier = (annotation.reuseId)!
-//            
-//            // For better performance, always try to reuse existing annotations.
-//            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier)
-//            
-//            // If there’s no reusable annotation view available, initialize a new one.
-//            if annotationView == nil {
-//                annotationView = CustomAnnotationView(reuseIdentifier: reuseIdentifier)
-//                if reuseIdentifier == Constants.AnnotationId.StartItem.rawValue || reuseIdentifier == Constants.AnnotationId.EndItem.rawValue {
-//                    annotationView!.frame = CGRect(x: 0, y: 0, width: Scale.scaleY(y: 40), height: Scale.scaleY(y: 40))
-////                    mapView.bringSubview(toFront: annotationView!)
-//                } else {
-////                    annotationView!.frame = CGRect(x: 0, y: 0, width: Scale.scaleY(y: 28), height: Scale.scaleY(y: 28))
-//                    annotationView!.frame = CGRect(x: 0, y: 0, width: Scale.scaleY(y: 15), height: Scale.scaleY(y: 15))
-//                    annotationView?.alpha = 0.8
-//                }
-//                // Set the annotation view’s background color to a value determined by its longitude.
-//                let hue = CGFloat(annotation.coordinate.longitude) / 100
-//                annotationView!.backgroundColor = UIColor(hue: hue, saturation: 0.5, brightness: 1, alpha: 1)
-//            }
-//            return annotationView
-//        }
-//        return nil
-//    }
-//    
-//    
-//    // Allow callout view to appear when an annotation is tapped.
-//    func mapView(_ mapView: MGLMapView, annotationCanShowCallout annotation: MGLAnnotation) -> Bool {
-//        return true
-//    }
-//    
-//    func mapView(_ mapView: MGLMapView, calloutViewFor annotation: MGLAnnotation) -> UIView? {
-//        // Only show callouts for `Hello world!` annotation
-//        if annotation.responds(to: #selector(getter: UIPreviewActionItem.title)) {
-//            // Instantiate and return our custom callout view
-//            let view = CustomCalloutView(representedObject: annotation)
-//            view.fromSource = Constants.PageSource.FromNavigation
-//            return view
-//        }
-//        
-//        return nil
-//    }
-//    
-//    func mapView(_ mapView: MGLMapView, tapOnCalloutFor annotation: MGLAnnotation) {
-//        mapView.deselectAnnotation(annotation, animated: true)
-//
-//        if let rep = annotation as? MyCustomPointAnnotation {
-//            if (rep.item?.category)! != "restroom" {
-//                // Hide the callout
-//                _ = gotoItemDetail(id: (rep.item?.id)!, from: Constants.PageSource.FromNavigation)
-//            }
-//        }
-//    }
-//    
-//    func mapView(_ mapView: MGLMapView, didAdd annotationViews: [MGLAnnotationView]) {
-//        for each in annotationViews {
-////            if let anno = each as? MyCustomPointAnnotation {
-////                if anno.reuseId == Constants.AnnotationId.EndItem.rawValue ||
-////                    anno.reuseId == Constants.AnnotationId.EndPoint.rawValue ||
-////                    anno.reuseId == Constants.AnnotationId.StartItem.rawValue ||
-////                    anno.reuseId == Constants.AnnotationId.StartPoint.rawValue {
-////                    let annoView = mapView.view(for: anno)
-////                }
-////            }
-//            debugPrint(each.frame.width)
-//            if each.frame.width == Scale.scaleY(y: 40) {
-//                debugPrint("true")
-//                mapView.bringSubview(toFront: each)
-//                view.bringSubview(toFront: each)
-//            }
-//        }
-//    }
-//    
+    //
 //    // Wait until the map is loaded before adding to the map.
     func mapView(_ mapView: MGLMapView, didFinishLoading style: MGLStyle) {
         debugPrint("did finish loading style")
         loadGeoJson()
     }
-//    func mapViewDidFinishRenderingFrame(_ mapView: MGLMapView, fullyRendered: Bool) {
-//        if mapView.zoomLevel > 16 {
-//            for annotation in mapView.annotations! {
-//                if let annotation = annotation as? MyCustomPointAnnotation {
-//                    if let view = mapView.view(for: annotation) as? CustomAnnotationView {
-//                        let reuseIdentifier = (annotation.reuseId)!
-//                        if reuseIdentifier == Constants.AnnotationId.StartItem.rawValue || reuseIdentifier == Constants.AnnotationId.EndItem.rawValue {
-//                        } else {
-//                            UIView.animate(withDuration: 0.5, animations: {
-//                                view.frame.size = CGSize(width: Scale.scaleY(y: 28), height: Scale.scaleY(y: 28))
-//                                view.alpha = 1
-//                            })
-//                        }
-//                    }
-//                }
-//            }
-//        } else {
-//            for annotation in mapView.annotations! {
-//                if let annotation = annotation as? MyCustomPointAnnotation {
-//                    if let view = mapView.view(for: annotation) as? CustomAnnotationView {
-//                        let reuseIdentifier = (annotation.reuseId)!
-//                        if reuseIdentifier == Constants.AnnotationId.StartItem.rawValue || reuseIdentifier == Constants.AnnotationId.EndItem.rawValue {
-//                        } else {
-//                            UIView.animate(withDuration: 0.5, animations: {
-//                                view.frame.size = CGSize(width: Scale.scaleY(y: 15), height: Scale.scaleY(y: 15))
-//                                view.alpha = 0.8
-//                            })
-//                        }
-//                    }
-//                }
-//            }
-//            
-//        }
-//    }
 //    
     func loadGeoJson() {
 //        DispatchQueue.global().async {
@@ -493,7 +379,7 @@ extension RouteMapViewController {
             layer.lineJoin = MGLStyleValue(rawValue: NSValue(mglLineJoin: .round))
             layer.lineCap = MGLStyleValue(rawValue: NSValue(mglLineCap: .round))
             //        layer.lineColor = MGLStyleValue(rawValue: UIColor(red: 59/255, green:178/255, blue:208/255, alpha:1))
-            layer.lineColor = MGLStyleValue(rawValue: UIColor.express)
+            layer.lineColor = MGLStyleValue(rawValue: UIColor.ospSentosaBlue)
             // Use a style function to smoothly adjust the line width from 2pt to 20pt between zoom levels 14 and 18. The `interpolationBase` parameter allows the values to interpolate along an exponential curve.
             layer.lineWidth = MGLStyleValue(rawValue: 1)
             //        layer.lineWidth = MGLStyleValue(interpolationBase: 1.5, stops: [
@@ -520,7 +406,7 @@ extension RouteMapViewController {
             let dashedLayer = MGLLineStyleLayer(identifier: "polyline-dash_\(index)", source: source)
             dashedLayer.lineJoin = layer.lineJoin
             dashedLayer.lineCap = layer.lineCap
-            dashedLayer.lineColor = MGLStyleValue(rawValue: UIColor.express)
+            dashedLayer.lineColor = MGLStyleValue(rawValue: UIColor.ospSentosaBlue)
             //        dashedLayer.lineOpacity = MGLStyleValue(rawValue: 0.5)
             dashedLayer.lineWidth = MGLStyleValue(rawValue: 5)//layer.lineWidth
             // Dash pattern in the format [dash, gap, dash, gap, ...]. You’ll want to adjust these values based on the line cap style.

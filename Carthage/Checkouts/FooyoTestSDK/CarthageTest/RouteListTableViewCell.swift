@@ -7,9 +7,13 @@
 //
 
 import UIKit
+protocol RouteListTableViewCellDelegate: class {
+    func RouteListTableViewCellDelegateDidTap(route: FooyoRoute)
+}
 
 class RouteListTableViewCell: UITableViewCell {
     
+    weak var delegate: RouteListTableViewCellDelegate?
     static let reuseIdentifier = "routeListTableViewCell"
     fileprivate var route: FooyoRoute?
     var titleLabel: UILabel! = {
@@ -95,11 +99,19 @@ class RouteListTableViewCell: UITableViewCell {
         contentView.addSubview(instructionView)
         contentView.addSubview(estimatedTimeLabel)
         contentView.addSubview(queueTimeLabel)
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(gestureHandler))
+        instructionView.addGestureRecognizer(gesture)
         setConstraints()
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func gestureHandler() {
+        if let route = route {
+            delegate?.RouteListTableViewCellDelegateDidTap(route: route)
+        }
     }
     
     func setSub(isHide: Bool) {

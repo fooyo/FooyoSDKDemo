@@ -18,7 +18,8 @@ class MyCustomPointAnnotation: MGLPointAnnotation {
     var index: Int? // for itinerary
     var scaled = false
     var isInSelectedCatrgory = true
-    
+    var isHidden = false
+
     func aCopy() -> MyCustomPointAnnotation {
         let t = MyCustomPointAnnotation()
         t.index = self.index

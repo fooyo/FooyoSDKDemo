@@ -9,6 +9,7 @@
 import UIKit
 import AlamofireImage
 import Alamofire
+import FooyoTestSDK
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -21,7 +22,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
 //        Alamofire.DataRequest.addAcceptableImageContentTypes(["image/*"])
 //        Alamofire.DataRequest.addAcceptableImageContentTypes(["image/jpg"])
-        
+        FooyoSDKOpenSession()
+
         window = UIWindow(frame: UIScreen.main.bounds)
 //        let vc = ViewController()
 //        let nav = UINavigationController(rootViewController: vc)

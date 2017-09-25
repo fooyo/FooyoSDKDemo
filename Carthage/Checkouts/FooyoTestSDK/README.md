@@ -65,9 +65,28 @@ Only `Hotspots` of `Non-linear Trails` will have `levelTwoId`. Their `levelOneId
 
 ## General SDK Functions
 
+### Session Activation
+
 ```swift
-FooyoSDKSetUserId(userId: id)
+func FooyoSDKOpenSession()
 ```
+
+`GUIDE` Call this function whenever the app becomes active. All the data required by Fooyo SDK will be loaded at the background.
+
+### User Login
+
+```swift
+func FooyoSDKSignIn(userId: String)
+```
+`GUIDE` Call this function whenever the app achieves the user Id. All the user related data required by Fooyo SDK will be loaded at the background.
+
+### User Logout
+
+```swift
+func FooyoSDKSignOut()
+```
+`GUIDE` Call this function whenever the app achieves the user Id. All the user related data locally saved by Fooyo SDK will be removed.
+
 
 ## BaseMap SDK
 
@@ -93,7 +112,7 @@ let index = FooyoIndex(category: String)
 let vc = FooyoBaseMapViewController(index: FooyoIndex?)
 ```
 
-- To show a specific location/trail, please specify the category name and the id of this location/trail:
+- To show a specific location/trail, please specify the category name and the level one id of this location/trail:
 
 ```swift
 let index = FooyoIndex(category: String, levelOneId: Int)
@@ -120,7 +139,7 @@ func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex) {
 }
 ```
 
-This function will be called when the information window is clicked:
+This function will be called when the pop-up information window is clicked:
 
 - If the information window of a location/linear trail is clicked, the `category` and the `levelOneId` will be returned;
 - If the information window of a hotspot (of a non-linear trail) is clicked, the `category`, `levelOneId` as well as the `levelTwoId` will all be returned.
@@ -188,6 +207,10 @@ let vc = FooyoBaseMapViewController(userId: String?)
 
 ```swift
 let vc = FooyoAddToPlanViewController(index: FooyoIndex, userId: String)
+let nav = UINavigationController(rootViewController: vc)
+nav.navigationBar.isHidden = true
+nav.modalPresentationStyle = .overFullScreen
+self.present(nav, animated: true, completion: nil)
 ```
 
 ### SDK Variables
@@ -195,5 +218,9 @@ let vc = FooyoAddToPlanViewController(index: FooyoIndex, userId: String)
 - `index`: FooyoIndex of the location/trail intended to be added to a specific plan (**compulsory**);
 
 - `userId`: Required to fetch the existing plans (**compulsory**);
+
+## Upcoming SDK Functions
+
+- To support that the user can open the location detail page within the plan editing pages and add the location into the **currently editing** plan using the "add" button;
 
 

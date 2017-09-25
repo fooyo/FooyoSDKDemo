@@ -246,11 +246,24 @@ class ItineraryDisplayListTableViewCell: UITableViewCell {
             }
         }
         transportationLabel.text = route?.getTime()
-        if index == 1 {
+        if isFirst && isLast {
             lineOne.isHidden = true
-            lineThree.isHidden = true
-            lineTwo.isHidden = false
-            lineFour.isHidden = false
+            lineThree.isHidden = false
+            lineFour.isHidden = true
+        } else {
+            if isFirst {
+                lineOne.isHidden = true
+                lineThree.isHidden = true
+                lineFour.isHidden = false
+            } else if isLast {
+                lineOne.isHidden = false
+                lineThree.isHidden = false
+                lineFour.isHidden = true
+            } else {
+                lineOne.isHidden = false
+                lineThree.isHidden = true
+                lineFour.isHidden = false
+            }
         }
         self.route = route
     }

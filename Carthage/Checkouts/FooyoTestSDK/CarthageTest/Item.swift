@@ -19,6 +19,9 @@ public class FooyoItem: BaseModel {
     var name: String?
     var category: FooyoCategory?
     var operation: String?
+    var gettingThere: String?
+    var carpark: String?
+
     var budget: Double?
     var coverImages: String?
     var coordinateLan: Double?
@@ -33,15 +36,23 @@ public class FooyoItem: BaseModel {
     var visitingTime: Int?
     var lowBudgetVisitingTime: Int?
     var themes: [FooyoTheme]?
-
+    var buses: [FooyoBus]?
+    
     public init(json: JSON) {
         super.init()
         id = json["id"].int
         name = json["name"].string
         operation = json["operation_hours"].string
+        gettingThere = json["getting_there"].string
+        carpark = json["nearest_carpark"].string
+
         if json["category"] != nil {
             category = FooyoCategory(json: json["category"])
         }
+        if json["buses"] != nil {
+            buses = json["buses"].arrayValue.map{ FooyoBus(json: $0) }
+        }
+        
         budget = json["budget"].double
         coordinateLan = json["lat"].double
         coordinateLon = json["lng"].double
@@ -51,6 +62,9 @@ public class FooyoItem: BaseModel {
             if let id = json["level_one_id"].int {
                 levelOneId = String(describing: id)
             }
+        }
+        if levelOneId == nil {
+            levelOneId = "\(id!)"
         }
         levelTwoId = json["level_two_id"].string
         if levelTwoId == nil {
@@ -89,16 +103,16 @@ public class FooyoItem: BaseModel {
     
     func getTag() -> String {
         switch (category?.name?.lowercased())! {
-        case "attractions", "events":
+        case FooyoConstants.CategoryName.Attractions.rawValue.lowercased(), FooyoConstants.CategoryName.Events.rawValue.lowercased():
             return parseOptionalString(input: region, defaultValue: "Pending") + " • \(parseOptionalString(input: category?.name))"
-        case "Interactive Trails".lowercased():
+        case FooyoConstants.CategoryName.Trails.rawValue.lowercased():
             if isNonLinearHotspot() {
                 return "Belongs to #\(parseOptionalString(input: trailName, defaultValue: "Pending"))"
             } else {
                 return parseOptionalString(input: region, defaultValue: "Pending") + " • \(parseOptionalString(input: category?.name))"
             }
         default:
-            return "Pending"
+            return parseOptionalString(input: region, defaultValue: "Pending")
         }
     }
     
@@ -155,37 +169,45 @@ public class FooyoItem: BaseModel {
     }
     
     func getDuration() -> String {
+        if let time = arrivingTime, let visiting = visitingTime {
+            let arrivalDate = DateTimeTool.fromFormatThreeToDate(time)
+//            let leaveDate = arrivalDate.mins
+            let calendar = Calendar.current
+            let leaveDate = calendar.date(byAdding: .minute, value: visiting, to: arrivalDate)!
+            return DateTimeTool.fromFormatThreeToFormatFour(date: time) + " - " + DateTimeTool.fromDateToFormatFour(date: leaveDate)
+        }
+        return ""
+    }
+    
+    func getArrivalTime() -> String {
         if let time = arrivingTime {
             return DateTimeTool.fromFormatThreeToFormatFour(date: time)
         }
         return ""
     }
     
-    class func findMatch(index: FooyoIndex) -> FooyoItem {
-        var item = FooyoItem()
-        if index.isNonLinearTrailHotspot() {
-            item = FooyoItem.items.first(where: { (a) -> Bool in
-                let checkOne = index.category == a.category?.name
-                let checkTwo = index.levelOneId == a.levelOneId
-                let checkThree = index.levelTwoId == a.levelTwoId
-                return checkOne && checkTwo && checkThree
-            })!
-        } else {
-            item = FooyoItem.items.first(where: { (a) -> Bool in
-                let checkOne = index.category == a.category?.name
-                let checkTwo = index.levelOneId == a.levelOneId
-                return checkOne && checkTwo
-            })!
-        }
-        return item
+    class func findMatch(index: FooyoIndex) -> [FooyoItem] {
+        var items = [FooyoItem]()
+        items = FooyoItem.items.filter({ (item) -> Bool in
+            let checkOne = index.category == item.category?.name
+            let checkTwo = index.levelOneId == item.levelOneId
+            return checkOne && checkTwo
+        })
+        return items
     }
     
     func isEssential() -> Bool {
         switch (category?.name)! {
-        case "Prayer Rooms", "Ticketing Counters", "Rest Rooms", "Bus Stops", "Tram Stops", "Cable Car Stations", "Express Stations", "Nursing Room", "Taxi Stand":
-            return false
-        default:
+        case FooyoConstants.CategoryName.Attractions.rawValue, FooyoConstants.CategoryName.Events.rawValue, FooyoConstants.CategoryName.Trails.rawValue:
             return true
+        default:
+            return false
         }
+    }
+    
+    func makeCopy() -> FooyoItem {
+        let t = FooyoItem()
+        t.id = self.id
+        return t
     }
 }

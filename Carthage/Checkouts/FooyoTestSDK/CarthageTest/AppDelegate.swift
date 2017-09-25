@@ -21,6 +21,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
 //        Alamofire.DataRequest.addAcceptableImageContentTypes(["image/*"])
 //        Alamofire.DataRequest.addAcceptableImageContentTypes(["image/jpg"])
+        FooyoSDKOpenSession()
         UITabBar.appearance().isTranslucent = false
 
         window = UIWindow(frame: UIScreen.main.bounds)

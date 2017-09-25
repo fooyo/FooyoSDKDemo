@@ -273,7 +273,6 @@ extension SearchHistoryViewController: UITableViewDelegate, UITableViewDataSourc
                 _ = self.navigationController?.popToViewController(sourceVC, animated: true)
             }
         }
-
     }
 }
 

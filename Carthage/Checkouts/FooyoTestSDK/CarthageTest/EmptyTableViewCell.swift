@@ -38,9 +38,10 @@ class EmptyTableViewCell: UITableViewCell {
             make.edges.equalToSuperview()
         }
         emptyLabel.snp.makeConstraints { (make) -> Void in
-            make.top.equalTo(Scale.scaleY(y: 174))
+//            make.top.equalTo(Scale.scaleY(y: 174))
             make.leading.equalTo(0)
             make.trailing.equalTo(0)
+            make.centerY.equalToSuperview()
         }
     }
     

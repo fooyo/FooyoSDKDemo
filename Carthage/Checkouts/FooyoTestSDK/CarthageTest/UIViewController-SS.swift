@@ -53,7 +53,8 @@ extension UIViewController: HttpClientDelegte {
     }
     
     func gotoDisplayItinerary(itinerary: FooyoItinerary, parentVC: UIViewController? = nil) {
-        let vc = DisplayItineraryViewController(itinerary: itinerary)
+//        let vc = DisplayItineraryViewController(itinerary: itinerary)
+        let vc = EditItineraryViewController(itinerary: itinerary, isDisplay: true)
         vc.hidesBottomBarWhenPushed = true
         if let parentVC = parentVC {
             parentVC.navigationController?.pushViewController(vc, animated: true)

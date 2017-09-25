@@ -15,13 +15,11 @@ class ItineraryListViewController: BaseViewController {
     
     fileprivate var tableView: UITableView! = {
         let t = UITableView()
-        t.backgroundColor = .white
-        t.separatorStyle = .singleLine
-        t.separatorColor = UIColor.ospGrey50
-        t.separatorInset = UIEdgeInsets.zero
+        t.separatorStyle = .none
         t.register(ItineraryTableViewCell.self, forCellReuseIdentifier: ItineraryTableViewCell.reuseIdentifier)
         t.register(EmptyTableViewCell.self, forCellReuseIdentifier: EmptyTableViewCell.reuseIdentifier)
-        t.backgroundColor = UIColor.ospGrey10
+        t.backgroundColor = UIColor.clear
+        t.tableFooterView = UIView()
         return t
     }()
     
@@ -39,21 +37,28 @@ class ItineraryListViewController: BaseViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        view.backgroundColor = UIColor.ospGrey10
+        view.backgroundColor = UIColor.clear
         view.addSubview(tableView)
         tableView.delegate = self
         tableView.dataSource = self
         tableView.snp.makeConstraints { (make) in
-            make.top.equalTo(Scale.scaleY(y: 10))
-            make.leading.equalToSuperview()
-            make.trailing.equalToSuperview()
-            make.bottom.equalTo(bottomLayoutGuide.snp.top)
+            make.edges.equalToSuperview()
+            //            make.top.equalTo(Scale.scaleY(y: 10))
+//            make.top.equalToSuperview()
+//            make.leading.equalToSuperview()
+//            make.trailing.equalToSuperview()
+//            make.bottom.equalTo(bottomLayoutGuide.snp.top)
         }
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    func reloadTableData(itineraries: [FooyoItinerary]) {
+        self.itineraries = itineraries
+        tableView.reloadData()
     }
 }
 
@@ -69,6 +74,7 @@ extension ItineraryListViewController: UITableViewDelegate, UITableViewDataSourc
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if itineraries.count == 0 {
             let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier, for: indexPath) as! EmptyTableViewCell
+            cell.overlay.backgroundColor = .clear
             if FooyoUser.currentUser.userId == nil {
                 cell.configureWith("Log in is required to view the plans.")
             } else {
@@ -77,10 +83,15 @@ extension ItineraryListViewController: UITableViewDelegate, UITableViewDataSourc
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: ItineraryTableViewCell.reuseIdentifier, for: indexPath)  as! ItineraryTableViewCell
+            cell.delegate = self
             let itinerary = itineraries[indexPath.row]
 //            let gesture = UITapGestureRecognizer(target: self, action: #selector())
 //            cell.delegate = self
-            cell.configureWith(itinerary: itinerary)
+            if indexPath.row == itineraries.count - 1 {
+                cell.configureWith(itinerary: itinerary, hideLine: true)
+            } else {
+                cell.configureWith(itinerary: itinerary)
+            }
 //
             return cell
         }
@@ -99,7 +110,6 @@ extension ItineraryListViewController: UITableViewDelegate, UITableViewDataSourc
         if itineraries.count > 0 {
             tableView.deselectRow(at: indexPath, animated: false)
             let itinerary = itineraries[indexPath.row]
-            debugPrint(itinerary)
             gotoDisplayItinerary(itinerary: itinerary, parentVC: parentVC)
 //            let vc = EditItineraryViewController(itinerary: itinerary)
 //            vc.hidesBottomBarWhenPushed = true
@@ -108,9 +118,8 @@ extension ItineraryListViewController: UITableViewDelegate, UITableViewDataSourc
     }
 }
 
-//extension ItineraryListViewController: ItineraryTableViewCellDelegate {
-//    func displayTickets(itinerary: Itinerary) {
-//        let vc = TicketsViewController(tickets: itinerary.tickets)
-//        parentVC?.navigationController?.pushViewController(vc, animated: true)
-//    }
-//}
+extension ItineraryListViewController: ItineraryTableViewCellDelegate {
+    func ItineraryTableViewCellDidTapped(itinerary: FooyoItinerary) {
+        gotoDisplayItinerary(itinerary: itinerary, parentVC: parentVC)
+    }
+}

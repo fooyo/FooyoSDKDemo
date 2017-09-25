@@ -96,7 +96,6 @@ class FooyoItinerary: BaseModel {
         t.name = name
         t.items = items
         t.routes = routes
-//        t.tickets = tickets
         t.tripType = tripType
         return t
     }
@@ -170,7 +169,7 @@ class FooyoItinerary: BaseModel {
             for index in 0..<myItineraries.count {
                 let iti = myItineraries[index]
                 if iti.id == itineraty.id {
-                    FooyoItinerary.myItineraries?[index] = itineraty.makeCopy()
+                    FooyoItinerary.myItineraries?[index] = itineraty
                     return
                 }
             }
@@ -187,4 +186,20 @@ class FooyoItinerary: BaseModel {
 //        }
 //        return false
 //    }
+    
+    func updateItems() {
+        if FooyoItem.items.count > 0 {
+            if items != nil {
+                for index in 0..<items!.count {
+                    for a in FooyoItem.items {
+                        if items![index].id == a.id {
+                            a.arrivingTime = items![index].arrivingTime
+                            items![index] = a
+                            break
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class FooyoUser: BaseModel, NSCoding {
+class FooyoUser: NSObject, NSCoding {
 
     static var currentUser = FooyoUser()
     

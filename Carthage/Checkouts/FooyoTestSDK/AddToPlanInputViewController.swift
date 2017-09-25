@@ -82,11 +82,31 @@ class AddToPlanInputViewController: UIViewController {
     func btnHandler() {
         //        debugDescription
         guard category != nil else {
-            displayAlert(title: "Reminder", message: "Please give a valid category name.", complete: nil)
+            let index = FooyoIndex(category: "Interactive Trails", levelOneId: "6225")
+            if let id = FooyoUser.currentUser.userId {
+                let vc = FooyoAddToPlanViewController(index: index, userId: id)
+                let nav = UINavigationController(rootViewController: vc)
+                nav.navigationBar.isHidden = true
+                nav.modalPresentationStyle = .overFullScreen
+                self.present(nav, animated: true, completion: nil)
+            } else {
+                displayAlert(title: "Reminder", message: "Have to login first", complete: nil)
+            }
+            //            displayAlert(title: "Reminder", message: "Please give a valid category name.", complete: nil)
             return
         }
         guard (category)! != "" else {
-            displayAlert(title: "Reminder", message: "Please give a valid category name.", complete: nil)
+            let index = FooyoIndex(category: "Interactive Trails", levelOneId: "6225")
+            if let id = FooyoUser.currentUser.userId {
+                let vc = FooyoAddToPlanViewController(index: index, userId: id)
+                let nav = UINavigationController(rootViewController: vc)
+                nav.navigationBar.isHidden = true
+                nav.modalPresentationStyle = .overFullScreen
+                self.present(nav, animated: true, completion: nil)
+            } else {
+                displayAlert(title: "Reminder", message: "Have to login first", complete: nil)
+            }
+//            displayAlert(title: "Reminder", message: "Please give a valid category name.", complete: nil)
             return
         }
         guard id != nil else {
@@ -99,11 +119,15 @@ class AddToPlanInputViewController: UIViewController {
         }
         
         let index = FooyoIndex(category: category!, levelOneId: id!)
-        let vc = FooyoAddToPlanViewController(index: index, userId: "test")
-        let nav = UINavigationController(rootViewController: vc)
-        nav.navigationBar.isHidden = true
-        nav.modalPresentationStyle = .overFullScreen
-        self.present(nav, animated: true, completion: nil)
+        if let id = FooyoUser.currentUser.userId {
+            let vc = FooyoAddToPlanViewController(index: index, userId: id)
+            let nav = UINavigationController(rootViewController: vc)
+            nav.navigationBar.isHidden = true
+            nav.modalPresentationStyle = .overFullScreen
+            self.present(nav, animated: true, completion: nil)
+        } else {
+            displayAlert(title: "Reminder", message: "Have to login first", complete: nil)
+        }
     }
     
     func categoryChanged(sender: UITextField) {

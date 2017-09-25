@@ -75,11 +75,11 @@ class CustomCalloutView: UIView, MGLCalloutView {
         t.contentMode = .scaleAspectFit
         return t
     }()
-//    fileprivate var allBusView: UIView! = {
-//        let t = UIView()
-//        t.backgroundColor = .clear
-//        return t
-//    }()
+    fileprivate var allBusView: UIView! = {
+        let t = UIView()
+        t.backgroundColor = .clear
+        return t
+    }()
     required init(representedObject: MGLAnnotation) {
         self.representedObject = representedObject
         
@@ -109,13 +109,9 @@ class CustomCalloutView: UIView, MGLCalloutView {
 //        containerView.addSubview(nameLabel)
 //        containerView.addSubview(stateLabel)
 //        containerView.addSubview(markButton)
-//        containerView.addSubview(allBusView)
+        containerView.addSubview(allBusView)
+        setConstraints()
         
-//        if (representedObject.subtitle)! == "restroom" {
-//            nameLabel.text = representedObject.title!!
-//        } else {
-//            nameLabel.text = representedObject.title!! + " >"
-//        }
         if let rep = self.representedObject as? MyCustomPointAnnotation {
             if let image = rep.item?.coverImages {
                 let width = Scale.scaleY(y: 70)
@@ -132,36 +128,44 @@ class CustomCalloutView: UIView, MGLCalloutView {
                 nameLabel.text = name
             }
             tagLabel.text = rep.item?.getTag()
-            reviewLabel.text = parseOptionalString(input: rep.item?.rating, defaultValue: "Pending")
-//            if let state = rep.item?.getState() {
-//                stateLabel.text = state
-//            }
-//            if rep.item?.category == Constants.ItemType.BusStop.rawValue || rep.item?.category == Constants.ItemType.ExpressStop.rawValue {
-//                stateLabel.isHidden = true
-//                allBusView.isHidden = false
-//                setupAllBusView(item: rep.item!)
-//            } else {
-//                stateLabel.isHidden = false
-//                allBusView.isHidden = true
-//            }
+            switch (rep.item?.category?.name?.lowercased())! {
+            case FooyoConstants.CategoryName.Attractions.rawValue.lowercased(), FooyoConstants.CategoryName.Events.rawValue.lowercased(), FooyoConstants.CategoryName.Trails.rawValue.lowercased():
+                reviewLabel.text = parseOptionalString(input: rep.item?.rating, defaultValue: "Pending")
+                expandView.isHidden = false
+            case FooyoConstants.CategoryName.Bus.rawValue.lowercased():
+                reviewView.isHidden = true
+                reviewLabel.isHidden = true
+                allBusView.isHidden = false
+                setupAllBusView(item: rep.item!)
+                expandView.isHidden = true
+                break
+            default:
+                reviewView.isHidden = true
+                reviewLabel.isHidden = true
+                expandView.isHidden = true
+            }
         }
         
         
+        
+    }
+    
+    func setConstraints() {
         containerView.snp.makeConstraints { (make) in
             make.leading.equalTo(0)
             make.trailing.equalTo(0)
             make.top.equalTo(0)
-//            make.bottom.equalTo(-tipHeight + 1)
+            //            make.bottom.equalTo(-tipHeight + 1)
             make.bottom.equalTo(-tipHeight + 2)
         }
         coverView.snp.makeConstraints { (make) in
             make.leading.equalTo(0)
             make.top.equalTo(0)
             make.bottom.equalTo(0)
-//            make.height.equalTo(Scale.scaleY(y: 110))
-//            make.height.equalTo(coverView.snp.width)
+            //            make.height.equalTo(Scale.scaleY(y: 110))
+            //            make.height.equalTo(coverView.snp.width)
             make.width.equalTo(coverView.snp.height)
-//            make.width.equalTo(100)
+            //            make.width.equalTo(100)
         }
         nameLabel.snp.makeConstraints { (make) in
             make.top.equalTo(Scale.scaleY(y: 8))
@@ -189,83 +193,73 @@ class CustomCalloutView: UIView, MGLCalloutView {
             make.width.equalTo(Scale.scaleX(x: 8))
             make.centerY.equalToSuperview()
         }
-//        allBusView.snp.makeConstraints { (make) in
-//            make.edges.equalTo(stateLabel)
-//        }
+        allBusView.snp.makeConstraints { (make) in
+            make.leading.equalTo(reviewView)
+            make.trailing.equalTo(expandView.snp.leading)
+            make.top.equalTo(reviewView)
+            make.height.equalTo(Scale.scaleY(y: 16))
+        }
     }
     
     required init?(coder decoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-//    func setupAllBusView(item: Item) {
-//        for each in allBusView.subviews {
-//            each.snp.removeConstraints()
-//            each.removeFromSuperview()
-//        }
-//        var subBusViews = [UIView]()
-//        var subLabels = [UILabel]()
-//        var index = 0
-//        if let buses = item.buses {
-//            for each in buses {
-//                var num = 0
-//                switch each.name! {
-//                case "Beach Tram":
-//                    num = 5
-//                case "Express":
-//                    num = 4
-//                case "Bus1":
-//                    num = 1
-//                case "Bus2":
-//                    num = 2
-//                case "Bus3":
-//                    num = 3
-//                default:
-//                    num = 0
-//                }
-//                
-//                let busView = UILabel()
-////                busView.layer.cornerRadius = Scale.scaleY(y: 2)
-//                busView.clipsToBounds = true
-//                busView.textColor = .white
-//                busView.font = UIFont.DefaultRegularWithSize(size: Scale.scaleY(y: 12))
-//                busView.text = Constants.routeNames[num]
-//                busView.backgroundColor = Constants.routeColor[num]
-//                busView.textAlignment = .center
-//                
-//                let label = UILabel()
-////                label.textColor = .white
-//                label.font = UIFont.DefaultRegularWithSize(size: Scale.scaleY(y: 12))
-//                label.textColor = UIColor.sntWarmGrey
-//                label.text = each.giveState()
-//                
-//                allBusView.addSubview(busView)
-//                allBusView.addSubview(label)
-//                subBusViews.append(busView)
-//                subLabels.append(label)
-//                
-//                busView.snp.makeConstraints({ (make) in
-//                    make.width.equalTo(Scale.scaleX(x: 50))
-//                    make.leading.equalToSuperview()
-//                    if index == 0 {
-//                        make.top.equalToSuperview()
-//                    } else {
-//                        make.top.equalTo(subBusViews[index - 1].snp.bottom).offset(Scale.scaleY(y: 3))
-//                    }
-//                })
-//                label.snp.makeConstraints({ (make) in
-//                    make.leading.equalTo(busView.snp.trailing).offset(Scale.scaleX(x: 5))
-////                    if index == 0 {
-////                        make.top.equalToSuperview()
-////                    } else {
-////                        make.top.equalTo(subBusViews[index - 1].snp.bottom).offset(Scale.scaleY(y: 3))
-////                    }
-//                    make.centerY.equalTo(busView)
-//                })
-//                index += 1
-//            }
-//        }
-//    }
+    func setupAllBusView(item: FooyoItem) {
+        for each in allBusView.subviews {
+            each.snp.removeConstraints()
+            each.removeFromSuperview()
+        }
+        var subBusViews = [UIView]()
+        var subLabels = [UILabel]()
+        var index = 0
+        if let buses = item.buses {
+            for each in buses {
+                
+                let busView = UILabel()
+                busView.layer.cornerRadius = Scale.scaleY(y: 4)
+                busView.clipsToBounds = true
+                busView.textColor = .white
+                busView.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 11))
+                busView.text = each.name
+                busView.textAlignment = .center
+                
+                switch (each.name)! {
+                case "Bus A":
+                    busView.backgroundColor = UIColor.busA
+                    busView.textColor = .white
+                case "Bus B":
+                    busView.backgroundColor = UIColor.busB
+                    busView.textColor = .white
+                default:
+                    break
+                }
+                let label = UILabel()
+                label.attributedText = each.getArrivingStatus()
+                
+                allBusView.addSubview(busView)
+                allBusView.addSubview(label)
+                subBusViews.append(busView)
+                subLabels.append(label)
+                
+                busView.snp.makeConstraints({ (make) in
+                    make.top.equalToSuperview()
+                    make.bottom.equalToSuperview()
+                    make.width.equalTo(Scale.scaleX(x: 40))
+                    if index == 0 {
+                        make.leading.equalToSuperview()
+                    } else {
+                        make.leading.equalTo(subLabels[index - 1].snp.trailing).offset(Scale.scaleY(y: 9))
+                    }
+                })
+                label.snp.makeConstraints({ (make) in
+                    make.leading.equalTo(busView.snp.trailing).offset(Scale.scaleX(x: 5))
+                    make.centerY.equalTo(busView)
+                })
+                index += 1
+            }
+        }
+    }
 //    func didTapBtn() {
 //        if let rep = self.representedObject as? MyCustomPointAnnotation {
 //            self.userDelegate?.didTapDirection(item: rep.item!)
@@ -301,13 +295,6 @@ class CustomCalloutView: UIView, MGLCalloutView {
         let frameOriginX = rect.origin.x + (rect.size.width/2.0) - (frameWidth/2.0)
         let frameOriginY = rect.origin.y - frameHeight
         frame = CGRect(x: frameOriginX, y: frameOriginY, width: frameWidth, height: frameHeight)
-        //        self.snp.makeConstraints { (make) in
-        //            make.width.equalTo(Scale.scaleX(x: 283))
-        //            make.height.equalTo(Scale.scaleY(y: 180) + tipHeight)
-        ////            make.centerY.equalToSuperview()
-        //            make.centerX.equalToSuperview()
-        //            make.bottom.equalTo((superview?.snp.centerY)!)
-        //        }
         if animated {
             alpha = 0
             UIView.animate(withDuration: 0.2) { [weak self] in

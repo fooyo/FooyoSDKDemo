@@ -15,7 +15,7 @@ class MainTabViewController: UITabBarController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         prepareTabs()
-        selectedIndex = 2
+        selectedIndex = 0
     }
     
     override func didReceiveMemoryWarning() {
@@ -45,7 +45,8 @@ class MainTabViewController: UITabBarController {
         case 0:
             return ExploreViewController()
         case 1:
-            return FooyoMyPlanViewController(userId: nil)
+//            return FooyoMyPlanViewController(userId: nil)
+            return FooyoMyPlanViewController(userId: ACCNUser.currentUser.userId)
         case 2:
             let vc = FooyoBaseMapViewController(hideTheDefaultNavigationBar: true)
             vc.delegate = self

@@ -11,11 +11,20 @@ import SVProgressHUD
 
 public class FooyoMyPlanViewController: UIViewController {
     
+    var menuHeight: CGFloat = 0
     var pageMenu : CAPSPageMenu?
     fileprivate var controllerArray = [ItineraryListViewController]()
-    
+    fileprivate var createBtn: UIButton! = {
+        let t = UIButton()
+        t.backgroundColor = UIColor.ospSentosaGreen
+        t.layer.cornerRadius = Scale.scaleY(y: 40) / 2
+        t.setTitle("CREATE A NEW PLAN", for: .normal)
+        t.setTitleColor(.white, for: .normal)
+        t.titleLabel?.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 12))
+        return t
+    }()
     // MARK: - Life Cycle
-    public init(userId: String?) {
+    public init(userId: String? = nil) {
         super.init(nibName: nil, bundle: nil)
         if let id = userId {
             FooyoUser.currentUser.userId = id
@@ -28,12 +37,28 @@ public class FooyoMyPlanViewController: UIViewController {
     
     override public func viewDidLoad() {
         super.viewDidLoad()
+        debugPrint("my itinerary vc has been loaded")
         applyGeneralVCSettings(vc: self)
+//        view.backgroundColor = UIColor.ospGrey10
         NotificationCenter.default.addObserver(self, selector: #selector(itinerarySaved(notification:)), name: FooyoConstants.notifications.FooyoSavedItinerary, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(itineraryDownloaded), name: FooyoConstants.notifications.FooyoItineraryDownloaded, object: nil)
 
         // Do any additional setup after loading the view.
+        var tabBarHeight: CGFloat = 0
+        if UITabBar.appearance().isTranslucent {
+            tabBarHeight = 49
+        }
+        menuHeight = FooyoConstants.mainHeight - tabBarHeight - 20 - Scale.scaleY(y: 10) * 2 - Scale.scaleY(y: 40)
+        
         configurePageViews()
+        view.addSubview(createBtn)
+        createBtn.snp.makeConstraints { (make) in
+            make.leading.equalTo(view).offset(Scale.scaleX(x: 22))
+            make.trailing.equalTo(view).offset(Scale.scaleX(x: -22))
+            make.height.equalTo(Scale.scaleY(y: 40))
+            make.bottom.equalTo(bottomLayoutGuide.snp.top).offset(Scale.scaleY(y: -10))
+        }
+        createBtn.addTarget(self, action: #selector(createHandler), for: .touchUpInside)
     }
 
     override public func didReceiveMemoryWarning() {
@@ -51,6 +76,15 @@ public class FooyoMyPlanViewController: UIViewController {
         loadData()
     }
     
+    func createHandler() {
+        if let id = FooyoUser.currentUser.userId {
+            let vc = FooyoCreatePlanViewController(userId: id)
+            let nav = UINavigationController(rootViewController: vc)
+            self.navigationController?.present(nav, animated: true, completion: nil)
+        } else {
+            displayAlert(title: "Reminder", message: "You have to login first before you can create a new plan.", complete: nil)
+        }
+    }
     
     func configurePageViews() {
         controllerArray = [ItineraryListViewController]()
@@ -87,22 +121,23 @@ public class FooyoMyPlanViewController: UIViewController {
             CAPSPageMenuOption.scrollAnimationDurationOnMenuItemTap(300),
             CAPSPageMenuOption.selectionIndicatorHeight(5)
             ]
-        pageMenu = CAPSPageMenu(viewControllers: controllerArray, frame: CGRect(x: 0.0, y: Scale.scaleY(y: 26), width: FooyoConstants.mainWidth, height: FooyoConstants.mainHeight), pageMenuOptions: parameters)
-        
-        for each in view.subviews {
-            each.removeFromSuperview()
-        }
+       
+        pageMenu = CAPSPageMenu(viewControllers: controllerArray, frame: CGRect(x: 0.0, y: 20, width: FooyoConstants.mainWidth, height: menuHeight), pageMenuOptions: parameters)
+        pageMenu!.view.removeFromSuperview()
         view.addSubview(pageMenu!.view)
     }
     
+    func reloadVCs() {
+        controllerArray[0].reloadTableData(itineraries: FooyoItinerary.today)
+        controllerArray[1].reloadTableData(itineraries: FooyoItinerary.future)
+        controllerArray[2].reloadTableData(itineraries: FooyoItinerary.past)
+    }
+    
     func loadData() {
-        debugPrint(FooyoUser.currentUser.userId)
         if let id = FooyoUser.currentUser.userId {
-            debugPrint(FooyoItinerary.myItineraries)
             if FooyoItinerary.myItineraries == nil {
                 SVProgressHUD.show()
                 HttpClient.sharedInstance.getItineraries { (itineraries, isSuccess) in
-                    debugPrint("getItineraries")
                     SVProgressHUD.dismiss()
                     if isSuccess {
                         if let itineraries = itineraries {
@@ -118,17 +153,14 @@ public class FooyoMyPlanViewController: UIViewController {
 
     
     func itinerarySaved(notification: Notification) {
-        if let plan = notification.object as? FooyoItinerary {
-            if FooyoItinerary.myItineraries != nil {
-                (FooyoItinerary.myItineraries)!.append(plan)
-                FooyoItinerary.sort()
-                self.configurePageViews()
-            }
+        debugPrint("received the saved notification")
+        if let _ = notification.object as? FooyoItinerary {
+            self.reloadVCs()
         }
     }
     
     func itineraryDownloaded() {
-        self.configurePageViews()
+        self.reloadVCs()
     }
 
 }

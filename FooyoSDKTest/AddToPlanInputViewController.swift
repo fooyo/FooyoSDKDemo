@@ -94,17 +94,21 @@ class AddToPlanInputViewController: UIViewController {
             displayAlert(title: "Reminder", message: "Please give a valid id.", complete: nil)
             return
         }
-        guard Int(id!) != nil else {
+        guard id! != "" else {
             displayAlert(title: "Reminder", message: "Please give a valid id.", complete: nil)
             return
         }
         
         let index = FooyoIndex(category: category!, levelOneId: id!)
-        let vc = FooyoAddToPlanViewController(index: index, userId: "test")
-        let nav = UINavigationController(rootViewController: vc)
-        nav.navigationBar.isHidden = true
-        nav.modalPresentationStyle = .overFullScreen
-        self.present(nav, animated: true, completion: nil)
+        if let id = ACCNUser.currentUser.userId {
+            let vc = FooyoAddToPlanViewController(index: index, userId: id)
+            let nav = UINavigationController(rootViewController: vc)
+            nav.navigationBar.isHidden = true
+            nav.modalPresentationStyle = .overFullScreen
+            self.present(nav, animated: true, completion: nil)
+        } else {
+            displayAlert(title: "Reminder", message: "Have to login first", complete: nil)
+        }
     }
     
     func categoryChanged(sender: UITextField) {

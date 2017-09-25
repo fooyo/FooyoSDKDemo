@@ -22,6 +22,7 @@
 		856EC4871F516EDA007E1C87 /* SwiftyJSON.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 856EC47F1F516EDA007E1C87 /* SwiftyJSON.framework */; };
 		856EC4881F516EDA007E1C87 /* TGPControls.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 856EC4801F516EDA007E1C87 /* TGPControls.framework */; };
 		856EC48A1F516EEE007E1C87 /* FooyoSDK.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 856EC4891F516EEE007E1C87 /* FooyoSDK.bundle */; };
+		856F62821F787B2100A2CC8F /* ACCNUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856F62811F787B2100A2CC8F /* ACCNUser.swift */; };
 		858C60B01F53E5BB00750BDF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 858C60AA1F53E5BB00750BDF /* AppDelegate.swift */; };
 		858C60B11F53E5BB00750BDF /* MainTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 858C60AB1F53E5BB00750BDF /* MainTabViewController.swift */; };
 		858C60B21F53E5BB00750BDF /* ExploreViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 858C60AC1F53E5BB00750BDF /* ExploreViewController.swift */; };
@@ -52,6 +53,7 @@
 		856EC47F1F516EDA007E1C87 /* SwiftyJSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyJSON.framework; path = Carthage/Build/iOS/SwiftyJSON.framework; sourceTree = "<group>"; };
 		856EC4801F516EDA007E1C87 /* TGPControls.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TGPControls.framework; path = Carthage/Build/iOS/TGPControls.framework; sourceTree = "<group>"; };
 		856EC4891F516EEE007E1C87 /* FooyoSDK.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = FooyoSDK.bundle; path = Carthage/Build/iOS/FooyoTestSDK.framework/FooyoSDK.bundle; sourceTree = "<group>"; };
+		856F62811F787B2100A2CC8F /* ACCNUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ACCNUser.swift; sourceTree = "<group>"; };
 		858C60AA1F53E5BB00750BDF /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		858C60AB1F53E5BB00750BDF /* MainTabViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainTabViewController.swift; sourceTree = "<group>"; };
 		858C60AC1F53E5BB00750BDF /* ExploreViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExploreViewController.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				856EC46F1F516A1C007E1C87 /* LaunchScreen.storyboard */,
 				856EC4721F516A1C007E1C87 /* Info.plist */,
 				8530F7F61F53ED570094EB49 /* Extension.swift */,
+				856F62811F787B2100A2CC8F /* ACCNUser.swift */,
 			);
 			path = FooyoSDKTest;
 			sourceTree = "<group>";
@@ -263,6 +266,7 @@
 				85CDE1D41F700B2D00DEC6AE /* SetUserViewController.swift in Sources */,
 				858C60B01F53E5BB00750BDF /* AppDelegate.swift in Sources */,
 				858C60B41F53E5BB00750BDF /* NavigationInputViewController.swift in Sources */,
+				856F62821F787B2100A2CC8F /* ACCNUser.swift in Sources */,
 				858C60B11F53E5BB00750BDF /* MainTabViewController.swift in Sources */,
 				8530F7F41F53E6680094EB49 /* FeatureTableViewCell.swift in Sources */,
 				858C60B21F53E5BB00750BDF /* ExploreViewController.swift in Sources */,

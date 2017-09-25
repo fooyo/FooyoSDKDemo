@@ -17,8 +17,8 @@ class ExploreViewController: UIViewController {
         t.separatorStyle = .none
         return t
     }()
-    fileprivate var featureNames = ["Show On Map", "Create Plan", "Add To Plan", "Navigation", "Set User Id"]
-    fileprivate var featureColors = ["1abc9c", "16a085", "f1c40f", "f39c12", "e74c3c"]
+    fileprivate var featureNames = ["Show On Map", "Create Plan", "Add To Plan", "Navigation", "User Login", "User Logout"]
+    fileprivate var featureColors = ["1abc9c", "16a085", "f1c40f", "f39c12", "e74c3c", "3498db"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -78,7 +78,7 @@ class ExploreViewController: UIViewController {
 
 extension ExploreViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
+        return 6
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let name = featureNames[indexPath.row]
@@ -99,10 +99,14 @@ extension ExploreViewController: UITableViewDelegate, UITableViewDataSource {
             vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: true)
         case 1:
-            let vc = FooyoCreatePlanViewController(userId: "test")
-            vc.delegate = self
-            let nav = UINavigationController(rootViewController: vc)
-            self.present(nav, animated: true, completion: nil)
+            if let id = FooyoUser.currentUser.userId {
+                let vc = FooyoCreatePlanViewController(userId: id)
+                vc.delegate = self
+                let nav = UINavigationController(rootViewController: vc)
+                self.present(nav, animated: true, completion: nil)
+            } else {
+                displayAlert(title: "Reminder", message: "Have to log in first.", complete: nil)
+            }
         case 2:
             let vc = AddToPlanInputViewController()
             vc.hidesBottomBarWhenPushed = true
@@ -115,6 +119,9 @@ extension ExploreViewController: UITableViewDelegate, UITableViewDataSource {
             let vc = SetUserViewController()
             vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: true)
+        case 5:
+            FooyoSDKSignOut()
+            displayAlert(title: "Reminder", message: "Signout Successfully", complete: nil)
         default:
         break
         }

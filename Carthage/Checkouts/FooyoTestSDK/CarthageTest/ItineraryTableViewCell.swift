@@ -7,13 +7,13 @@
 //
 
 import UIKit
-//protocol ItineraryTableViewCellDelegate: class {
-//    func displayTickets(itinerary: Itinerary)
-//}
+protocol ItineraryTableViewCellDelegate: class {
+    func ItineraryTableViewCellDidTapped(itinerary: FooyoItinerary)
+}
 
 class ItineraryTableViewCell: UITableViewCell {
     static let reuseIdentifier = "itineraryTableViewCell"
-//    weak var delegate: ItineraryTableViewCellDelegate?
+    weak var delegate: ItineraryTableViewCellDelegate?
     
     fileprivate var itinerary: FooyoItinerary?
     
@@ -46,6 +46,12 @@ class ItineraryTableViewCell: UITableViewCell {
         return t
     }()
     
+    fileprivate var lineView: UIView! = {
+        let t = UIView()
+        t.backgroundColor = UIColor.ospGrey50
+        return t
+    }()
+    
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         selectionStyle = .none
@@ -56,18 +62,33 @@ class ItineraryTableViewCell: UITableViewCell {
         contentView.addSubview(nameLabel)
         contentView.addSubview(tagLabel)
         contentView.addSubview(collectionView)
+        contentView.addSubview(lineView)
         collectionView.delegate = self
         collectionView.dataSource = self
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(gestureHandler))
+        collectionView.addGestureRecognizer(gesture)
     }
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configureWith(itinerary: FooyoItinerary) {
+    func gestureHandler() {
+//        debugPrint("testing")
+        if let itinerary = itinerary {
+            delegate?.ItineraryTableViewCellDidTapped(itinerary: itinerary)
+        }
+    }
+    func configureWith(itinerary: FooyoItinerary, hideLine: Bool = false) {
         self.itinerary = itinerary
         nameLabel.text = itinerary.name
         tagLabel.text = itinerary.getSummaryTag()
+        if hideLine {
+            lineView.isHidden = true
+        } else {
+            lineView.isHidden = false
+        }
         collectionView.reloadData()
+        
         setConstraints()
     }
     
@@ -88,6 +109,12 @@ class ItineraryTableViewCell: UITableViewCell {
             make.bottom.equalToSuperview().offset(Scale.scaleY(y: -4))
             make.top.equalTo(tagLabel.snp.bottom).offset(Scale.scaleY(y: 3))
         }
+        lineView.snp.makeConstraints { (make) in
+            make.leading.equalToSuperview()
+            make.trailing.equalToSuperview()
+            make.bottom.equalToSuperview()
+            make.height.equalTo(0.5)
+        }
     }
 }
 
@@ -99,18 +126,18 @@ extension ItineraryTableViewCell: UICollectionViewDelegate, UICollectionViewData
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if let items = itinerary?.items {
-            return items.count + 1
+            return items.count
         }
         return 0
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if indexPath.row == 0 {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ItinerarySummaryMapCollectionViewCell.reuseIdentifier, for: indexPath) as! ItinerarySummaryMapCollectionViewCell
-            cell.configureWith(plan: itinerary!)
-            return cell
-        }
+//        if indexPath.row == 0 {
+//            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ItinerarySummaryMapCollectionViewCell.reuseIdentifier, for: indexPath) as! ItinerarySummaryMapCollectionViewCell
+//            cell.configureWith(plan: itinerary!)
+//            return cell
+//        }
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ItinerarySummaryCollectionViewCell.reuseIdentifier, for: indexPath) as! ItinerarySummaryCollectionViewCell
-        let item = (itinerary?.items)![indexPath.row - 1]
+        let item = (itinerary?.items)![indexPath.row]
         cell.configureWith(item: item)
         return cell
     }

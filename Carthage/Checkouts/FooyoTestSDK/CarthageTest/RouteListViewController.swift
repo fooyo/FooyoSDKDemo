@@ -31,10 +31,9 @@ public class FooyoNavigationViewController: UIViewController {
     fileprivate var sugRoute: FooyoRoute?
     fileprivate var walkingRoutes: [FooyoRoute]?
     fileprivate var busRoutes: [FooyoRoute]?
+    fileprivate var carRoutes: [FooyoRoute]?
+
     fileprivate var pagination = FooyoPagination()
-//    fileprivate var refreshControlOne = UIRefreshControl()
-//    fileprivate var refreshControlTwo = UIRefreshControl()
-//    fileprivate var refreshControlThree = UIRefreshControl()
     
     fileprivate var backButton: UIImageView = {
         let t = UIImageView()
@@ -101,35 +100,6 @@ public class FooyoNavigationViewController: UIViewController {
         return t
     }()
     
-    
-//    fileprivate var sugTable: UITableView! = {
-//        let t = UITableView()
-//        t.register(RouteListTableViewCell.self, forCellReuseIdentifier: RouteListTableViewCell.reuseIdentifier)
-//        t.register(EmptyTableViewCell.self, forCellReuseIdentifier: EmptyTableViewCell.reuseIdentifier)
-//        t.tableFooterView = UIView()
-//        t.separatorColor = UIColor.sntWhite
-//        t.separatorInset = UIEdgeInsets.zero
-//        return t
-//    }()
-//    fileprivate var walkingTable: UITableView! = {
-//        let t = UITableView()
-//        t.register(RouteListTableViewCell.self, forCellReuseIdentifier: RouteListTableViewCell.reuseIdentifier)
-//        t.register(EmptyTableViewCell.self, forCellReuseIdentifier: EmptyTableViewCell.reuseIdentifier)
-//        t.tableFooterView = UIView()
-//        t.separatorColor = UIColor.sntWhite
-//        t.separatorInset = UIEdgeInsets.zero
-//        return t
-//    }()
-//    fileprivate var busTable: UITableView! = {
-//        let t = UITableView()
-//        t.register(RouteListTableViewCell.self, forCellReuseIdentifier: RouteListTableViewCell.reuseIdentifier)
-//        t.register(EmptyTableViewCell.self, forCellReuseIdentifier: EmptyTableViewCell.reuseIdentifier)
-//        t.tableFooterView = UIView()
-//        t.separatorColor = UIColor.sntWhite
-//        t.separatorInset = UIEdgeInsets.zero
-//        return t
-//    }()
-    
     var pageMenu : CAPSPageMenu?
     fileprivate var controllerArray = [RouteTableViewController]()
     
@@ -149,18 +119,14 @@ public class FooyoNavigationViewController: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        NotificationCenter.default.addObserver(self, selector: #selector(displayAlert(notification:)), name: FooyoConstants.notifications.FooyoDisplayAlert, object: nil)
-
-        NotificationCenter.default.addObserver(self, selector: #selector(updateNavigation(notification:)), name: FooyoConstants.notifications.FooyoUpdateNavigationPoint, object: nil)
-
-//        if mapView.userLocation.
         applyGeneralVCSettings(vc: self)
 
-        mapView.showsUserLocation = true
-        
-        findMatch(start: startIndex, end: endIndex)
+        NotificationCenter.default.addObserver(self, selector: #selector(displayAlert(notification:)), name: FooyoConstants.notifications.FooyoDisplayAlert, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateNavigation(notification:)), name: FooyoConstants.notifications.FooyoUpdateNavigationPoint, object: nil)
 
-//        refreshData()
+
+        mapView.showsUserLocation = true
+        findMatch(start: startIndex, end: endIndex)
 
         view.addSubview(bigBack)
         bigBack.addSubview(backButton)
@@ -173,38 +139,8 @@ public class FooyoNavigationViewController: UIViewController {
         view.addSubview(startIcon)
         view.addSubview(endIcon)
         view.addSubview(switchIcon)
-        //        upperView.addSubview(sugBtn)
-//        upperView.addSubview(walkingBtn)
-//        upperView.addSubview(busBtn)
-//        sugTable.delegate = self
-//        sugTable.dataSource = self
-//        walkingTable.delegate = self
-//        walkingTable.dataSource = self
-//        busTable.delegate = self
-//        busTable.dataSource = self
-        
-//        sugTable.addSubview(refreshControlOne)
-//        sugTable.sendSubview(toBack: refreshControlOne)
-//        refreshControlOne.addTarget(self, action: #selector(refreshData), for: .valueChanged)
-//        walkingTable.addSubview(refreshControlTwo)
-//        walkingTable.sendSubview(toBack: refreshControlTwo)
-//        refreshControlTwo.addTarget(self, action: #selector(refreshData), for: .valueChanged)
-//        busTable.addSubview(refreshControlThree)
-//        busTable.sendSubview(toBack: refreshControlThree)
-//        refreshControlThree.addTarget(self, action: #selector(refreshData), for: .valueChanged)
-//        
-//        activeSug()
-//        sugBtn.addTarget(self, action: #selector(activeSug), for: .touchUpInside)
-//        walkingBtn.addTarget(self, action: #selector(activeWalking), for: .touchUpInside)
-//        busBtn.addTarget(self, action: #selector(activeBus), for: .touchUpInside)
-//        scrollView.contentSize = CGSize(width: 3 * Constants.mainWidth, height: Constants.mainHeight - Scale.scaleY(y: 157))
-//        sugView.frame = CGRect(x: 0, y: 0, width: Constants.mainWidth, height: Constants.mainHeight - Scale.scaleY(y: 157))
-//        walkingView.frame = CGRect(x: Constants.mainWidth, y: 0, width: Constants.mainWidth, height: Constants.mainHeight - Scale.scaleY(y: 157))
-//        busView.frame = CGRect(x: 2 * Constants.mainWidth, y: 0, width: Constants.mainWidth, height: Constants.mainHeight - Scale.scaleY(y: 157))
-//        
         switchIcon.addTarget(self, action: #selector(switchHandler), for: .touchUpInside)
-//        backButton.addTarget(self, action: #selector(backHandler), for: .touchUpInside)
-//        
+        
         let startGesture = UITapGestureRecognizer(target: self, action: #selector(startHandler))
         startLabel.addGestureRecognizer(startGesture)
         let endGesture = UITapGestureRecognizer(target: self, action: #selector(endHandler))
@@ -241,10 +177,6 @@ public class FooyoNavigationViewController: UIViewController {
     }
     
     func findMatch(start: FooyoIndex?, end: FooyoIndex?) {
-        debugPrint(end)
-        debugPrint(end?.category)
-        debugPrint(end?.levelOneId)
-        debugPrint(end?.levelTwoId)
         if let start = start {
             if start.isNonLinearTrailHotspot() {
                 startItem = FooyoItem.items.first(where: { (item) -> Bool in
@@ -255,6 +187,8 @@ public class FooyoNavigationViewController: UIViewController {
                 })
             } else if start.isLocation() {
                 startItem = FooyoItem.items.first(where: { (item) -> Bool in
+                    debugPrint(parseOptionalString(input: item.category?.name))
+                    debugPrint(parseOptionalString(input: item.levelOneId))
                     let checkOne = parseOptionalString(input: start.category) == parseOptionalString(input: item.category?.name)
                     let checkTwo = parseOptionalString(input: start.levelOneId) == parseOptionalString(input: item.levelOneId)
                     return checkOne && checkTwo
@@ -278,21 +212,12 @@ public class FooyoNavigationViewController: UIViewController {
             }
         }
         
-        let test = FooyoItem.items.first { (item) -> Bool in
-            let check = parseOptionalString(input: item.levelOneId) == "481"
-            let checkTwo = parseOptionalString(input: item.category?.name) == "Attractions"
-            return check && checkTwo
-        }
-        debugPrint(test)
-        debugPrint(test?.category?.name)
-        debugPrint(startItem)
-        debugPrint(endItem)
         if let end = endItem {
             endLabel.text = end.name
             endItem = end
             endCoord = end.getCoor()
         } else {
-            endLabel.text = "Choose Destination..."
+            endLabel.text = "Select A Location..."
             endItem = nil
             endCoord = nil
         }
@@ -307,7 +232,7 @@ public class FooyoNavigationViewController: UIViewController {
             SVProgressHUD.show()
             DispatchQueue.global(qos: .background).async {
                 while !self.checkUserLocation() {
-                    debugPrint("testing")
+//                    debugPrint("testing")
                 }
                 if self.endCoord != nil {
                     self.refreshData()
@@ -369,7 +294,9 @@ public class FooyoNavigationViewController: UIViewController {
             CAPSPageMenuOption.scrollAnimationDurationOnMenuItemTap(300),
             CAPSPageMenuOption.selectionIndicatorHeight(5)
         ]
-        pageMenu = CAPSPageMenu(viewControllers: controllerArray, frame: CGRect(x: 0.0, y: Scale.scaleY(y: 143), width: FooyoConstants.mainWidth, height: FooyoConstants.mainHeight), pageMenuOptions: parameters)
+        
+        pageMenu = CAPSPageMenu(viewControllers: controllerArray, frame: CGRect(x: 0.0, y: Scale.scaleY(y: 143), width: FooyoConstants.mainWidth, height: FooyoConstants.mainHeight - Scale.scaleY(y: 143)), pageMenuOptions: parameters)
+        pageMenu!.view.removeFromSuperview()
         
         view.addSubview(pageMenu!.view)
     }
@@ -378,13 +305,11 @@ public class FooyoNavigationViewController: UIViewController {
     func startHandler() {
         changeMode = .ChangeStart
         gotoSearchPage(source: .FromNavigation, sourceVC: self)
-//        vc.delegate = self
     }
     
     func endHandler() {
         changeMode = .ChangeEnd
         gotoSearchPage(source: .FromNavigation, sourceVC: self)
-//        vc.delegate = self
     }
 //
     
@@ -395,9 +320,9 @@ public class FooyoNavigationViewController: UIViewController {
         if let walk = walkingRoutes {
             controllerArray[1].reConfigure(routes: walk)
         }
-//        if let bus = busRoutes {
-//            controllerArray[2].reConfigure(routes: bus)
-//        }
+        if let car = carRoutes {
+            controllerArray[2].reConfigure(routes: car)
+        }
         if let bus = busRoutes {
             controllerArray[3].reConfigure(routes: bus)
         }
@@ -424,7 +349,12 @@ public class FooyoNavigationViewController: UIViewController {
             } else {
                 return false
             }
-            
+//            debugPrint(userLocation.latitude)
+//            debugPrint(userLocation.longitude)
+//            startItem = nil
+//            startCoord = CLLocationCoordinate2D(latitude: 1.252815, longitude: 103.821172)
+//            return true
+//            
             let polygonRenderer = MKPolygonRenderer(polygon: polygon)
             let mapPoint: MKMapPoint = MKMapPointForCoordinate(userLocation)
             let polygonViewPoint: CGPoint = polygonRenderer.point(for: mapPoint)
@@ -440,7 +370,6 @@ public class FooyoNavigationViewController: UIViewController {
                 startCoord = userLocation
                 return true
             }
-//            return checkCoordValid(coord: userLocation)
         } else {
             startItem = FooyoItem.vivo
             startCoord = FooyoItem.vivo.getCoor()
@@ -458,6 +387,7 @@ public class FooyoNavigationViewController: UIViewController {
         }
         sugRoute = nil
         walkingRoutes = nil
+        carRoutes = nil
         busRoutes = nil
         pagination.resetData()
         loadData()
@@ -476,10 +406,13 @@ public class FooyoNavigationViewController: UIViewController {
                 }
             }
             walkingRoutes = routes.filter({ (route) -> Bool in
-                return route.type == "foot"
+                return route.type == FooyoConstants.RouteType.Walking.rawValue
             })
             busRoutes = routes.filter({ (route) -> Bool in
-                return route.type == "bus"
+                return route.type == FooyoConstants.RouteType.PSV.rawValue
+            })
+            carRoutes = routes.filter({ (route) -> Bool in
+                return route.type == FooyoConstants.RouteType.Car.rawValue
             })
             sugRoute = routes.first(where: { (route) -> Bool in
                 return route.suggested == true
@@ -490,8 +423,6 @@ public class FooyoNavigationViewController: UIViewController {
 //
     func loadData() {
         pagination.resetStatus()
-        debugPrint(startCoord)
-        debugPrint(endCoord)
         HttpClient.sharedInstance.findNavigationFor(start: startCoord!, end: endCoord!) { (routes, isSuccess) in
             if isSuccess {
                 self.sortRoutes(routes: routes)
@@ -502,12 +433,6 @@ public class FooyoNavigationViewController: UIViewController {
                 self.pagination.error = FooyoConstants.generalErrorMessage
             }
             SVProgressHUD.dismiss()
-//            self.refreshControlOne.endRefreshing()
-//            self.refreshControlTwo.endRefreshing()
-//            self.refreshControlThree.endRefreshing()
-//            self.sugTable.reloadData()
-//            self.walkingTable.reloadData()
-//            self.busTable.reloadData()
         }
     }
 //
@@ -515,63 +440,7 @@ public class FooyoNavigationViewController: UIViewController {
         _ = navigationController?.popViewController(animated: true)
     }
     
-//    func activeSug() {
-//        enableSugBtn()
-//        distableBusBtn()
-//        distableWalkingBtn()
-//        debugPrint(Constants.mainWidth)
-//        debugPrint(scrollView.frame.height)
-//        let size = CGRect(x: 0, y: 0, width: Constants.mainWidth, height: scrollView.frame.height)
-//        scrollView.scrollRectToVisible(size, animated: true)
-//    }
-//    func activeWalking() {
-//        enableWalkingBtn()
-//        distableBusBtn()
-//        distableSugBtn()
-//        debugPrint(Constants.mainWidth)
-//        debugPrint(scrollView.frame.height)
-//        let size = CGRect(x: Constants.mainWidth, y: 0, width: Constants.mainWidth, height: scrollView.frame.height)
-//        scrollView.scrollRectToVisible(size, animated: true)
-//    }
-//    func activeBus() {
-//        enableBusBtn()
-//        distableSugBtn()
-//        distableWalkingBtn()
-//        debugPrint(Constants.mainWidth)
-//        debugPrint(scrollView.frame.height)
-//        let size = CGRect(x: 2 * Constants.mainWidth, y: 0, width: Constants.mainWidth, height: scrollView.frame.height)
-//        scrollView.scrollRectToVisible(size, animated: true)
-//    }
     func setConstraints() {
-        //        sugBtn.snp.makeConstraints { (make) in
-//            make.height.equalTo(Scale.scaleY(y: 32))
-//            make.leading.equalTo(Scale.scaleX(x: 15))
-//            make.bottom.equalTo(Scale.scaleY(y: -8))
-//        }
-//        walkingBtn.snp.makeConstraints { (make) in
-//            make.height.equalTo(sugBtn)
-//            make.width.equalTo(sugBtn)
-//            make.leading.equalTo(sugBtn.snp.trailing).offset(Scale.scaleX(x: 5))
-//            make.centerY.equalTo(sugBtn)
-//        }
-//        busBtn.snp.makeConstraints { (make) in
-//            make.centerY.equalTo(sugBtn)
-//            make.height.equalTo(sugBtn)
-//            make.width.equalTo(sugBtn)
-//            make.leading.equalTo(walkingBtn.snp.trailing).offset(Scale.scaleX(x: 5))
-//            make.trailing.equalTo(Scale.scaleX(x: -15))
-//        }
-//        backButton.snp.makeConstraints { (make) in
-////            make.width.equalTo(Scale.scaleX(x: 10.4))
-////            make.height.equalTo(Scale.scaleY(y: 17.8))
-////            make.leading.equalTo(Scale.scaleX(x: 8.8))
-//            make.top.equalTo(Scale.scaleY(y: 35.8))
-//            make.leading.equalToSuperview()
-//            make.trailing.equalTo(startIcon.snp.leading)
-////            make.top.equalTo(startLabel)
-//            make.bottom.equalTo(startLabel)
-//        }
-        
         bigBack.snp.makeConstraints { (make) in
             make.leading.equalToSuperview()
             make.top.equalTo(topLayoutGuide.snp.bottom).offset(Scale.scaleY(y: 10))
@@ -631,77 +500,27 @@ public class FooyoNavigationViewController: UIViewController {
         }
     }
     
-//        dashLine.snp.makeConstraints { (make) in
-//            make.centerX.equalTo(startIcon)
-//            make.top.equalTo(startIcon.snp.bottom)
-//            make.bottom.equalTo(endIcon.snp.top)
-//        }
-//        scrollView.snp.makeConstraints { (make) in
-//            make.leading.equalToSuperview()
-//            make.trailing.equalToSuperview()
-//            make.bottom.equalToSuperview()
-//            make.top.equalTo(upperView.snp.bottom)
-//        }
-//        sugTable.snp.makeConstraints { (make) in
-//            make.edges.equalTo(sugView)
-//        }
-//        walkingTable.snp.makeConstraints { (make) in
-//            make.edges.equalTo(walkingView)
-//        }
-//        busTable.snp.makeConstraints { (make) in
-//            make.edges.equalTo(busView)
-//        }
-//    }
-//    
-//    func enableSugBtn() {
-//        sugBtn.setImage(#imageLiteral(resourceName: "heart_white"), for: .normal)
-//        sugBtn.setTitleColor(.white, for: .normal)
-//        sugBtn.backgroundColor = UIColor.sntMelon
-//    }
-//    func distableSugBtn() {
-//        sugBtn.setImage(#imageLiteral(resourceName: "heart"), for: .normal)
-//        sugBtn.setTitleColor(UIColor.sntGreyishBrown, for: .normal)
-//        sugBtn.backgroundColor = UIColor.white
-//    }
-//    func enableWalkingBtn() {
-//        walkingBtn.setImage(#imageLiteral(resourceName: "walking_white"), for: .normal)
-//        walkingBtn.setTitleColor(.white, for: .normal)
-//        walkingBtn.backgroundColor = UIColor.sntMelon
-//    }
-//    func distableWalkingBtn() {
-//        walkingBtn.setImage(#imageLiteral(resourceName: "walking"), for: .normal)
-//        walkingBtn.setTitleColor(UIColor.sntGreyishBrown, for: .normal)
-//        walkingBtn.backgroundColor = UIColor.white
-//    }
-//    func enableBusBtn() {
-//        busBtn.setImage(#imageLiteral(resourceName: "bus_white"), for: .normal)
-//        busBtn.setTitleColor(.white, for: .normal)
-//        busBtn.backgroundColor = UIColor.sntMelon
-//    }
-//    func distableBusBtn() {
-//        busBtn.setImage(#imageLiteral(resourceName: "bus"), for: .normal)
-//        busBtn.setTitleColor(UIColor.sntGreyishBrown, for: .normal)
-//        busBtn.backgroundColor = UIColor.white
-//    }
     func switchHandler() {
-        let tmp = startCoord
-        startCoord = endCoord
+        let tmp = CLLocationCoordinate2D(latitude: (startCoord?.latitude)!, longitude: (startCoord?.longitude)!)
+        startCoord = CLLocationCoordinate2D(latitude: (endCoord?.latitude)!, longitude: (endCoord?.longitude)!)
         endCoord = tmp
-        let item = startItem
-        startItem = endItem
+        
+        let item = startItem?.makeCopy()
+        startItem = endItem?.makeCopy()
         endItem = item
+        
         let str = startLabel.text
         startLabel.text = endLabel.text
         endLabel.text = str
-//        configureLable()
+
         startLabel.transform = CGAffineTransform(translationX: 0, y: Scale.scaleY(y: 20) + Scale.scaleY(y: 7) + 1 + Scale.scaleY(y: 23))
         endLabel.transform = CGAffineTransform(translationX: 0, y: -(Scale.scaleY(y: 20) + Scale.scaleY(y: 7) + 1 + Scale.scaleY(y: 23)))
         UIView.animate(withDuration: 0.3) { 
             self.startLabel.transform = CGAffineTransform(translationX: 0, y: 0)
             self.endLabel.transform = CGAffineTransform(translationX: 0, y: 0)
         }
-//        pagination.reset()
-//        refreshData()
+        pagination.reset()
+        refreshData()
     }
     func displayAlert(notification: Notification) {
         if let info = notification.object as? [String: String] {
@@ -718,12 +537,16 @@ public class FooyoNavigationViewController: UIViewController {
                 endItem = item
                 endCoord = endItem?.getCoor()
                 endLabel.text = endItem?.name
-                refreshData()
+                if startCoord != nil {
+                    pagination.reset()
+                    refreshData()
+                }
             case .ChangeStart:
                 startItem = item
                 startCoord = startItem?.getCoor()
                 startLabel.text = startItem?.name
                 if endCoord != nil {
+                    pagination.reset()
                     refreshData()
                 }
             default:
@@ -733,175 +556,3 @@ public class FooyoNavigationViewController: UIViewController {
     }
 }
 
-//extension RouteListViewController: UITableViewDelegate, UITableViewDataSource {
-//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        if tableView == sugTable {
-//            return 1
-//        } else if tableView == walkingTable {
-//            if let routes = walkingRoutes {
-//                if routes.count > 0 {
-//                    return routes.count
-//                }
-//            }
-//            return 1
-//        } else {
-//            if let routes = busRoutes {
-//                if routes.count > 0 {
-//                    return routes.count
-//                }
-//            }
-//            return 1
-//        }
-//    }
-//    
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        if tableView == sugTable {
-//            if let sug = sugRoute {
-//                let cell = tableView.dequeueReusableCell(withIdentifier: RouteListTableViewCell.reuseIdentifier, for: indexPath) as! RouteListTableViewCell
-//                cell.configureWith(route: sug)
-//                return cell
-//            } else {
-//                let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier) as! EmptyTableViewCell
-//                if let error = pagination.error {
-//                    cell.configureWith(error)
-//                } else {
-//                    if pagination.loaded {
-//                        cell.configureWith(Constants.generalErrorMessage)
-//                    } else {
-//                        cell.configureWith("")
-//                    }
-//                }
-//                return cell
-//            }
-//        } else if tableView == walkingTable {
-//            if let routes = walkingRoutes {
-//                if routes.count == 0 {
-//                    let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier) as! EmptyTableViewCell
-//                    cell.configureWith("There is no walking path available.")
-//                    return cell
-//                }
-//                let cell = tableView.dequeueReusableCell(withIdentifier: RouteListTableViewCell.reuseIdentifier, for: indexPath) as! RouteListTableViewCell
-//                let route = routes[indexPath.row]
-//                cell.configureWith(route: route)
-//                return cell
-//            } else {
-//                let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier) as! EmptyTableViewCell
-//                if let error = pagination.error {
-//                    cell.configureWith(error)
-//                } else {
-//                    if pagination.loaded {
-//                        cell.configureWith(Constants.generalErrorMessage)
-//                    } else {
-//                        cell.configureWith("")
-//                    }
-//                }
-//                return cell
-//            }
-//        } else {
-//            if let routes = busRoutes {
-//                if routes.count == 0 {
-//                    let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier) as! EmptyTableViewCell
-//                    cell.configureWith("There is no bus path available.")
-//                    return cell
-//                }
-//                let cell = tableView.dequeueReusableCell(withIdentifier: RouteListTableViewCell.reuseIdentifier, for: indexPath) as! RouteListTableViewCell
-//                let route = routes[indexPath.row]
-//                cell.configureWith(route: route)
-//                return cell
-//            } else {
-//                let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier) as! EmptyTableViewCell
-//                if let error = pagination.error {
-//                    cell.configureWith(error)
-//                } else {
-//                    if pagination.loaded {
-//                        cell.configureWith(Constants.generalErrorMessage)
-//                    } else {
-//                        cell.configureWith("")
-//                    }
-//                }
-//                return cell
-//            }
-//
-//        }
-//    }
-//    
-//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//        if tableView == sugTable {
-//            if let route = sugRoute {
-//                return RouteListTableViewCell.estimateHeightWith(route: route)
-//            }
-//            return tableView.frame.height
-//        } else if tableView == walkingTable {
-//            if let routes = walkingRoutes {
-//                if routes.count != 0 {
-//                    let route = routes[indexPath.row]
-//                    return RouteListTableViewCell.estimateHeightWith(route: route)
-//                }
-//            }
-//            return tableView.frame.height
-//        } else {
-//            if let routes = busRoutes {
-//                if routes.count != 0 {
-//                    let route = routes[indexPath.row]
-//                    return RouteListTableViewCell.estimateHeightWith(route: route)
-//                }
-//            }
-//            return tableView.frame.height
-//        }
-//    }
-//    
-//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        tableView.deselectRow(at: indexPath, animated: false)
-//        if tableView == sugTable {
-//            if let route = sugRoute {
-//                gotoRouteDetail(route: route)
-//            }
-//        } else if tableView == walkingTable {
-//            if let routes = walkingRoutes {
-//                if routes.count != 0 {
-//                    let route = routes[indexPath.row]
-//                    gotoRouteDetail(route: route)
-//                }
-//            }
-//        } else {
-//            if let routes = busRoutes {
-//                if routes.count != 0 {
-//                    let route = routes[indexPath.row]
-//                    gotoRouteDetail(route: route)
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//
-//extension FooyoNavigationViewController: SearchViewControllerDelegate {
-//    func searchViewItemSelected(id: Int, name: String, category: String) {
-//        let items = Item.items.filter { (item) -> Bool in
-//            return item.id == id
-//        }
-//        let item = items[0]
-//        switch changeMode {
-//        case .ChangeStart:
-//            if item.id == destination?.id {
-//                displayAlert(title: "Error", message: "The starting and the ending points cannot be the same.", complete: nil)
-//                return
-//            }
-//            startLabel.text = name
-//            start = item.getCoor()
-//            startItem = item
-//            pagination.reset()
-//            refreshData()
-//        default:
-//            if item.id == startItem?.id {
-//                displayAlert(title: "Error", message: "The starting and the ending points cannot be the same.", complete: nil)
-//                return
-//            }
-//            endLabel.text = name
-//            end = item.getCoor()
-//            destination = item
-//            pagination.reset()
-//            refreshData()
-//        }
-//    }
-//}

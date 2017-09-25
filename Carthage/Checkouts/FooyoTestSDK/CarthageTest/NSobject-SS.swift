@@ -14,8 +14,20 @@ import SVProgressHUD
 
 extension NSObject {
     
-    public func FooyoSDKSetUserId(userId: String) {
+    public func FooyoSDKOpenSession() {
+        fetchLocations()
+        fetchCategories()
+    }
+    
+    public func FooyoSDKSignIn(userId: String) {
         FooyoUser.currentUser.userId = userId
+        fetchMyPlans()
+    }
+    
+    public func FooyoSDKSignOut() {
+        FooyoUser.currentUser = FooyoUser()
+        FooyoItinerary.myItineraries = nil
+        FooyoItinerary.newItinerary = FooyoItinerary()
     }
     
     func parseOptionalString(input: String?, defaultValue: String = "") -> String {
@@ -53,14 +65,21 @@ extension NSObject {
     }
     
     func fetchMyPlans() {
-        HttpClient.sharedInstance.getItineraries { (itineraries, isSuccess) in
-            if isSuccess {
-                if let itineraries = itineraries {
-                    FooyoItinerary.myItineraries = itineraries
-                    FooyoItinerary.sort()
-                    self.PostItineraryDownloadedNotification()
-                }
+        if FooyoItinerary.myItineraries == nil {
+            HttpClient.sharedInstance.getItineraries { (itineraries, isSuccess) in
             }
+        }
+    }
+    func fetchLocations() {
+        if FooyoItem.items.count == 0 {
+            HttpClient.sharedInstance.getItems(completion: { (items, isSuccess) in
+            })
+        }
+    }
+    func fetchCategories() {
+        if FooyoCategory.categories.count == 0 {
+            HttpClient.sharedInstance.getCategories(completion: { (items, isSuccess) in
+            })
         }
     }
     
@@ -95,7 +114,6 @@ extension NSObject {
         let notification = Notification(name: FooyoConstants.notifications.FooyoItineraryDownloaded, object: nil, userInfo: nil)
         NotificationCenter.default.post(notification)
     }
-    
     
     func PostItineraryAddItemNotification(item: FooyoItem) {
         let notification = Notification(name: FooyoConstants.notifications.FooyoItineraryAddItem, object: item, userInfo: nil)

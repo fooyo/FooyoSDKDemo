@@ -294,29 +294,30 @@ public class FooyoCreatePlanViewController: UIViewController {
         _ = dismiss(animated: true, completion: nil)
     }
     func continueHandler() {
-//        guard planTitle != nil else {
-//            displayAlert(title: "Reminder", message: "The title cannot be empty.", complete: nil)
-//            return
-//        }
-//        guard planTime != nil else {
-//            displayAlert(title: "Reminder", message: "The arrival date cannot be empty.", complete: nil)
-//            return
-//        }
-//        guard planBudget != nil else {
-//            displayAlert(title: "Reminder", message: "The budget cannot be empty.", complete: nil)
-//            return
-//        }
-//        FooyoItinerary.newItinerary.name = planTitle
-//        FooyoItinerary.newItinerary.budget = planBudget
-//        FooyoItinerary.newItinerary.time = planTime
-//        FooyoItinerary.newItinerary.tripType = planType
-
+        guard planTitle != nil else {
+            displayAlert(title: "Reminder", message: "The title cannot be empty.", complete: nil)
+            return
+        }
+        guard planTime != nil else {
+            displayAlert(title: "Reminder", message: "The arrival date cannot be empty.", complete: nil)
+            return
+        }
+        guard planBudget != nil else {
+            displayAlert(title: "Reminder", message: "The budget cannot be empty.", complete: nil)
+            return
+        }
+        
         FooyoItinerary.newItinerary = FooyoItinerary()
         FooyoItinerary.newItinerary.items = mustGoPlaces
-        FooyoItinerary.newItinerary.name = "TEST"
-        FooyoItinerary.newItinerary.budget = 50
-        FooyoItinerary.newItinerary.tripType = FooyoConstants.tripType.FullDay.rawValue
-        FooyoItinerary.newItinerary.time = DateTimeTool.fromDateToFormatThree(date: Date())
+        FooyoItinerary.newItinerary.name = planTitle
+        FooyoItinerary.newItinerary.budget = planBudget
+        FooyoItinerary.newItinerary.time = planTime
+        FooyoItinerary.newItinerary.tripType = planType
+
+//        FooyoItinerary.newItinerary.name = "TEST"
+//        FooyoItinerary.newItinerary.budget = 50
+//        FooyoItinerary.newItinerary.tripType = FooyoConstants.tripType.FullDay.rawValue
+//        FooyoItinerary.newItinerary.time = DateTimeTool.fromDateToFormatThree(date: Date())
         let vc = ChooseThemeViewController()
         self.navigationController?.pushViewController(vc, animated: true)
     }

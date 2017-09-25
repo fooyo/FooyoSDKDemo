@@ -151,6 +151,7 @@ class SearchResultViewController: BaseViewController {
     
     func searchHandler() {
         let vc = SearchHistoryViewController(source: .FromHomeMap)
+        vc.sourceVC = self.sourceVC
         self.navigationController?.pushViewController(vc, animated: true)
     }
     

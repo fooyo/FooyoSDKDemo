@@ -18,6 +18,9 @@ import SVProgressHUD
 //}
 
 class EditItineraryViewController: FooyoBaseMapViewController {
+    
+    var isDisplayMode: Bool = true
+    
     var startItem = FooyoItem()
     var timeNow = Date()
     var ignoreBudget = false
@@ -186,6 +189,12 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         return t
     }()
     
+    fileprivate var allBusView: UIView! = {
+        let t = UIView()
+        t.backgroundColor = .clear
+        return t
+    }()
+    
     var budgetLabel: UILabel! = {
         let t = UILabel()
         t.alpha = 0.9
@@ -212,9 +221,11 @@ class EditItineraryViewController: FooyoBaseMapViewController {
     var currentIndex = 0
 
     // MARK: - Life Cycle
-    init(itinerary: FooyoItinerary) {
+    init(itinerary: FooyoItinerary, isDisplay: Bool = false) {
         super.init(hideTheDefaultNavigationBar: false)
-        self.itinerary = itinerary.makeCopy()
+//        self.itinerary = itinerary.makeCopy()
+        self.itinerary = itinerary
+        self.isDisplayMode = isDisplay
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -223,19 +234,29 @@ class EditItineraryViewController: FooyoBaseMapViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        if self.itinerary?.items != nil && self.itinerary?.routes == nil {
-            updateNavigationInformation(fromAdd: true)
+        debugPrint("i am view loading")
+        debugPrint(itinerary?.items?.count)
+        debugPrint(itinerary?.routes?.count)
+        if let items = self.itinerary?.items, let routes = self.itinerary?.routes {
+            if items.count != routes.count + 1 {
+                checkHistory()
+                updateNavigationInformation()
+            } else {
+                addToHistory()
+            }
+        } else {
+            checkHistory()
+            updateNavigationInformation()
         }
+        
         NotificationCenter.default.addObserver(self, selector: #selector(addItem(notification:)), name: FooyoConstants.notifications.FooyoItineraryAddItem, object: nil)
         
-        addToHistory()
         if itinerary?.tripType == FooyoConstants.tripType.HalfDayAfternoon.rawValue {
             timeNow = DateTimeTool.fromFormatOneToDate("12:30")
         } else {
             timeNow = DateTimeTool.fromFormatOneToDate("09:00")
         }
         
-        self.navigationItem.title = itinerary?.name
         goBtn.isHidden = true
         gpsBtn.isHidden = true
         setupNavigationBar()
@@ -249,6 +270,7 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         itemView.addSubview(reviewLabel)
         itemView.addSubview(playView)
         itemView.addSubview(playLabel)
+        itemView.addSubview(allBusView)
         view.addSubview(budgetLabel)
         view.addSubview(collectionView)
         view.addSubview(collectionViewTwo)
@@ -279,39 +301,148 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         collectionViewTwo.delegate = self
         collectionViewTwo.dataSource = self
         setConstraints()
-        
-//        if itinerary?.items?.count > 0 {
-//            showCollection()
-//        } else {
-//            
-//        }
+        if itinerary?.items?.count != nil {
+            showCollection()
+        }
+        checkMode()
+    }
+    
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if self.navigationController?.navigationBar.isHidden == true {
+            UIView.animate(withDuration: 0.3) {
+                self.navigationController?.navigationBar.isHidden = false
+            }
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        reloadEditData()
+        if let items = itinerary?.items {
+            if items.count > 1 {
+                if expanded {
+                    mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 320, 60), animated: true)
+                } else {
+                    mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 190, 60), animated: true)
+                }
+            } else if items.count == 1 {
+                mapView.setCenter(items[0].getCoor(), animated: true)
+            }
+        }
     }
     
-    func setupNavigationBar() {
-        navigationItem.leftBarButtonItems = nil
-        navigationItem.rightBarButtonItems = nil
-        navigationItem.hidesBackButton = false
-        let rightBtn = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(saveHandler))
-        navigationItem.rightBarButtonItem = rightBtn
-        if let name = itinerary?.name {
-            navigationItem.title = name
-        } else {
-            let title = "Trip on " + DateTimeTool.fromFormatThreeToFormatTwo(date: (itinerary?.time)!)
-            navigationItem.title = title
-            itinerary?.name = title
+    func checkMode() {
+        if isDisplayMode {
+//            redoBtn.alpha = 0
+//            undoBtn.alpha = 0
+//            autoButton.alpha = 0
+            listBtn.alpha = 0
+            searchView.alpha = 0
+            filterBtn.transform = CGAffineTransform(translationX: 0, y: Scale.scaleY(y: -50))
+            budgetLabel.transform = CGAffineTransform(translationX: 0, y: Scale.scaleY(y: -50))
         }
+    }
+    
+    func updateMode() {
+        isDisplayMode = !isDisplayMode
+        setupNavigationBar()
+        if isDisplayMode {
+            UIView.animate(withDuration: 0.3, animations: {
+                self.redoBtn.transform = CGAffineTransform(translationX: 0, y: 0)
+                self.undoBtn.transform = CGAffineTransform(translationX: 0, y: 0)
+                self.autoButton.transform = CGAffineTransform(translationX: 0, y: 0)
+                self.filterBtn.transform = CGAffineTransform(translationX: 0, y: Scale.scaleY(y: -50))
+                self.budgetLabel.transform = CGAffineTransform(translationX: 0, y: Scale.scaleY(y: -50))
+                self.searchView.transform = CGAffineTransform(translationX: 0, y: Scale.scaleY(y: -50))
+//                self.redoBtn.alpha = 0
+//                self.undoBtn.alpha = 0
+//                self.autoButton.alpha = 0
+                self.listBtn.alpha = 0
+                self.searchView.alpha = 0
+            })
+        } else {
+            if expanded {
+                UIView.animate(withDuration: 0.3, animations: {
+                    let height = -(Scale.scaleY(y: 40) / 2 + Scale.scaleY(y: 292))
+                    self.redoBtn.transform = CGAffineTransform(translationX: 0, y: height)
+                    self.undoBtn.transform = CGAffineTransform(translationX: 0, y: height)
+                    self.autoButton.transform = CGAffineTransform(translationX: 0, y: height)
+                    self.filterBtn.transform = CGAffineTransform(translationX: 0, y: 0)
+                    self.budgetLabel.transform = CGAffineTransform(translationX: 0, y: 0)
+                    self.searchView.transform = CGAffineTransform(translationX: 0, y: 0)
+//                    self.redoBtn.alpha = 1
+//                    self.undoBtn.alpha = 1
+//                    self.autoButton.alpha = 1
+                    self.listBtn.alpha = 1
+                    self.searchView.alpha = 1
+                })
+                showCollectionTwo()
+            } else {
+                UIView.animate(withDuration: 0.3, animations: {
+                    let height = -(Scale.scaleY(y: 40) / 2 + Scale.scaleY(y: 150))
+                    self.redoBtn.transform = CGAffineTransform(translationX: 0, y: height)
+                    self.undoBtn.transform = CGAffineTransform(translationX: 0, y: height)
+                    self.autoButton.transform = CGAffineTransform(translationX: 0, y: height)
+                    self.filterBtn.transform = CGAffineTransform(translationX: 0, y: 0)
+                    self.budgetLabel.transform = CGAffineTransform(translationX: 0, y: 0)
+                    self.searchView.transform = CGAffineTransform(translationX: 0, y: 0)
+//                    self.redoBtn.alpha = 1
+//                    self.undoBtn.alpha = 1
+//                    self.autoButton.alpha = 1
+                    self.listBtn.alpha = 1
+                    self.searchView.alpha = 1
+                })
+                showCollection()
+            }
+        }
+    }
+    func setupNavigationBar() {
+        if isDisplayMode {
+            navigationItem.leftBarButtonItems = nil
+
+            navigationItem.title = itinerary?.name
+            let switchButton = UIBarButtonItem(image: UIImage.getBundleImage(name: "plan_listview"),  style: .plain, target: self, action: #selector(listModeHandler))
+            let editButton = UIBarButtonItem(image: UIImage.getBundleImage(name: "plan_edit"),  style: .plain, target: self, action: #selector(editHandler))
+            navigationItem.rightBarButtonItems = [editButton, switchButton]
+        } else {
+            navigationItem.leftBarButtonItems = nil
+            navigationItem.rightBarButtonItems = nil
+//            navigationItem.hidesBackButton = true
+            
+            let cancelBtn = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelHandler))
+            navigationItem.leftBarButtonItem = cancelBtn
+
+            let rightBtn = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(saveHandler))
+            navigationItem.rightBarButtonItem = rightBtn
+            if let name = itinerary?.name {
+                navigationItem.title = name
+            } else {
+                let title = "Trip on " + DateTimeTool.fromFormatThreeToFormatTwo(date: (itinerary?.time)!)
+                navigationItem.title = title
+                itinerary?.name = title
+            }
+        }
+    }
+    
+    func editHandler() {
+        //        let _ = gotoEditItinerary(itinerary: itinerary!)
+        updateMode()
+    }
+    
+    func cancelHandler() {
+        updateMode()
+    }
+    func listModeHandler() {
+        let vc = DisplayItineraryListViewController(itinerary: itinerary!)
+        vc.delegate = self
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     func setConstraints() {
         listBtn.snp.makeConstraints { (make) in
             make.height.width.equalTo(Scale.scaleY(y: 40))
             make.top.equalTo(filterBtn.snp.bottom).offset(Scale.scaleY(y: 10))
-//            make.trailing.equalTo(Scale.scaleX(x: -16))
             make.centerX.equalTo(filterBtn)
         }
         listBtnInside.snp.makeConstraints { (make) in
@@ -359,6 +490,12 @@ class EditItineraryViewController: FooyoBaseMapViewController {
             make.centerY.equalTo(reviewView)
             make.leading.equalTo(reviewView.snp.trailing).offset(Scale.scaleX(x: 8))
             make.trailing.equalTo(nameLabel)
+        }
+        allBusView.snp.makeConstraints { (make) in
+            make.leading.equalTo(playView)
+            make.top.equalTo(playView)
+            make.trailing.equalTo(playView)
+            make.bottom.equalTo(reviewView)
         }
         budgetLabel.snp.makeConstraints { (make) in
             make.centerX.equalToSuperview()
@@ -419,10 +556,12 @@ class EditItineraryViewController: FooyoBaseMapViewController {
             make.height.equalTo(Scale.scaleY(y: 30))
             make.top.equalTo(collectionView)//.offset(Scale.scaleY(y: 16))
         }
-        
     }
     
     func addToHistory() {
+        debugPrint("addToHistory")
+        debugPrint(currentIndex)
+        debugPrint(history.count)
         if currentIndex < history.count - 1 {
             history[currentIndex + 1] = itinerary!.makeCopy()
             history = Array(history[0...(currentIndex + 1)])
@@ -462,7 +601,9 @@ class EditItineraryViewController: FooyoBaseMapViewController {
     }
     
     func checkHistory() {
-        if history.count == 0 {
+        debugPrint("i am checking history")
+        debugPrint(history.count)
+        if history.count == 0 || history.count == 1 {
             redoBtn.alpha = 0.36
             undoBtn.alpha = 0.36
             redoBtn.isUserInteractionEnabled = false
@@ -493,15 +634,19 @@ class EditItineraryViewController: FooyoBaseMapViewController {
             let anno = allAnnotations.first(where: { (anno) -> Bool in
                 return anno.item?.id == item.id
             })
-            if itinerary?.items?.contains(item) == true {
-                if anno != nil {
+            mapView.setCenter(item.getCoor(), zoomLevel: 14, direction: 0, animated: true, completionHandler: {
+                self.mapView.selectAnnotation(anno!, animated: true)
+            })
+
+//            if itinerary?.items?.contains(item) == true {
+//                if anno != nil {
 //                    mapView.selectAnnotation(anno!, animated: true)
-                }
-            } else {
-                if anno != nil {
-                    didTapAdd(item: item, annotation: anno!)
-                }
-            }
+//                }
+//            } else {
+//                if anno != nil {
+//                    didTapAdd(item: item, annotation: anno!)
+//                }
+//            }
         }
     }
     func autoButtonHandler() {
@@ -540,6 +685,12 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         }
     }
     func saveHandler() {
+        
+        guard itinerary?.items != nil else {
+            displayAlert(title: "Warning", message: "You must add at least one location into your day plan before saving.", complete: nil)
+            return
+        }
+        
         //1. Create the alert controller.
         let alert = UIAlertController(title: "Save your trip", message: "Are you sure to save the following trip?", preferredStyle: .alert)
         
@@ -568,9 +719,10 @@ class EditItineraryViewController: FooyoBaseMapViewController {
                     if isSuccess {
                         if let itinerary = itinerary {
                             FooyoItinerary.update(itineraty: itinerary)
-//                            Itinerary.sort()
-//                            NotificationCenter.default.post(name:   NSNotification.Name(rawValue: FooyoConstants.Notification.updateItinerary.rawValue), object: itinerary)
-                            _ = self.navigationController?.popViewController(animated: true)
+                            self.PostItinerarySavedNotification(plan: itinerary)
+                            self.updateMode()
+                            SVProgressHUD.showSuccess(withStatus: "Your itinerary has been updated successfully.")
+//                            _ = self.navigationController?.popViewController(animated: true)
                         }
                     }
                 })
@@ -583,7 +735,12 @@ class EditItineraryViewController: FooyoBaseMapViewController {
 //                            Itinerary.myItineraries.append(itinerary)
 //                            Itinerary.sort()
 //                            NotificationCenter.default.post(name: NSNotification.Name(rawValue: Constants.Notification.newItinerary.rawValue), object: nil)
+                            if FooyoItinerary.myItineraries != nil {
+                                (FooyoItinerary.myItineraries)!.append(itinerary)
+                                FooyoItinerary.sort()
+                            }
                             self.PostItinerarySavedNotification(plan: itinerary)
+                            SVProgressHUD.showSuccess(withStatus: "Your itinerary has been created successfully.")
                         }
                         _ = self.dismiss(animated: true, completion: nil)
                     } else {
@@ -603,9 +760,12 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         UIView.animate(withDuration: 0.3, animations: {
             let height = -(Scale.scaleY(y: 40) / 2 + Scale.scaleY(y: 150))
             self.collectionView.transform = CGAffineTransform(translationX: 0, y: height)
-            self.redoBtn.transform = CGAffineTransform(translationX: 0, y: height)
-            self.undoBtn.transform = CGAffineTransform(translationX: 0, y: height)
-            self.autoButton.transform = CGAffineTransform(translationX: 0, y: height)
+            if self.isDisplayMode {
+            } else {
+                self.redoBtn.transform = CGAffineTransform(translationX: 0, y: height)
+                self.undoBtn.transform = CGAffineTransform(translationX: 0, y: height)
+                self.autoButton.transform = CGAffineTransform(translationX: 0, y: height)
+            }
             self.expandBtn.transform = CGAffineTransform(translationX: 0, y: height)
             
             self.collectionViewTwo.transform = CGAffineTransform(translationX: 0, y: 0)
@@ -619,9 +779,12 @@ class EditItineraryViewController: FooyoBaseMapViewController {
             let height = -(Scale.scaleY(y: 40) / 2 + Scale.scaleY(y: 292))
             self.collectionViewTwo.transform = CGAffineTransform(translationX: 0, y: height)
             self.collectionViewTwoUpper.transform = CGAffineTransform(translationX: 0, y: height)
-            self.redoBtn.transform = CGAffineTransform(translationX: 0, y: height)
-            self.undoBtn.transform = CGAffineTransform(translationX: 0, y: height)
-            self.autoButton.transform = CGAffineTransform(translationX: 0, y: height)
+            if self.isDisplayMode {
+            } else {
+                self.redoBtn.transform = CGAffineTransform(translationX: 0, y: height)
+                self.undoBtn.transform = CGAffineTransform(translationX: 0, y: height)
+                self.autoButton.transform = CGAffineTransform(translationX: 0, y: height)
+            }
             self.expandBtn.transform = CGAffineTransform(translationX: 0, y: height).rotated(by: CGFloat.pi)
             
             self.collectionView.transform = CGAffineTransform(translationX: 0, y: 0)
@@ -658,8 +821,29 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         }
         nameLabel.text = item.name
         tagLabel.text = item.getTag()
-        playLabel.text = "Play time: " + item.getVisitingTime()
-        reviewLabel.text = item.rating
+        switch (item.category?.name)! {
+        case FooyoConstants.CategoryName.Attractions.rawValue, FooyoConstants.CategoryName.Events.rawValue, FooyoConstants.CategoryName.Trails.rawValue:
+            playLabel.text = "Play time: " + item.getVisitingTime()
+            reviewLabel.text = item.rating
+            playLabel.isHidden = false
+            reviewLabel.isHidden = false
+            reviewView.isHidden = false
+            playView.isHidden = false
+            allBusView.isHidden = true
+        case FooyoConstants.CategoryName.Bus.rawValue:
+            setupAllBusView(item: item)
+            playLabel.isHidden = true
+            reviewLabel.isHidden = true
+            reviewView.isHidden = true
+            playView.isHidden = true
+            allBusView.isHidden = false
+        default:
+            allBusView.isHidden = true
+            playLabel.isHidden = true
+            reviewLabel.isHidden = true
+            reviewView.isHidden = true
+            playView.isHidden = true
+        }
         dismissItem()
         dismissBothCollection()
         UIView.animate(withDuration: 0.3) {
@@ -670,15 +854,74 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         
     }
     
+    func setupAllBusView(item: FooyoItem) {
+        for each in allBusView.subviews {
+            each.snp.removeConstraints()
+            each.removeFromSuperview()
+        }
+        var subBusViews = [UIView]()
+        var subLabels = [UILabel]()
+        var index = 0
+        if let buses = item.buses {
+            for each in buses {
+                
+                let busView = UILabel()
+                busView.layer.cornerRadius = Scale.scaleY(y: 4)
+                busView.clipsToBounds = true
+                busView.textColor = .white
+                busView.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 11))
+                busView.text = each.name
+                busView.textAlignment = .center
+                
+                switch (each.name)! {
+                case "Bus A":
+                    busView.backgroundColor = UIColor.busA
+                    busView.textColor = .white
+                case "Bus B":
+                    busView.backgroundColor = UIColor.busB
+                    busView.textColor = .white
+                default:
+                    break
+                }
+                let label = UILabel()
+                label.attributedText = each.getArrivingStatus()
+                
+                allBusView.addSubview(busView)
+                allBusView.addSubview(label)
+                subBusViews.append(busView)
+                subLabels.append(label)
+                
+                busView.snp.makeConstraints({ (make) in
+                    make.leading.equalToSuperview()
+                    make.width.equalTo(Scale.scaleX(x: 54))
+                    make.height.equalTo(Scale.scaleY(y: 20))
+                    if index == 0 {
+                        make.top.equalToSuperview()
+                    } else {
+                        make.top.equalTo(subBusViews[index - 1].snp.bottom).offset(Scale.scaleY(y: 5))
+                    }
+                })
+                label.snp.makeConstraints({ (make) in
+                    make.leading.equalTo(busView.snp.trailing).offset(Scale.scaleX(x: 13))
+                    make.centerY.equalTo(busView)
+                })
+                index += 1
+            }
+        }
+    }
     func reloadEditData() {
         reloadMapIcons()
         if expanded {
             if itinerary?.items != nil {
                 showCollectionTwo()
+            } else {
+                dismissBothCollection()
             }
         } else {
             if itinerary?.items != nil {
                 showCollection()
+            } else {
+                dismissBothCollection()
             }
         }
         reloadCollections()
@@ -702,36 +945,35 @@ class EditItineraryViewController: FooyoBaseMapViewController {
     
     override func reloadMapIcons() {
         super.reloadMapIcons()
-        if let items = itinerary?.items {
-            if items.count > 1 {
-                if expanded {
-                    mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 320, 60), animated: true)
-//                    mapView.setvis
-                } else {
-                    mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 190, 60), animated: true)
-                }
-            } else if items.count == 1 {
-                mapView.setCenter(items[0].getCoor(), animated: true)
-            }
-        }
+//        if let items = itinerary?.items {
+//            if items.count > 1 {
+//                if expanded {
+//                    mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 320, 60), animated: true)
+//                } else {
+//                    mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 190, 60), animated: true)
+//                }
+//            } else if items.count == 1 {
+//                mapView.setCenter(items[0].getCoor(), animated: true)
+//            }
+//        }
         debugPrint("plotted is \(plotted)")
         if !plotted {
             loadGeoJson()
             plotted = true
         }
     }
+    
+    
+//    func setupNavigationBar() {
+//        
+//    }
 }
 
 extension EditItineraryViewController {
 //    override func mapviewcallout
-//    override func mapView(_ mapView: MGLMapView, annotationCanShowCallout annotation: MGLAnnotation) -> Bool {
-//        if let anno = annotation as? MyCustomPointAnnotation {
-//            if anno.item?.isEssential() == true {
-//                return true
-//            }
-//        }
-//        return false
-//    }
+    override func mapView(_ mapView: MGLMapView, annotationCanShowCallout annotation: MGLAnnotation) -> Bool {
+        return true
+    }
     override func mapView(_ mapView: MGLMapView, calloutViewFor annotation: MGLAnnotation) -> MGLCalloutView? {
         // Only show callouts for `Hello world!` annotation
         if annotation.responds(to: #selector(getter: UIPreviewActionItem.title)) {
@@ -743,6 +985,15 @@ extension EditItineraryViewController {
                     if itinerary?.items != nil {
                         if (itinerary?.items?.contains(item))! {
                             view.inItinerary = true
+                        }
+                    }
+                    if isDisplayMode {
+                        view.isEditable = false
+                    } else {
+                        if item.isEssential() {
+                            view.isEditable = true
+                        } else {
+                            view.isEditable = false
                         }
                     }
                 }
@@ -758,7 +1009,7 @@ extension EditItineraryViewController {
     }
     
     
-    func mapView(_ mapView: MGLMapView, didSelect annotation: MGLAnnotation) {
+    override func mapView(_ mapView: MGLMapView, didSelect annotation: MGLAnnotation) {
         //        mapView.deselectAnnotation(annotation, animated: false)
         if let anno = annotation as? MyCustomPointAnnotation {
             if let item = anno.item {
@@ -885,12 +1136,8 @@ extension EditItineraryViewController {
                     debugPrint(each.arrivingTime)
                 }
                 
-                DispatchQueue.main.async {
-                    self.collectionViewTwo.reloadData()
-
-                }
+                self.collectionViewTwo.reloadData()
                 self.collectionView.reloadData()
-                debugPrint("i am ending this")
 //                if self.newItem != nil && self.newItemFirst {
 //                    debugPrint("i am scrolling")
 //                    self.newItemFirst = false
@@ -953,6 +1200,7 @@ extension EditItineraryViewController: CustomCalloutViewItineraryDelegate {
         itinerary?.items?.remove(at: index!)
         if (itinerary?.items?.isEmpty)! {
             itinerary?.items = nil
+            dismissBothCollection()
         } else {
             itinerary?.routes?.removeLast()
         }
@@ -998,8 +1246,6 @@ extension EditItineraryViewController: CustomCalloutViewItineraryDelegate {
         
 //        mapView.selectAnnotation(annotation, animated: true)
     }
-    
-    
     
     func dismiss() {
         UIView.animate(withDuration: 0.3) {
@@ -1138,5 +1384,11 @@ extension EditItineraryViewController: RAReorderableLayoutDataSource, RAReordera
             reloadEditData()
             updateNavigationInformation()
         }
+    }
+}
+
+extension EditItineraryViewController: DisplayItineraryListViewControllerDelegate {
+    func displayItineraryListViewControllerUpdateTheMode() {
+        self.updateMode()
     }
 }

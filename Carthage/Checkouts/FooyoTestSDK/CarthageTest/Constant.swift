@@ -56,6 +56,23 @@ struct FooyoConstants {
         
     }
     
+    
+    enum CategoryName: String {
+        case Attractions = "Attractions"
+        case Events = "Events"
+        case Trails = "Interactive Trails"
+        case Prayer = "Prayer Rooms"
+        case Ticketing = "Ticketing Counters"
+        case Rest = "Rest Rooms"
+        case Bus = "Bus Stops"
+        case Tram = "Tram Stops"
+        case Cable = "Cable Car Stations"
+        case Express = "Express Stations"
+        case Fun = "Fun Shops"
+        case Nursing = "Nursing Room"
+        case Taxi = "Taxi Stand"
+    }
+    
     enum PathType: String {
         case Sheltered = "sheltered"
         case Fastest = "fastest"
@@ -72,6 +89,8 @@ struct FooyoConstants {
     enum RouteType: String {
         case Walking = "foot"
         case PSV = "bus"
+        case Car = "car"
+
     }
     
     static let transportationTypes: [FooyoConstants.TransportationType] = [.Foot, .BusA, .BusB, .Drive, .Express, .Tram]
@@ -156,12 +175,11 @@ struct FooyoConstants {
     }
     
     enum AnnotationId: String {
-        case StartPoint = "StartPoint"
-        case EndPoint = "EndPoint"
         case StartItem = "StartItem"
         case EndItem = "EndItem"
         case UserMarker = "UserMarker"
         case ItineraryItem = "ItineraryItem"
+        
         case ThemeItem = "ThemeItem"
         case NotEssential = "NotEssential"
     }

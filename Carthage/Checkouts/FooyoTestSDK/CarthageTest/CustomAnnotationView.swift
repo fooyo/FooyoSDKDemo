@@ -38,23 +38,27 @@ class CustomAnnotationView: MGLAnnotationView {
         // Use CALayer’s corner radius to turn this view into a circle.
         
         addSubview(iconView)
-//        addSubview(overLayView)
         addSubview(indexLabel)
         iconView.snp.makeConstraints { (make) in
             make.edges.equalToSuperview()
         }
         indexLabel.snp.makeConstraints { (make) in
-            make.center.equalToSuperview()
+            make.edges.equalToSuperview()
         }
         indexLabel.isHidden = true
         switch (reuseIdentifier)! {
+        case FooyoConstants.AnnotationId.StartItem.rawValue:
+            layer.cornerRadius = Scale.scaleY(y: 12) / 2
+            layer.borderColor = UIColor.black.cgColor
+            layer.borderWidth = 3
+            backgroundColor = .white
         case FooyoConstants.AnnotationId.ItineraryItem.rawValue:
-            layer.cornerRadius = Scale.scaleY(y: 25) / 2
+            layer.cornerRadius = Scale.scaleY(y: 30) / 2
             layer.borderColor = UIColor.ospSentosaBlue.cgColor
             layer.borderWidth = 5
             backgroundColor = .white
             indexLabel.isHidden = false
-        case FooyoConstants.AnnotationId.UserMarker.rawValue:
+        case FooyoConstants.AnnotationId.UserMarker.rawValue, FooyoConstants.AnnotationId.EndItem.rawValue:
             layer.cornerRadius = 0
             layer.borderColor = UIColor.white.cgColor
             layer.borderWidth = 0
@@ -64,7 +68,14 @@ class CustomAnnotationView: MGLAnnotationView {
             layer.borderWidth = 0
             iconView.image = UIImage.getBundleImage(name: "basemap_marker").withAlignmentRectInsets(UIEdgeInsets(top: 0, left: 0, bottom: -frame.height / 2, right: 0))
         default:
-            layer.cornerRadius = Scale.scaleY(y: 12) / 2
+//            if annotation?.i
+            if let anno = annotation as? MyCustomPointAnnotation {
+                if anno.item?.isEssential() == true {
+                    layer.cornerRadius = Scale.scaleY(y: 16) / 2
+                } else {
+                    layer.cornerRadius = Scale.scaleY(y: 12) / 2
+                }
+            }
             layer.borderColor = UIColor.white.cgColor
             layer.borderWidth = 1
             if let anno = annotation as? MyCustomPointAnnotation {

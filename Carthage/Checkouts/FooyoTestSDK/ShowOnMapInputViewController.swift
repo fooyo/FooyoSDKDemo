@@ -83,9 +83,16 @@ class ShowOnMapInputViewController: UIViewController {
         
         if let category = category {
             if category == "" {
-                displayAlert(title: "Reminder", message: "Please give a valid category name.", complete: nil)
-                return
+//                displayAlert(title: "Reminder", message: "Please give a valid category name.", complete: nil)
+//                return
+                let index = FooyoIndex(category: "Attractions", levelOneId: "606")
+                let vc = FooyoBaseMapViewController(index: index, hideTheDefaultNavigationBar: false)
+                vc.delegate = self
+                self.navigationController?.pushViewController(vc, animated: true)
             }
+//            if category == "" {
+//                
+//            }
             if let id = id {
                 if id == "" {
                     let index = FooyoIndex(category: category)

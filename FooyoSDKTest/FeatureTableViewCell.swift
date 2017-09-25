@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import FooyoTestSDK
 
 class FeatureTableViewCell: UITableViewCell {
     static let reuseIdentifier = "FeatureTableViewCell"
