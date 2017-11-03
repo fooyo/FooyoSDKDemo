@@ -11,6 +11,7 @@ import Mapbox
 import AlamofireImage
 
 class CustomAnnotationView: MGLAnnotationView {
+    
     var iconView: UIImageView! = {
         let t = UIImageView()
         return t

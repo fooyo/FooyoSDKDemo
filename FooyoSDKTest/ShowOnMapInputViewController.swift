@@ -82,11 +82,36 @@ class ShowOnMapInputViewController: UIViewController {
     func btnHandler() {
 //        debugDescription
         
+        let index = FooyoIndex(category: "Fun Shops")
+//        let index = FooyoIndex(category: "Interactive Trails", levelOneId: "6225")
+        
+        let vc = FooyoBaseMapViewController(index: index, hideTheDefaultNavigationBar: false)
+        let nav = UINavigationController(rootViewController: vc)
+        self.present(nav, animated: true, completion: nil)
+//        nav.navigationBar.isHidden = true
+//        nav.modalPresentationStyle = .overFullScreen
+//        
+//        let topController = UIApplication.
+//        topController?.present(nav, animated: true, completion: nil)
+//        self.navigationController?.navigationBar.isTranslucent = true
+//        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+//        self.navigationController?.navigationBar.shadowImage = UIImage()
+//        self.navigationController?.navigationBar.backgroundColor = .clear
+//        self.navigationController?.pushViewController(vc, animated: true)
+        return
+        
         if let category = category {
             if category == "" {
-                displayAlert(title: "Reminder", message: "Please give a valid category name.", complete: nil)
-                return
+//                displayAlert(title: "Reminder", message: "Please give a valid category name.", complete: nil)
+//                return
+                let index = FooyoIndex(category: "Attractions", levelOneId: "606")
+                let vc = FooyoBaseMapViewController(index: index, hideTheDefaultNavigationBar: false)
+                vc.delegate = self
+                self.navigationController?.pushViewController(vc, animated: true)
             }
+//            if category == "" {
+//                
+//            }
             if let id = id {
                 if id == "" {
                     let index = FooyoIndex(category: category)
@@ -120,7 +145,8 @@ class ShowOnMapInputViewController: UIViewController {
 }
 
 extension ShowOnMapInputViewController: FooyoBaseMapViewControllerDelegate {
-    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex) {
+    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex, isEditingAPlan: Bool) {
+        debugPrint(isEditingAPlan)
         debugPrint(index.category)
         debugPrint(index.levelOneId)
         debugPrint(index.levelTwoId)

@@ -83,11 +83,31 @@ class AddToPlanInputViewController: UIViewController {
     func btnHandler() {
         //        debugDescription
         guard category != nil else {
-            displayAlert(title: "Reminder", message: "Please give a valid category name.", complete: nil)
+            let index = FooyoIndex(category: "Interactive Trails", levelOneId: "6225")
+            if let id = ACCNUser.currentUser.userId {
+                let vc = FooyoAddToPlanViewController(index: index, userId: id)
+                vc.delegate = self
+                let nav = UINavigationController(rootViewController: vc)
+                nav.navigationBar.isHidden = true
+                nav.modalPresentationStyle = .overFullScreen
+                self.present(nav, animated: true, completion: nil)
+            } else {
+                displayAlert(title: "Reminder", message: "Have to login first", complete: nil)
+            }
             return
         }
         guard (category)! != "" else {
-            displayAlert(title: "Reminder", message: "Please give a valid category name.", complete: nil)
+            let index = FooyoIndex(category: "Interactive Trails", levelOneId: "6225")
+            if let id = ACCNUser.currentUser.userId {
+                let vc = FooyoAddToPlanViewController(index: index, userId: id)
+                vc.delegate = self
+                let nav = UINavigationController(rootViewController: vc)
+                nav.navigationBar.isHidden = true
+                nav.modalPresentationStyle = .overFullScreen
+                self.present(nav, animated: true, completion: nil)
+            } else {
+                displayAlert(title: "Reminder", message: "Have to login first", complete: nil)
+            }
             return
         }
         guard id != nil else {
@@ -102,6 +122,8 @@ class AddToPlanInputViewController: UIViewController {
         let index = FooyoIndex(category: category!, levelOneId: id!)
         if let id = ACCNUser.currentUser.userId {
             let vc = FooyoAddToPlanViewController(index: index, userId: id)
+            vc.delegate = self
+
             let nav = UINavigationController(rootViewController: vc)
             nav.navigationBar.isHidden = true
             nav.modalPresentationStyle = .overFullScreen
@@ -155,4 +177,18 @@ extension AddToPlanInputViewController: UITableViewDelegate, UITableViewDataSour
     //            break
     //        }
     //    }
+}
+
+extension AddToPlanInputViewController: FooyoAddToPlanViewControllerDelegate {
+    func fooyoAddToPlanViewController(didSelectInformationWindow index: FooyoIndex, isEditingAPlan: Bool) {
+        debugPrint(isEditingAPlan)
+        debugPrint(index.category)
+        debugPrint(index.levelOneId)
+        debugPrint(index.levelTwoId)
+        if isEditingAPlan {
+            FooyoSDKAddToTheEditingPlan(index: index)
+        } else {
+            debugPrint("normall add to plan")
+        }
+    }
 }

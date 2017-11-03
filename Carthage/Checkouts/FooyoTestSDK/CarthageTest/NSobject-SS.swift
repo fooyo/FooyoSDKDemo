@@ -17,6 +17,10 @@ extension NSObject {
     public func FooyoSDKOpenSession() {
         fetchLocations()
         fetchCategories()
+        FontBlaster.blast() { (fonts) in
+            debugPrint("i am printing fonts")
+            print(fonts) // fonts is an array of Strings containing font names
+        }
     }
     
     public func FooyoSDKSignIn(userId: String) {
@@ -26,8 +30,13 @@ extension NSObject {
     
     public func FooyoSDKSignOut() {
         FooyoUser.currentUser = FooyoUser()
+        FooyoUser.destoryCurrentUser()
         FooyoItinerary.myItineraries = nil
         FooyoItinerary.newItinerary = FooyoItinerary()
+    }
+    
+    public func FooyoSDKAddToTheEditingPlan(index: FooyoIndex) {
+        PostGetIndexFromBaseNotification(index: index)
     }
     
     func parseOptionalString(input: String?, defaultValue: String = "") -> String {
@@ -117,6 +126,21 @@ extension NSObject {
     
     func PostItineraryAddItemNotification(item: FooyoItem) {
         let notification = Notification(name: FooyoConstants.notifications.FooyoItineraryAddItem, object: item, userInfo: nil)
+        NotificationCenter.default.post(notification)
+    }
+    
+    func PostAddToPlanItemSelectionNotification(item: FooyoItem) {
+        let notification = Notification(name: FooyoConstants.notifications.FooyoAddToPlanItemSelected, object: item, userInfo: nil)
+        NotificationCenter.default.post(notification)
+    }
+    
+    func PostMyPlanItemSelectionNotification(item: FooyoItem) {
+        let notification = Notification(name: FooyoConstants.notifications.FooyoMyPlanItemSelected, object: item, userInfo: nil)
+        NotificationCenter.default.post(notification)
+    }
+    
+    func PostGetIndexFromBaseNotification(index: FooyoIndex) {
+        let notification = Notification(name: FooyoConstants.notifications.FooyoGetIndexFromBase, object: index, userInfo: nil)
         NotificationCenter.default.post(notification)
     }
 }

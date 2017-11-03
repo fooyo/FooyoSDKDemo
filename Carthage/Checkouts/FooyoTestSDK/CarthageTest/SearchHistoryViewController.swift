@@ -12,6 +12,8 @@ class SearchHistoryViewController: BaseViewController {
     fileprivate var searchSource = FooyoConstants.PageSource.FromHomeMap
     weak var sourceVC: UIViewController?
 
+    fileprivate var key = ""
+    fileprivate var keyItems = [FooyoItem]()
     fileprivate var historyItems = [FooyoItem]()
     fileprivate var overLay: UIView! = {
         let t = UIView()
@@ -39,7 +41,7 @@ class SearchHistoryViewController: BaseViewController {
         t.backgroundColor = .white
         t.leftView = UIView.init(frame: CGRect(x: 0, y: 0, width: 9, height: 1))
         t.leftViewMode = .always
-        t.returnKeyType = .search
+        t.returnKeyType = .done
         return t
     }()
     fileprivate var searchIcon: UIImageView! = {
@@ -89,6 +91,8 @@ class SearchHistoryViewController: BaseViewController {
         view.addSubview(bigBack)
         bigBack.addSubview(backView)
         view.addSubview(searchField)
+        searchField.addTarget(self, action: #selector(serchUpdate), for: .editingChanged)
+
         searchField.delegate = self
         searchField.addSubview(searchIcon)
         searchField.addSubview(searchLine)
@@ -108,11 +112,17 @@ class SearchHistoryViewController: BaseViewController {
     
     override public func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        if self.navigationController?.isNavigationBarHidden == false {
+        if self.navigationController?.navigationBar.isHidden == false {
             UIView.animate(withDuration: 0.3, animations: {
-                self.navigationController?.isNavigationBarHidden = true
+                self.navigationController?.navigationBar.isHidden = true
             })
         }
+        if self.navigationController?.isNavigationBarHidden == false {
+            UIView.animate(withDuration: 0.3) {
+                self.navigationController?.isNavigationBarHidden = true
+            }
+        }
+        searchField.becomeFirstResponder()
     }
     
     func setConstraints() {
@@ -123,8 +133,8 @@ class SearchHistoryViewController: BaseViewController {
             make.centerX.equalToSuperview()
             make.top.equalTo(topLayoutGuide.snp.bottom).offset(Scale.scaleY(y: 9))
             make.height.equalTo(Scale.scaleY(y: 40))
-            make.leading.equalTo(Scale.scaleX(x: 33))
-            make.trailing.equalTo(Scale.scaleX(x: -33))
+            make.leading.equalTo(Scale.scaleX(x: 40))
+            make.trailing.equalTo(Scale.scaleX(x: -40))
         }
         searchIcon.snp.makeConstraints { (make) in
             make.centerY.equalToSuperview()
@@ -140,7 +150,8 @@ class SearchHistoryViewController: BaseViewController {
         bigBack.snp.makeConstraints { (make) in
 //            make.top.equalTo(topLayoutGuide.snp.bottom).offset(Scale.scaleY(y: 17))
             make.leading.equalToSuperview()
-            make.height.equalTo(Scale.scaleY(y: 24))
+//            make.height.equalTo(Scale.scaleY(y: 24))
+            make.height.equalTo(searchField)
             make.centerY.equalTo(searchField)
             make.trailing.equalTo(searchField.snp.leading)
         }
@@ -187,22 +198,44 @@ class SearchHistoryViewController: BaseViewController {
 
 extension SearchHistoryViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if historyItems.count == 0 {
-            return 1
+        if key == "" {
+            if historyItems.count == 0 {
+                return 1
+            } else {
+                return historyItems.count
+            }
         } else {
-            return historyItems.count
+            if keyItems.count == 0 {
+                return 1
+            } else {
+                return keyItems.count
+            }
         }
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if historyItems.count != 0 {
-            let item = historyItems[indexPath.row]
-            let cell = tableView.dequeueReusableCell(withIdentifier: ItemSummaryTableViewCell.reuseIdentifier) as! ItemSummaryTableViewCell
-            cell.configureWith(item: item)
-            return cell
+        if key == "" {
+            if historyItems.count != 0 {
+                let item = historyItems[indexPath.row]
+                let cell = tableView.dequeueReusableCell(withIdentifier: ItemSummaryTableViewCell.reuseIdentifier) as! ItemSummaryTableViewCell
+                cell.configureWith(item: item)
+                return cell
+            } else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier) as! EmptyTableViewCell
+                cell.configureWith("History is empty.")
+                return cell
+            }
         } else {
-            let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier) as! EmptyTableViewCell
-            cell.configureWith("History is empty.")
-            return cell
+            if keyItems.count != 0 {
+                let item = keyItems[indexPath.row]
+                let cell = tableView.dequeueReusableCell(withIdentifier: ItemSummaryTableViewCell.reuseIdentifier) as! ItemSummaryTableViewCell
+                cell.configureWith(item: item)
+                return cell
+            } else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier) as! EmptyTableViewCell
+                cell.configureWith("There is no matching result.")
+                return cell
+            }
+            
         }
     }
     
@@ -216,7 +249,11 @@ extension SearchHistoryViewController: UITableViewDelegate, UITableViewDataSourc
         lower.backgroundColor = UIColor.ospGrey10
         t.addSubview(lower)
         let label = UILabel()
-        label.text = "SEARCH HISTORY"
+        if key == "" {
+            label.text = "SEARCH HISTORY"
+        } else {
+            label.text = "SEARCH RESULTS"
+        }
         label.font = UIFont.DefaultBoldWithSize(size: Scale.scaleY(y: 12))
         label.textColor = UIColor.ospDarkGrey
         t.addSubview(label)
@@ -246,47 +283,100 @@ extension SearchHistoryViewController: UITableViewDelegate, UITableViewDataSourc
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if historyItems.count != 0 {
-            return Scale.scaleY(y: 55)
+        if key == "" {
+            
+            if historyItems.count != 0 {
+                return Scale.scaleY(y: 55)
+            } else {
+                return tableView.frame.height
+            }
         } else {
-            return tableView.frame.height
+            
+            if keyItems.count != 0 {
+                return Scale.scaleY(y: 55)
+            } else {
+                return tableView.frame.height
+            }
         }
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        if historyItems.count > 0 {
-            let item = historyItems[indexPath.row]
+        if key == "" {
             
-//            let history = history[indexPath.row]
-//            let id = history["id"] as! Int
-//            let category = history["category"] as! String
-//            let name = history["name"] as! String
-//            
-            if searchSource == FooyoConstants.PageSource.FromHomeMap {
-                PostSearchNotification(item: item)
-            } else if searchSource == FooyoConstants.PageSource.FromItineraryEditMap {
-                PostItineraryAddItemNotification(item: item)
-            } else if searchSource == FooyoConstants.PageSource.FromNavigation {
-                PostUpdateNavigationPointNotification(item: item)
+            if historyItems.count > 0 {
+                let item = historyItems[indexPath.row]
+                if searchSource == FooyoConstants.PageSource.FromHomeMap {
+                    PostSearchNotification(item: item)
+                    _ = self.navigationController?.popToRootViewController(animated: true)
+                } else if searchSource == FooyoConstants.PageSource.FromItineraryEditMap {
+                    PostItineraryAddItemNotification(item: item)
+                    if let sourceVC = sourceVC {
+                        _ = self.navigationController?.popToViewController(sourceVC, animated: true)
+                    }
+                } else if searchSource == FooyoConstants.PageSource.FromNavigation {
+                    PostUpdateNavigationPointNotification(item: item)
+                    if let sourceVC = sourceVC {
+                        _ = self.navigationController?.popToViewController(sourceVC, animated: true)
+                    }
+                }
             }
-            if let sourceVC = sourceVC {
-                _ = self.navigationController?.popToViewController(sourceVC, animated: true)
+        } else {
+            if keyItems.count > 0 {
+                let item = keyItems[indexPath.row]
+                
+                if FooyoUser.currentUser.updateSearchResult(newId: item.id!) {
+                    FooyoUser.currentUser.saveToDefaults()
+                    PostUpdateHistoryNotification()
+                }
+                
+                if searchSource == FooyoConstants.PageSource.FromHomeMap {
+                    PostSearchNotification(item: item)
+                    _ = self.navigationController?.popToRootViewController(animated: true)
+                } else if searchSource == FooyoConstants.PageSource.FromItineraryEditMap {
+                    PostItineraryAddItemNotification(item: item)
+                    if let sourceVC = sourceVC {
+                        _ = self.navigationController?.popToViewController(sourceVC, animated: true)
+                    }
+                } else if searchSource == FooyoConstants.PageSource.FromNavigation {
+                    PostUpdateNavigationPointNotification(item: item)
+                    if let sourceVC = sourceVC {
+                        _ = self.navigationController?.popToViewController(sourceVC, animated: true)
+                    }
+                }
+                
             }
         }
     }
 }
 
 extension SearchHistoryViewController: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        let key = textField.text!
-        if key == "" {
-            displayAlert(title: "Reminder", message: "The key word for search cannot be empty.", complete: nil)
+    func serchUpdate(field: UITextField) {
+        key = field.text!
+        debugPrint(key)
+        if key != "" {
+            keyItems = FooyoItem.items.filter({ (item) -> Bool in
+                if item.name?.lowercased().contains(key.lowercased()) == true {
+                    return true
+                }
+                return false
+            })
         } else {
-            searchHandler(key: key)
-            //            let vc = SearchResultViewController(key: key)
-//            vc.delegate = self
-//            self.navigationController?.pushViewController(vc, animated: true)
+            keyItems = [FooyoItem]()
         }
+        tableView.reloadData()
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+//        let key = textField.text!
+//        if key == "" {
+//            displayAlert(title: "Reminder", message: "The key word for search cannot be empty.", complete: nil)
+//        } else {
+//            searchHandler(key: key)
+//            //            let vc = SearchResultViewController(key: key)
+////            vc.delegate = self
+////            self.navigationController?.pushViewController(vc, animated: true)
+//        }
+        view.endEditing(true)
         return true
     }
 //    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {

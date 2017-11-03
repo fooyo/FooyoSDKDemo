@@ -56,9 +56,24 @@ class DisplayItineraryListViewController: BaseViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    override public func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if self.navigationController?.navigationBar.isHidden == true {
+            UIView.animate(withDuration: 0.3) {
+                self.navigationController?.navigationBar.isHidden = false
+            }
+        }
+        if self.navigationController?.isNavigationBarHidden == true {
+            UIView.animate(withDuration: 0.3) {
+                self.navigationController?.isNavigationBarHidden = false
+            }
+        }
+    }
+
     func setupNavigationBar() {
         navigationItem.title = self.itinerary?.name
-        let editButton = UIBarButtonItem(image: UIImage.getBundleImage(name: "plan_edit"), style: .plain, target: self, action: #selector(editHandler))
+        let editButton = UIBarButtonItem(image: UIImage.getBundleImage(name: "plan_neweditview"), style: .plain, target: self, action: #selector(editHandler))
         navigationItem.rightBarButtonItem = editButton
     }
     
@@ -85,7 +100,7 @@ extension DisplayItineraryListViewController: UITableViewDelegate, UITableViewDa
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ItineraryDisplayListTableViewCell.reuseIdentifier, for: indexPath) as! ItineraryDisplayListTableViewCell
-//        cell.delegate = self
+        cell.delegate = self
         
         let item = (itinerary?.items)![indexPath.row]
         if itinerary?.items?.count == 1 {
@@ -118,11 +133,34 @@ extension DisplayItineraryListViewController: UITableViewDelegate, UITableViewDa
     }
 }
 
-//extension DisplayItineraryListViewController: ItineraryDisplayListTableViewCellDelegate {
-//    func didTapRoute(route: Route) {
-//        gotoRouteDetail(route: route)
-//    }
-//}
+extension DisplayItineraryListViewController: ItineraryDisplayListTableViewCellDelegate {
+    func didTapRoute(route: FooyoRoute) {
+        var start: FooyoIndex?
+        var end: FooyoIndex?
+        if let item = route.startItem {
+            let category = item.category?.name
+            let one = item.levelOneId
+            let two = item.levelTwoId
+            start = FooyoIndex(category: category, levelOneId: one, levelTwoId: two)
+        }
+        if let item = route.endItem {
+            let category = item.category?.name
+            let one = item.levelOneId
+            let two = item.levelTwoId
+            end = FooyoIndex(category: category, levelOneId: one, levelTwoId: two)
+        }
+        let vc = FooyoNavigationViewController(startIndex: start, endIndex: end)
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    func didTapNavigation(item: FooyoItem) {
+        let category = item.category?.name
+        let one = item.levelOneId
+        let two = item.levelTwoId
+        let index = FooyoIndex(category: category, levelOneId: one, levelTwoId: two)
+        let vc = FooyoNavigationViewController(startIndex: nil, endIndex: index)
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+}
 
 extension DisplayItineraryListViewController {
 //    func updateItineraries(_ notification: Foundation.Notification) {

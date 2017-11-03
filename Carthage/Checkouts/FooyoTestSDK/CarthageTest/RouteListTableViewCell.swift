@@ -235,6 +235,8 @@ class RouteListTableViewCell: UITableViewCell {
 //            setupInstructionView()
 //            queueTimeLabel.text = "Wait time: " + route.getWaitingTime()
 //        }
+        instructionView.scrollsToTop = true
+//        instructionView.scrollRectToVisible(CGRect.init(x: 0, y: 0, width: 1, height: 1), animated: true)
     }
     
     func setupInstructionView() {
@@ -261,9 +263,9 @@ class RouteListTableViewCell: UITableViewCell {
         
         var subViews = [NavigationItemView]()
         var index = 0
-        var firstPSV = true
-        for each in (route?.PSVList)! {
-            let itemView = NavigationItemView(type: FooyoConstants.transportationTypes[each])
+        var firstPSV = true        
+        for each in (route?.typeList)! {
+            let itemView = NavigationItemView(type: FooyoConstants.transportationTypes[Int(each)])
             instructionView.addSubview(itemView)
             subViews.append(itemView)
             if firstPSV {
@@ -284,7 +286,6 @@ class RouteListTableViewCell: UITableViewCell {
             }
             index = index + 1
         }
-        
         instructionView.addSubview(endIcon)
         endIcon.snp.makeConstraints { (make) in
             make.trailing.equalToSuperview()

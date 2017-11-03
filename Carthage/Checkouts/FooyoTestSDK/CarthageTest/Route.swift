@@ -33,7 +33,8 @@ class FooyoRoute: BaseModel {
     var coordinates: [[Double]]?
     var coordList: [[[Double]]]?
     
-    var typeList: [FooyoConstants.RouteType]?
+//    var typeList: [FooyoConstants.RouteType]?
+    var typeList: [Double]?
     var PSVList: [Int]?
     
     init(json: JSON) {
@@ -41,7 +42,7 @@ class FooyoRoute: BaseModel {
         type = json["meta"]["vehicle"].string
         subType = json["meta"]["weighting"].string
         suggested = json["meta"]["suggested"].bool
-        waitingTime = json["meta"]["queue_time"].int
+        waitingTime = json["meta"]["next_arriving_time"].int
         timeSummary = json["paths"][0]["time"].int
         distanceSummary = json["paths"][0]["distance"].double
         bbox = json["paths"][0]["bbox"].arrayValue.map{ $0.double! }
@@ -60,12 +61,12 @@ class FooyoRoute: BaseModel {
     //    }
     
     func getWaitingString() -> NSMutableAttributedString? {
-        if let list = PSVList {
+        if let list = typeList {
             if list.count > 1 {
-                let firstPSV = list[1]
+                let firstPSV = Int(list[1])
                 let psv = FooyoConstants.transportationTypes[firstPSV]
                 var strOne = NSMutableAttributedString(string: psv.rawValue, attributes: [NSFontAttributeName: UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 12)), NSForegroundColorAttributeName: FooyoConstants.transportationColors[firstPSV]])
-                var strTwo = NSMutableAttributedString(string: getWaitingTime(), attributes: [NSFontAttributeName: UIFont.DefaultRegularWithSize(size: Scale.scaleY(y: 12)), NSForegroundColorAttributeName: UIColor.ospDarkGrey])
+                var strTwo = NSMutableAttributedString(string: getWaitingTime(name: psv.rawValue), attributes: [NSFontAttributeName: UIFont.DefaultRegularWithSize(size: Scale.scaleY(y: 12)), NSForegroundColorAttributeName: UIColor.ospDarkGrey])
                 strOne.append(strTwo)
                 return strOne
             }
@@ -73,12 +74,15 @@ class FooyoRoute: BaseModel {
         return nil
     }
     
-    func getWaitingTime() -> String {
-        if waitingTime == nil || waitingTime == 0 {
-            //            let randomNum:UInt32 = arc4random_uniform(25) // range is 0 to 99
-            //            let someInt:Int = Int(randomNum)
-            //            let time = someInt + 5
-            return " in 1 mins"
+    func getWaitingTime(name: String) -> String {
+        if let waitingTime = waitingTime {
+            if waitingTime < 0 {
+                return " (\(name) timing information is currently unavailable)"
+            } else if waitingTime == 0 {
+                return " Arriving"
+            }
+        } else {
+            return " (\(name) timing information is currently unavailable)"
         }
         return " in \(waitingTime!) mins"
     }
@@ -105,7 +109,8 @@ class FooyoRoute: BaseModel {
             let km = Scale.roundToPlaces(value: CGFloat(distanceSummary!) / 1000.0, places: 1)
             return "\(Double(km))" + " km"
         }
-        return "\(distanceSummary!)" + " m"
+        let m = Int(floor(distanceSummary!))
+        return "\(m)" + " m"
     }
     
     func getBounds() -> MGLCoordinateBounds {
@@ -131,16 +136,15 @@ class FooyoRoute: BaseModel {
     
     func splitPoints() {
         if type == "bus" {
-            var isWalking = true
+//            var isWalking = true
             if let coordinates = coordinates {
                 var list = [[Double]]()
                 var type: Double = -1
                 let first = coordinates[0]
-                debugPrint(first)
+//                if type == 1 {
+//                    isWalking = false
+//                }
                 type = first[2]
-                if type == 1 {
-                    isWalking = false
-                }
                 let point = [first[0], first[1]]
                 list.append(point)
                 
@@ -150,18 +154,10 @@ class FooyoRoute: BaseModel {
                         let point = [each[0], each[1]]
                         list.append(point)
                     } else {
-                        if type == 0 {
-                            if typeList == nil {
-                                typeList = [.Walking]
-                            } else {
-                                typeList?.append(.Walking)
-                            }
+                        if typeList == nil {
+                            typeList = [type]
                         } else {
-                            if typeList == nil {
-                                typeList = [.PSV]
-                            } else {
-                                typeList?.append(.PSV)
-                            }
+                            typeList?.append(type)
                         }
                         if coordList == nil {
                             coordList = [list]
@@ -170,26 +166,18 @@ class FooyoRoute: BaseModel {
                         }
                         
                         type = each[2]
-                        if type == 1 {
-                            isWalking = false
-                        }
                         list = [[Double]]()
                         let point = [each[0], each[1]]
                         list.append(point)
+//                        if type == 1 {
+//                            isWalking = false
+//                        }
                     }
                     if index == coordinates.count - 1 {
-                        if type == 0 {
-                            if typeList == nil {
-                                typeList = [.Walking]
-                            } else {
-                                typeList?.append(.Walking)
-                            }
+                        if typeList == nil {
+                            typeList = [type]
                         } else {
-                            if typeList == nil {
-                                typeList = [.PSV]
-                            } else {
-                                typeList?.append(.PSV)
-                            }
+                            typeList?.append(type)
                         }
                         if coordList == nil {
                             coordList = [list]
@@ -197,7 +185,9 @@ class FooyoRoute: BaseModel {
                             coordList?.append(list)
                         }
                     }
+
                 }
+                
             }
             if (coordList?.count)! > 1 {
                 if let list = coordList {
@@ -208,13 +198,17 @@ class FooyoRoute: BaseModel {
                     }
                 }
             }
-            if isWalking {
-                type = "walking"
-            }
+//            if isWalking {
+////                type = "foot"
+////                debugPrint("there is no bus taking inside the")
+//            }
+        } else {
+            typeList = [0]
         }
     }
     
     func splitPSV() {
+        debugPrint(type)
         if type == "bus" {
             var tmpPSV = 0
             PSVList = [tmpPSV]

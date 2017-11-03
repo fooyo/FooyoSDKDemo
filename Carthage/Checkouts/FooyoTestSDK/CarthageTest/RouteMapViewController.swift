@@ -42,12 +42,19 @@ class RouteMapViewController: FooyoBaseMapViewController {
     fileprivate var navigationIcon: ShadowView! = {
         let t = ShadowView()
         t.backgroundColor = UIColor.ospSentosaGreen
-//        t.contentMode = .scaleAspectFit
         t.layer.cornerRadius = Scale.scaleY(y: 52) / 2
         return t
     }()
     fileprivate var navigationImage: UIImageView! = {
         let t = UIImageView()
+        t.contentMode = .scaleAspectFit
+        return t
+    }()
+    
+    fileprivate var timeLabel: UILabel! = {
+        let t = UILabel()
+        t.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 12))
+        t.textColor = UIColor.ospSentosaGreen
         return t
     }()
     
@@ -102,6 +109,14 @@ class RouteMapViewController: FooyoBaseMapViewController {
         goBtn.isHidden = true
         view.addSubview(lowerView)
         lowerView.addSubview(navigationIcon)
+        navigationIcon.addSubview(navigationImage)
+        lowerView.addSubview(timeLabel)
+        timeLabel.text = route?.getTime()
+        if route?.type == FooyoConstants.RouteType.Walking.rawValue {
+            navigationImage.applyBundleImage(name: "navigation_walk")
+        } else {
+            navigationImage.applyBundleImage(name: "navigation_bus")
+        }
         lowerView.addSubview(instructionView)
         instructionView.snp.makeConstraints { (make) in
             make.leading.equalTo(Scale.scaleX(x: 18))
@@ -120,12 +135,20 @@ class RouteMapViewController: FooyoBaseMapViewController {
             make.trailing.equalTo(Scale.scaleX(x: -10))
             make.centerY.equalTo(lowerView.snp.top)
         }
+        navigationImage.snp.makeConstraints { (make) in
+            make.center.equalToSuperview()
+            make.height.width.equalTo(Scale.scaleY(y: 20))
+        }
         gpsBtn.snp.remakeConstraints { (make) in
             make.centerX.equalTo(navigationIcon)
             make.height.width.equalTo(Scale.scaleY(y: 40))
             make.bottom.equalTo(navigationIcon.snp.top).offset(Scale.scaleY(y: -16))
         }
         setupInstructionView()
+        timeLabel.snp.makeConstraints { (make) in
+            make.top.equalTo(navigationIcon.snp.bottom).offset(Scale.scaleY(y: 9))
+            make.centerX.equalTo(navigationIcon)
+        }
 //        self.sortItems()
 //        setConstraints()
     }
@@ -157,8 +180,8 @@ class RouteMapViewController: FooyoBaseMapViewController {
         var subViews = [NavigationItemView]()
         var index = 0
         var firstPSV = true
-        for each in (route?.PSVList)! {
-            let itemView = NavigationItemView(type: FooyoConstants.transportationTypes[each])
+        for each in (route?.typeList)! {
+            let itemView = NavigationItemView(type: FooyoConstants.transportationTypes[Int(each)])
             instructionView.addSubview(itemView)
             subViews.append(itemView)
             if firstPSV {
@@ -203,6 +226,11 @@ class RouteMapViewController: FooyoBaseMapViewController {
             debugPrint("i am redefining")
             UIView.animate(withDuration: 0.3) {
                 self.navigationController?.navigationBar.isHidden = false
+            }
+        }
+        if self.navigationController?.isNavigationBarHidden == true {
+            UIView.animate(withDuration: 0.3) {
+                self.navigationController?.isNavigationBarHidden = false
             }
         }
     }
@@ -273,6 +301,7 @@ class RouteMapViewController: FooyoBaseMapViewController {
 //        }
 //        mapView.addAnnotations(otherAnnotations)
 //    }
+   
 }
 
 extension RouteMapViewController {
@@ -301,19 +330,19 @@ extension RouteMapViewController {
             
             
             var lines = [MGLPolyline]()
-            var linesType = [String]()
+            var linesType = [Double]()
             if self.route?.type == "bus" {
                 for index in 0..<(self.route?.typeList?.count)! {
                     let type = (self.route?.typeList)![index]
                     let list = (self.route?.coordList)![index]
                     let line = self.getLine(locations: list)
                     lines.append(line)
-                    linesType.append(type.rawValue)
+                    linesType.append(type)
                 }
             } else {
                 let line = self.getLine(locations: (self.route?.coordinates)!)
                 lines.append(line)
-                linesType.append(FooyoConstants.RouteType.Walking.rawValue)
+                linesType.append(0)
             }
             
             
@@ -360,7 +389,7 @@ extension RouteMapViewController {
         return MGLPolyline(coordinates: &coordinates, count: UInt(coordinates.count))
     }
     
-    func drawPolyline(lines: [MGLPolyline], linesType: [String]) {
+    func drawPolyline(lines: [MGLPolyline], linesType: [Double]) {
         // Add our GeoJSON data to the map as an MGLGeoJSONSource.
         // We can then reference this data from an MGLStyleLayer.
         
@@ -412,15 +441,53 @@ extension RouteMapViewController {
             // Dash pattern in the format [dash, gap, dash, gap, ...]. You’ll want to adjust these values based on the line cap style.
             dashedLayer.lineDashPattern = MGLStyleValue(rawValue: [0, 1.5])
             
-            if type == FooyoConstants.RouteType.Walking.rawValue {
+            switch type {
+            case 0:
                 style.addLayer(layer)
                 style.addLayer(dashedLayer)
-            } else {
+                layer.lineColor = MGLStyleValue(rawValue: UIColor.ospSentosaBlue)
+            case 1:
+                
                 style.addLayer(layer)
                 style.addLayer(casingLayer)
+                casingLayer.lineColor = MGLStyleValue(rawValue: UIColor.busA)
+                layer.lineColor = MGLStyleValue(rawValue: UIColor.busA)
+            case 2:
+                
+                style.addLayer(layer)
+                style.addLayer(casingLayer)
+                casingLayer.lineColor = MGLStyleValue(rawValue: UIColor.busB)
+                layer.lineColor = MGLStyleValue(rawValue: UIColor.busB)
+            case 3:
+                
+                style.addLayer(layer)
+                style.addLayer(casingLayer)
+                casingLayer.lineColor = MGLStyleValue(rawValue: UIColor.bus123)
+                layer.lineColor = MGLStyleValue(rawValue: UIColor.bus123)
+            case 4:
+                style.addLayer(layer)
+                style.addLayer(casingLayer)
+                casingLayer.lineColor = MGLStyleValue(rawValue: UIColor.express)
+                layer.lineColor = MGLStyleValue(rawValue: UIColor.express)
+            default:
+                style.addLayer(layer)
+                style.addLayer(casingLayer)
+                casingLayer.lineColor = MGLStyleValue(rawValue: UIColor.tram)
+                layer.lineColor = MGLStyleValue(rawValue: UIColor.tram)
             }
             //        style.insertLayer(casingLayer, below: layer)
             //        style.addLayer(casingLayer)
         }
+    }
+    
+    override func mapView(_ mapView: MGLMapView, calloutViewFor annotation: MGLAnnotation) -> MGLCalloutView? {
+        if annotation.responds(to: #selector(getter: UIPreviewActionItem.title)) {
+            // Instantiate and return our custom callout view
+            let view = CustomCalloutView(representedObject: annotation)
+            view.expandView.isHidden = true
+            return view
+        }
+        
+        return nil
     }
 }

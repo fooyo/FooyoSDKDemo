@@ -29,14 +29,17 @@ public class FooyoItem: BaseModel {
     var levelOneId: String?
     var levelTwoId: String?
     var region: String?
-    var rating: String?
+    var rating: Double?
     var trailName: String?
+    var trailImage: String?
     
     var arrivingTime: String?
     var visitingTime: Int?
     var lowBudgetVisitingTime: Int?
     var themes: [FooyoTheme]?
     var buses: [FooyoBus]?
+    
+    var isInEditMode: Bool? = false
     
     public init(json: JSON) {
         super.init()
@@ -54,6 +57,11 @@ public class FooyoItem: BaseModel {
         }
         
         budget = json["budget"].double
+        
+        if budget == nil {
+            budget = 15
+        }
+        
         coordinateLan = json["lat"].double
         coordinateLon = json["lng"].double
         coverImages = json["thumbnail"].string
@@ -72,11 +80,11 @@ public class FooyoItem: BaseModel {
                 levelTwoId = String(describing: id)
             }
         }
-        rating = json["rating"].string
+        rating = json["rating"].double
         region = json["region"].string
         trailName = json["ldr_trail_name"].string
-        
-        
+        trailImage = json["ldr_trail_thumbnail"].string
+
         arrivingTime = json["arriving_time"].string
         visitingTime = json["visiting_time"].int
         lowBudgetVisitingTime = json["low_budget_visiting_time"].int
@@ -104,15 +112,15 @@ public class FooyoItem: BaseModel {
     func getTag() -> String {
         switch (category?.name?.lowercased())! {
         case FooyoConstants.CategoryName.Attractions.rawValue.lowercased(), FooyoConstants.CategoryName.Events.rawValue.lowercased():
-            return parseOptionalString(input: region, defaultValue: "Pending") + " • \(parseOptionalString(input: category?.name))"
+            return parseOptionalString(input: region, defaultValue: "") + " • \(parseOptionalString(input: category?.name))"
         case FooyoConstants.CategoryName.Trails.rawValue.lowercased():
             if isNonLinearHotspot() {
-                return "Belongs to #\(parseOptionalString(input: trailName, defaultValue: "Pending"))"
+                return "Belongs to #\(parseOptionalString(input: trailName, defaultValue: ""))"
             } else {
-                return parseOptionalString(input: region, defaultValue: "Pending") + " • \(parseOptionalString(input: category?.name))"
+                return parseOptionalString(input: region, defaultValue: "") + " • \(parseOptionalString(input: category?.name))"
             }
         default:
-            return parseOptionalString(input: region, defaultValue: "Pending")
+            return parseOptionalString(input: region, defaultValue: "")
         }
     }
     
@@ -123,36 +131,37 @@ public class FooyoItem: BaseModel {
     }
     
     func getLowBudgetVisitingTime() -> String {
-        if lowBudgetVisitingTime! < 60 {
-            return "\(String(describing: self.lowBudgetVisitingTime!)) mins"
-        } else if lowBudgetVisitingTime! < 120 {
-            let mins = lowBudgetVisitingTime! - 60
-            if mins > 0 {
-                return "1 hr \(String(mins)) mins"
+        if let time = lowBudgetVisitingTime {
+            let hour = time / 60
+            let min = time % 60
+            if hour > 0 {
+                if min > 0 {
+                    return "\(hour) hrs \(min) mins"
+                } else {
+                    return "\(hour) hrs"
+                }
             } else {
-                return "1 hr"
-            }
-        } else {
-            let mins = lowBudgetVisitingTime! - 120
-            if mins > 0 {
-                return "2 hr \(String(mins)) mins"
-            } else {
-                return "2 hr"
+                return "\(min) mins"
             }
         }
+        return "Unavailable"
     }
     
     func getVisitingTime() -> String {
-        if visitingTime! < 60 {
-            return "\(String(describing: self.visitingTime!)) mins"
-        } else {
-            let mins = visitingTime! - 60
-            if mins > 0 {
-                return "1 hr \(String(mins)) mins"
+        if let time = visitingTime {
+            let hour = time / 60
+            let min = time % 60
+            if hour > 0 {
+                if min > 0 {
+                    return "\(hour) hrs \(min) mins"
+                } else {
+                    return "\(hour) hrs"
+                }
             } else {
-                return "1 hr"
+                return "\(min) mins"
             }
         }
+        return "Unavailable"
     }
     
     func belongsToTheme(theme: String?) -> Bool {
@@ -186,13 +195,22 @@ public class FooyoItem: BaseModel {
         return ""
     }
     
-    class func findMatch(index: FooyoIndex) -> [FooyoItem] {
+    class func findMatch(index: FooyoIndex) -> [FooyoItem]? {
+//        debugPrint("")
+        debugPrint(index.category)
+        debugPrint(index.levelOneId)
         var items = [FooyoItem]()
         items = FooyoItem.items.filter({ (item) -> Bool in
             let checkOne = index.category == item.category?.name
             let checkTwo = index.levelOneId == item.levelOneId
             return checkOne && checkTwo
         })
+        if items.count == 0 {
+            debugPrint("no match")
+            return nil
+        }
+        debugPrint(items.count)
+        debugPrint(items[0].name)
         return items
     }
     
@@ -208,6 +226,19 @@ public class FooyoItem: BaseModel {
     func makeCopy() -> FooyoItem {
         let t = FooyoItem()
         t.id = self.id
+        t.name = self.name
         return t
+    }
+    
+    func getRatingStr() -> String {
+        if let rating = rating {
+            return "\(rating)" + "/5"
+        }
+        return ""
+    }
+    
+    func getFooyoIndex() -> FooyoIndex {
+        let index = FooyoIndex(category: self.category?.name, levelOneId: self.levelOneId, levelTwoId: self.levelTwoId)
+        return index
     }
 }

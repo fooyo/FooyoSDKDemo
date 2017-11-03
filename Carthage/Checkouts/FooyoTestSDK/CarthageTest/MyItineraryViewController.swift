@@ -8,9 +8,12 @@
 
 import UIKit
 import SVProgressHUD
-
+public protocol FooyoMyPlanViewControllerDelegate: class {
+    func fooyoMyPlanViewController(didSelectInformationWindow index: FooyoIndex, isEditingAPlan: Bool)
+}
 public class FooyoMyPlanViewController: UIViewController {
     
+    public weak var delegate: FooyoMyPlanViewControllerDelegate?
     var menuHeight: CGFloat = 0
     var pageMenu : CAPSPageMenu?
     fileprivate var controllerArray = [ItineraryListViewController]()
@@ -23,6 +26,7 @@ public class FooyoMyPlanViewController: UIViewController {
         t.titleLabel?.font = UIFont.DefaultSemiBoldWithSize(size: Scale.scaleY(y: 12))
         return t
     }()
+    
     // MARK: - Life Cycle
     public init(userId: String? = nil) {
         super.init(nibName: nil, bundle: nil)
@@ -42,15 +46,16 @@ public class FooyoMyPlanViewController: UIViewController {
 //        view.backgroundColor = UIColor.ospGrey10
         NotificationCenter.default.addObserver(self, selector: #selector(itinerarySaved(notification:)), name: FooyoConstants.notifications.FooyoSavedItinerary, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(itineraryDownloaded), name: FooyoConstants.notifications.FooyoItineraryDownloaded, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(itemSelected(notification:)), name: FooyoConstants.notifications.FooyoMyPlanItemSelected, object: nil)
 
         // Do any additional setup after loading the view.
-        var tabBarHeight: CGFloat = 0
-        if UITabBar.appearance().isTranslucent {
-            tabBarHeight = 49
-        }
-        menuHeight = FooyoConstants.mainHeight - tabBarHeight - 20 - Scale.scaleY(y: 10) * 2 - Scale.scaleY(y: 40)
+//        var tabBarHeight: CGFloat = 0
+//        if UITabBar.appearance().isTranslucent {
+//            tabBarHeight = 49
+//        }
+        menuHeight = FooyoConstants.mainHeight - 49 - 20 - Scale.scaleY(y: 10) * 2 - Scale.scaleY(y: 40)
         
-        configurePageViews()
         view.addSubview(createBtn)
         createBtn.snp.makeConstraints { (make) in
             make.leading.equalTo(view).offset(Scale.scaleX(x: 22))
@@ -59,6 +64,8 @@ public class FooyoMyPlanViewController: UIViewController {
             make.bottom.equalTo(bottomLayoutGuide.snp.top).offset(Scale.scaleY(y: -10))
         }
         createBtn.addTarget(self, action: #selector(createHandler), for: .touchUpInside)
+        
+        configurePageViews()
     }
 
     override public func didReceiveMemoryWarning() {
@@ -68,10 +75,15 @@ public class FooyoMyPlanViewController: UIViewController {
     
     override public func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        if self.navigationController?.isNavigationBarHidden == false {
+        if self.navigationController?.navigationBar.isHidden == false {
             UIView.animate(withDuration: 0.3, animations: {
-                self.navigationController?.isNavigationBarHidden = true
+                self.navigationController?.navigationBar.isHidden = true
             })
+        }
+        if self.navigationController?.isNavigationBarHidden == false {
+            UIView.animate(withDuration: 0.3) {
+                self.navigationController?.isNavigationBarHidden = true
+            }
         }
         loadData()
     }
@@ -79,6 +91,7 @@ public class FooyoMyPlanViewController: UIViewController {
     func createHandler() {
         if let id = FooyoUser.currentUser.userId {
             let vc = FooyoCreatePlanViewController(userId: id)
+            vc.homePage = .FromMyPlan
             let nav = UINavigationController(rootViewController: vc)
             self.navigationController?.present(nav, animated: true, completion: nil)
         } else {
@@ -125,6 +138,13 @@ public class FooyoMyPlanViewController: UIViewController {
         pageMenu = CAPSPageMenu(viewControllers: controllerArray, frame: CGRect(x: 0.0, y: 20, width: FooyoConstants.mainWidth, height: menuHeight), pageMenuOptions: parameters)
         pageMenu!.view.removeFromSuperview()
         view.addSubview(pageMenu!.view)
+        pageMenu!.view.snp.makeConstraints { (make) in
+            make.leading.equalToSuperview()
+            make.trailing.equalToSuperview()
+            make.top.equalTo(20)
+            make.bottom.equalTo(createBtn.snp.top).offset(Scale.scaleY(y: -10))
+        }
+        
     }
     
     func reloadVCs() {
@@ -161,6 +181,13 @@ public class FooyoMyPlanViewController: UIViewController {
     
     func itineraryDownloaded() {
         self.reloadVCs()
+    }
+    
+    func itemSelected(notification: Notification) {
+        debugPrint("notification received")
+        if let item = notification.object as? FooyoItem {
+            delegate?.fooyoMyPlanViewController(didSelectInformationWindow: item.getFooyoIndex(), isEditingAPlan: (item.isInEditMode)!)
+        }
     }
 
 }

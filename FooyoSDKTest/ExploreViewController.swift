@@ -123,7 +123,6 @@ extension ExploreViewController: UITableViewDelegate, UITableViewDataSource {
         case 5:
             FooyoSDKSignOut()
             displayAlert(title: "Reminder", message: "Signout Successfully", complete: nil)
-        
         default:
         break
         }

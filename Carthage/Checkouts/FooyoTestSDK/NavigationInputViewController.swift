@@ -74,8 +74,15 @@ class NavigationInputViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        if navigationController?.navigationBar.isHidden == true {
-            self.navigationController?.navigationBar.isHidden = false
+        if self.navigationController?.navigationBar.isHidden == true {
+            UIView.animate(withDuration: 0.3) {
+                self.navigationController?.navigationBar.isHidden = false
+            }
+        }
+        if self.navigationController?.isNavigationBarHidden == true {
+            UIView.animate(withDuration: 0.3) {
+                self.navigationController?.isNavigationBarHidden = false
+            }
         }
     }
     
@@ -93,7 +100,7 @@ class NavigationInputViewController: UIViewController {
                 startIndex = FooyoIndex(category: start, levelOneId: one)
             }
         } else {
-            startIndex = FooyoIndex(category: "Attractions", levelOneId: "477")
+            startIndex = FooyoIndex(category: "Express Stations", levelOneId: "384")
         }
         
         if let end = endCategory, let one = endLvlOneID {
@@ -103,9 +110,8 @@ class NavigationInputViewController: UIViewController {
                 endIndex = FooyoIndex(category: end, levelOneId: one)
             }
         } else {
-            endIndex = FooyoIndex(category: "Attractions", levelOneId: "476")
+            endIndex = FooyoIndex(category: "Attractions", levelOneId: "783")
         }
-        
         
         let vc = FooyoNavigationViewController(startIndex: startIndex, endIndex: endIndex)
         self.navigationController?.pushViewController(vc, animated: true)

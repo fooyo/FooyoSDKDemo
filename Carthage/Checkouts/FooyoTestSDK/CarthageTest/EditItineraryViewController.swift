@@ -14,11 +14,14 @@ import SVProgressHUD
 //import DateToolsSwift
 
 //protocol EditItineraryViewControllerDelegate: class {
-//    func editUpdateItinerary(itinerary: FooyoItinerary)
+//    func fooyoItinerryViewController(didSelectInformationWindow index: FooyoIndex)
 //}
 
 class EditItineraryViewController: FooyoBaseMapViewController {
-    
+//    public weak var delegate: EditItineraryViewControllerDelegate?
+
+    fileprivate var firstTimeLoad = true
+    fileprivate var homePage: FooyoConstants.PageSource = .FromAddToPlan
     var isDisplayMode: Bool = true
     
     var startItem = FooyoItem()
@@ -221,22 +224,25 @@ class EditItineraryViewController: FooyoBaseMapViewController {
     var currentIndex = 0
 
     // MARK: - Life Cycle
-    init(itinerary: FooyoItinerary, isDisplay: Bool = false) {
+    init(itinerary: FooyoItinerary, isDisplay: Bool = false, homePage: FooyoConstants.PageSource) {
         super.init(hideTheDefaultNavigationBar: false)
 //        self.itinerary = itinerary.makeCopy()
         self.itinerary = itinerary
         self.isDisplayMode = isDisplay
+        self.homePage = homePage
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         debugPrint("i am view loading")
         debugPrint(itinerary?.items?.count)
         debugPrint(itinerary?.routes?.count)
+        NotificationCenter.default.addObserver(self, selector: #selector(getIndexFromBase(notification:)), name: FooyoConstants.notifications.FooyoGetIndexFromBase, object: nil)
+
         if let items = self.itinerary?.items, let routes = self.itinerary?.routes {
             if items.count != routes.count + 1 {
                 checkHistory()
@@ -245,8 +251,12 @@ class EditItineraryViewController: FooyoBaseMapViewController {
                 addToHistory()
             }
         } else {
-            checkHistory()
-            updateNavigationInformation()
+            if self.itinerary?.items != nil && self.itinerary?.routes == nil {
+                checkHistory()
+                updateNavigationInformation()
+            } else {
+                addToHistory()
+            }
         }
         
         NotificationCenter.default.addObserver(self, selector: #selector(addItem(notification:)), name: FooyoConstants.notifications.FooyoItineraryAddItem, object: nil)
@@ -258,11 +268,13 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         }
         
         goBtn.isHidden = true
-        gpsBtn.isHidden = true
+//        gpsBtn.isHidden = true
         setupNavigationBar()
         view.addSubview(listBtn)
         listBtn.addSubview(listBtnInside)
         view.addSubview(itemView)
+        let itemViewGesture = UITapGestureRecognizer(target: self, action: #selector(itemViewGestureHandler))
+        itemView.addGestureRecognizer(itemViewGesture)
         itemView.addSubview(avatarView)
         itemView.addSubview(nameLabel)
         itemView.addSubview(tagLabel)
@@ -303,10 +315,10 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         setConstraints()
         if itinerary?.items?.count != nil {
             showCollection()
+            updateBudget()
         }
         checkMode()
     }
-    
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -315,23 +327,45 @@ class EditItineraryViewController: FooyoBaseMapViewController {
                 self.navigationController?.navigationBar.isHidden = false
             }
         }
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        if let items = itinerary?.items {
-            if items.count > 1 {
-                if expanded {
-                    mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 320, 60), animated: true)
-                } else {
-                    mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 190, 60), animated: true)
-                }
-            } else if items.count == 1 {
-                mapView.setCenter(items[0].getCoor(), animated: true)
+        if self.navigationController?.isNavigationBarHidden == true {
+            UIView.animate(withDuration: 0.3) {
+                self.navigationController?.isNavigationBarHidden = false
             }
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if firstTimeLoad {
+            firstTimeLoad = false
+            if let items = itinerary?.items {
+                if items.count > 1 {
+                    if expanded {
+                        mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 320, 60), animated: true)
+                    } else {
+                        mapView.setVisibleCoordinateBounds((itinerary?.getBounds())!, edgePadding: UIEdgeInsetsMake(120, 60, 190, 60), animated: true)
+                    }
+                } else if items.count == 1 {
+                    mapView.setCenter(items[0].getCoor(), animated: true)
+                }
+            }
+        }
+    }
+    
+    func itemViewGestureHandler() {
+        if let item = displayedItem {
+            if homePage == FooyoConstants.PageSource.FromMyPlan {
+                if isDisplayMode {
+                    item.isInEditMode = false
+                } else {
+                    item.isInEditMode = true
+                }
+                PostMyPlanItemSelectionNotification(item: item)
+            } else if homePage == FooyoConstants.PageSource.FromAddToPlan {
+                PostAddToPlanItemSelectionNotification(item: item)
+            }
+        }
+    }
     func checkMode() {
         if isDisplayMode {
 //            redoBtn.alpha = 0
@@ -339,6 +373,7 @@ class EditItineraryViewController: FooyoBaseMapViewController {
 //            autoButton.alpha = 0
             listBtn.alpha = 0
             searchView.alpha = 0
+            gpsBtn.alpha = 1
             filterBtn.transform = CGAffineTransform(translationX: 0, y: Scale.scaleY(y: -50))
             budgetLabel.transform = CGAffineTransform(translationX: 0, y: Scale.scaleY(y: -50))
         }
@@ -346,6 +381,10 @@ class EditItineraryViewController: FooyoBaseMapViewController {
     
     func updateMode() {
         isDisplayMode = !isDisplayMode
+        for each in mapView.selectedAnnotations {
+            mapView.deselectAnnotation(each, animated: true)
+        }
+//        mapView.deselectAnnotation(<#T##annotation: MGLAnnotation?##MGLAnnotation?#>, animated: <#T##Bool#>)
         setupNavigationBar()
         if isDisplayMode {
             UIView.animate(withDuration: 0.3, animations: {
@@ -360,7 +399,13 @@ class EditItineraryViewController: FooyoBaseMapViewController {
 //                self.autoButton.alpha = 0
                 self.listBtn.alpha = 0
                 self.searchView.alpha = 0
+                self.gpsBtn.alpha = 1
             })
+            if itinerary?.items != nil {
+                showCollection()
+            } else {
+                dismissBothCollection()
+            }
         } else {
             if expanded {
                 UIView.animate(withDuration: 0.3, animations: {
@@ -376,8 +421,14 @@ class EditItineraryViewController: FooyoBaseMapViewController {
 //                    self.autoButton.alpha = 1
                     self.listBtn.alpha = 1
                     self.searchView.alpha = 1
+                    self.gpsBtn.alpha = 0
                 })
-                showCollectionTwo()
+                debugPrint(items)
+                if itinerary?.items != nil {
+                    showCollectionTwo()
+                } else {
+                    dismissBothCollection()
+                }
             } else {
                 UIView.animate(withDuration: 0.3, animations: {
                     let height = -(Scale.scaleY(y: 40) / 2 + Scale.scaleY(y: 150))
@@ -392,35 +443,42 @@ class EditItineraryViewController: FooyoBaseMapViewController {
 //                    self.autoButton.alpha = 1
                     self.listBtn.alpha = 1
                     self.searchView.alpha = 1
+                    self.gpsBtn.alpha = 0
                 })
-                showCollection()
+                if itinerary?.items != nil {
+                    showCollection()
+                } else {
+                    dismissBothCollection()
+                }
             }
         }
     }
     func setupNavigationBar() {
-        if isDisplayMode {
-            navigationItem.leftBarButtonItems = nil
-
+        navigationItem.leftBarButtonItems = nil
+        navigationItem.rightBarButtonItems = nil
+        if homePage == .FromAddToPlan {
             navigationItem.title = itinerary?.name
-            let switchButton = UIBarButtonItem(image: UIImage.getBundleImage(name: "plan_listview"),  style: .plain, target: self, action: #selector(listModeHandler))
-            let editButton = UIBarButtonItem(image: UIImage.getBundleImage(name: "plan_edit"),  style: .plain, target: self, action: #selector(editHandler))
-            navigationItem.rightBarButtonItems = [editButton, switchButton]
-        } else {
-            navigationItem.leftBarButtonItems = nil
-            navigationItem.rightBarButtonItems = nil
-//            navigationItem.hidesBackButton = true
-            
-            let cancelBtn = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelHandler))
-            navigationItem.leftBarButtonItem = cancelBtn
-
             let rightBtn = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(saveHandler))
             navigationItem.rightBarButtonItem = rightBtn
-            if let name = itinerary?.name {
-                navigationItem.title = name
+        } else if homePage == .FromMyPlan {
+            if isDisplayMode {
+                navigationItem.title = itinerary?.name
+                let switchButton = UIBarButtonItem(image: UIImage.getBundleImage(name: "plan_newlistview"),  style: .plain, target: self, action: #selector(listModeHandler))
+                let editButton = UIBarButtonItem(image: UIImage.getBundleImage(name: "plan_neweditview"),  style: .plain, target: self, action: #selector(editHandler))
+                navigationItem.rightBarButtonItems = [editButton, switchButton]
             } else {
-                let title = "Trip on " + DateTimeTool.fromFormatThreeToFormatTwo(date: (itinerary?.time)!)
-                navigationItem.title = title
-                itinerary?.name = title
+                let cancelBtn = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelHandler))
+                navigationItem.leftBarButtonItem = cancelBtn
+                
+                let rightBtn = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(saveHandler))
+                navigationItem.rightBarButtonItem = rightBtn
+                if let name = itinerary?.name {
+                    navigationItem.title = name
+                } else {
+                    let title = "Trip on " + DateTimeTool.fromFormatThreeToFormatTwo(date: (itinerary?.time)!)
+                    navigationItem.title = title
+                    itinerary?.name = title
+                }
             }
         }
     }
@@ -513,6 +571,11 @@ class EditItineraryViewController: FooyoBaseMapViewController {
             make.center.equalToSuperview()
             make.width.height.equalTo(Scale.scaleY(y: 21.8))
         }
+        gpsBtn.snp.remakeConstraints { (make) in
+            make.height.width.equalTo(autoButton)
+            make.leading.equalTo(autoButton)
+            make.bottom.equalTo(autoButton.snp.top).offset(Scale.scaleY(y: -10))
+        }
         redoBtn.snp.makeConstraints { (make) in
             make.centerY.equalTo(autoButton)
             make.width.height.equalTo(autoButton)
@@ -594,8 +657,9 @@ class EditItineraryViewController: FooyoBaseMapViewController {
     
     func listHandler() {
         if let itinerary = itinerary {
-            let vc = EditItineraryListViewController(plan: itinerary)
-            vc.sourceVC = self
+            let vc = NewEditItineraryListViewController(plan: itinerary, homePage: homePage)
+//            let vc = EditItineraryListViewController(plan: itinerary)
+//            vc.sourceVC = self
             self.navigationController?.pushViewController(vc, animated: true)
         }
     }
@@ -629,6 +693,43 @@ class EditItineraryViewController: FooyoBaseMapViewController {
     }
     
     //MARK: Handler
+    func getIndexFromBase(notification: Notification) {
+        if let index = notification.object as? FooyoIndex {
+            let items = FooyoItem.findMatch(index: index)
+            if let items = items {
+                if let itineraryItems = itinerary?.items {
+                    for each in items {
+                        for itineraryItem in itineraryItems {
+                            if each.id == itineraryItem.id {
+                                displayAlert(title: "Reminder", message: "The selected location is already in the plan.", complete: nil)
+                                return
+                            }
+                        }
+                    }
+                }
+                if itinerary?.items == nil {
+                    itinerary?.items = items
+                    startItem = items[0]
+                } else {
+                    itinerary?.items?.append(contentsOf: items)
+                }
+                let count = (itinerary?.items?.count)!
+                if count == 1 {
+                    items[0].arrivingTime = DateTimeTool.fromDateToFormatThree(date: timeNow)
+                }
+                reloadEditData()
+                if count > 1 {
+                    updateNavigationInformation(fromAdd: true)
+                } else {
+                    addToHistory()
+                }
+                updateBudget()
+            } else {
+                displayAlert(title: "Internal Error", message: "There's no matching location with the given FooyoIndex", complete: nil)
+            }
+        }
+    }
+    
     func addItem(notification: Notification) {
         if let item = notification.object as? FooyoItem {
             let anno = allAnnotations.first(where: { (anno) -> Bool in
@@ -719,9 +820,14 @@ class EditItineraryViewController: FooyoBaseMapViewController {
                     if isSuccess {
                         if let itinerary = itinerary {
                             FooyoItinerary.update(itineraty: itinerary)
+                            FooyoItinerary.sort()
                             self.PostItinerarySavedNotification(plan: itinerary)
-                            self.updateMode()
                             SVProgressHUD.showSuccess(withStatus: "Your itinerary has been updated successfully.")
+                            if self.homePage == FooyoConstants.PageSource.FromMyPlan {
+                                self.updateMode()
+                            } else if self.homePage == FooyoConstants.PageSource.FromAddToPlan {
+                                _ = self.navigationController?.popViewController(animated: true)
+                            }
 //                            _ = self.navigationController?.popViewController(animated: true)
                         }
                     }
@@ -737,8 +843,10 @@ class EditItineraryViewController: FooyoBaseMapViewController {
 //                            NotificationCenter.default.post(name: NSNotification.Name(rawValue: Constants.Notification.newItinerary.rawValue), object: nil)
                             if FooyoItinerary.myItineraries != nil {
                                 (FooyoItinerary.myItineraries)!.append(itinerary)
-                                FooyoItinerary.sort()
+                            } else {
+                                FooyoItinerary.myItineraries = [itinerary]
                             }
+                            FooyoItinerary.sort()
                             self.PostItinerarySavedNotification(plan: itinerary)
                             SVProgressHUD.showSuccess(withStatus: "Your itinerary has been created successfully.")
                         }
@@ -761,6 +869,7 @@ class EditItineraryViewController: FooyoBaseMapViewController {
             let height = -(Scale.scaleY(y: 40) / 2 + Scale.scaleY(y: 150))
             self.collectionView.transform = CGAffineTransform(translationX: 0, y: height)
             if self.isDisplayMode {
+                self.gpsBtn.transform = CGAffineTransform(translationX: 0, y: height)
             } else {
                 self.redoBtn.transform = CGAffineTransform(translationX: 0, y: height)
                 self.undoBtn.transform = CGAffineTransform(translationX: 0, y: height)
@@ -780,6 +889,7 @@ class EditItineraryViewController: FooyoBaseMapViewController {
             self.collectionViewTwo.transform = CGAffineTransform(translationX: 0, y: height)
             self.collectionViewTwoUpper.transform = CGAffineTransform(translationX: 0, y: height)
             if self.isDisplayMode {
+                self.gpsBtn.transform = CGAffineTransform(translationX: 0, y: height)
             } else {
                 self.redoBtn.transform = CGAffineTransform(translationX: 0, y: height)
                 self.undoBtn.transform = CGAffineTransform(translationX: 0, y: height)
@@ -824,7 +934,7 @@ class EditItineraryViewController: FooyoBaseMapViewController {
         switch (item.category?.name)! {
         case FooyoConstants.CategoryName.Attractions.rawValue, FooyoConstants.CategoryName.Events.rawValue, FooyoConstants.CategoryName.Trails.rawValue:
             playLabel.text = "Play time: " + item.getVisitingTime()
-            reviewLabel.text = item.rating
+            reviewLabel.text = item.getRatingStr()
             playLabel.isHidden = false
             reviewLabel.isHidden = false
             reviewView.isHidden = false
@@ -1100,15 +1210,25 @@ extension EditItineraryViewController {
                     if let warnings = itinerary?.warnings {
                         if !warnings.isEmpty {
                             for each in warnings {
+//                                if (each.contains("will be closed on the day")) {
+//                                    self.displayAlert(title: "Reminder", message: each, complete: nil)
+//                                } else if each.contains("budget is lower") && !self.ignoreBudget {
+//                                    let alertController = UIAlertController(title: "Reminder", message: each, preferredStyle: .alert)
+//                                    alertController.addAction(UIAlertAction(title: "Don't remind me again", style: .default, handler: { (action) in
+//                                        self.ignoreBudget = true
+//                                    }))
+//                                    alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+//                                    self.present(alertController, animated: true, completion: nil)
+//                                } else if (each.contains("too long") || each.contains("estimated visiting time ")) && !self.ignoreTime {
+//                                    let alertController = UIAlertController(title: "Reminder", message: each, preferredStyle: .alert)
+//                                    alertController.addAction(UIAlertAction(title: "Don't remind me again", style: .default, handler: { (action) in
+//                                        self.ignoreTime = true
+//                                    }))
+//                                    alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+//                                    self.present(alertController, animated: true, completion: nil)
+//                                }
                                 if (each.contains("will be closed on the day")) {
                                     self.displayAlert(title: "Reminder", message: each, complete: nil)
-                                } else if each.contains("budget is lower") && !self.ignoreBudget {
-                                    let alertController = UIAlertController(title: "Reminder", message: each, preferredStyle: .alert)
-                                    alertController.addAction(UIAlertAction(title: "Don't remind me again", style: .default, handler: { (action) in
-                                        self.ignoreBudget = true
-                                    }))
-                                    alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                                    self.present(alertController, animated: true, completion: nil)
                                 } else if (each.contains("too long") || each.contains("estimated visiting time ")) && !self.ignoreTime {
                                     let alertController = UIAlertController(title: "Reminder", message: each, preferredStyle: .alert)
                                     alertController.addAction(UIAlertAction(title: "Don't remind me again", style: .default, handler: { (action) in
@@ -1117,6 +1237,9 @@ extension EditItineraryViewController {
                                     alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                                     self.present(alertController, animated: true, completion: nil)
                                 }
+                                
+                                
+                                
                             }
                             
                         }
@@ -1152,19 +1275,27 @@ extension EditItineraryViewController {
 
 extension EditItineraryViewController: CustomCalloutViewItineraryDelegate {
     func updateBudget() {
+        var budget: Double = 0
         if let items = self.itinerary?.items {
-            var budget: Double = 0
             for each in items {
                 if let price = each.budget {
                     budget += price
                 }
             }
-            budgetLabel.text = "$\(Int(budget))"
-            if budget > (self.itinerary?.budget)! {
-                budgetLabel.backgroundColor = UIColor.ospSentosaRed
-            } else {
-                budgetLabel.backgroundColor = UIColor.ospSentosaGreen
+        }
+        budgetLabel.text = "$\(Int(budget))"
+        if budget > (self.itinerary?.budget)! {
+            budgetLabel.backgroundColor = UIColor.ospSentosaRed
+            if self.ignoreBudget == false {
+                let alertController = UIAlertController(title: "Reminder", message: "The estimated cost is higher than your budget.", preferredStyle: .alert)
+                alertController.addAction(UIAlertAction(title: "Don't remind me again", style: .default, handler: { (action) in
+                    self.ignoreBudget = true
+                }))
+                alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                self.present(alertController, animated: true, completion: nil)
             }
+        } else {
+            budgetLabel.backgroundColor = UIColor.ospSentosaGreen
         }
     }
     func didTapAdd(item: FooyoItem, annotation: MyCustomPointAnnotation) {
@@ -1283,13 +1414,17 @@ extension EditItineraryViewController: RAReorderableLayoutDataSource, RAReordera
         if collectionView == self.collectionView {
             debugPrint("i am loading a collectionView cell")
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ItineraryMapCollectionViewCell.reuseIdentifier, for: indexPath) as! ItineraryMapCollectionViewCell
-//            cell.delegate = self
+            cell.delegate = self
             let item = (itinerary?.items)![indexPath.row]
             if let count = itinerary?.routes?.count {
                 if indexPath.row < count {
                     let route = itinerary?.routes?[indexPath.row]
                     route?.startItem = itinerary?.items?[indexPath.row]
                     route?.endItem = itinerary?.items?[indexPath.row + 1]
+                    debugPrint("======")
+                    debugPrint(route?.startItem?.name)
+                    debugPrint(route?.endItem?.name)
+                    debugPrint("----------")
                     cell.configureWith(item: item, route: route, isLowBudgetVisiting: ((itinerary?.budget)! <= 100 && (itinerary?.tripType)! == FooyoConstants.tripType.FullDay.rawValue))
                     return cell
                 }
@@ -1319,7 +1454,19 @@ extension EditItineraryViewController: RAReorderableLayoutDataSource, RAReordera
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: false)
-//        gotoItemDetail(id: (itinerary?.items?[indexPath.row].id)!, from: .FromItineraryEditMap)
+        if let items = itinerary?.items {
+            let item = items[indexPath.row]
+            if homePage == FooyoConstants.PageSource.FromMyPlan {
+                if isDisplayMode {
+                    item.isInEditMode = false
+                } else {
+                    item.isInEditMode = true
+                }
+                PostMyPlanItemSelectionNotification(item: item)
+            } else if homePage == FooyoConstants.PageSource.FromAddToPlan {
+                PostAddToPlanItemSelectionNotification(item: item)
+            }
+        }
     }
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
@@ -1390,5 +1537,35 @@ extension EditItineraryViewController: RAReorderableLayoutDataSource, RAReordera
 extension EditItineraryViewController: DisplayItineraryListViewControllerDelegate {
     func displayItineraryListViewControllerUpdateTheMode() {
         self.updateMode()
+    }
+}
+
+extension EditItineraryViewController: ItineraryMapCollectionViewCellDelegate {
+    func didTapRoute(route: FooyoRoute) {
+        var start: FooyoIndex?
+        var end: FooyoIndex?
+        if let item = route.startItem {
+            let category = item.category?.name
+            let one = item.levelOneId
+            let two = item.levelTwoId
+            start = FooyoIndex(category: category, levelOneId: one, levelTwoId: two)
+        }
+        if let item = route.endItem {
+            let category = item.category?.name
+            let one = item.levelOneId
+            let two = item.levelTwoId
+            end = FooyoIndex(category: category, levelOneId: one, levelTwoId: two)
+        }
+        let vc = FooyoNavigationViewController(startIndex: start, endIndex: end)
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func didTapNavigation(item: FooyoItem) {
+        let category = item.category?.name
+        let one = item.levelOneId
+        let two = item.levelTwoId
+        let index = FooyoIndex(category: category, levelOneId: one, levelTwoId: two)
+        let vc = FooyoNavigationViewController(startIndex: nil, endIndex: index)
+        self.navigationController?.pushViewController(vc, animated: true)
     }
 }

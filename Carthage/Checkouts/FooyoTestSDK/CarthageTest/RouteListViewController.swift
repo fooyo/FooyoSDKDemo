@@ -162,6 +162,11 @@ public class FooyoNavigationViewController: UIViewController {
                 self.navigationController?.navigationBar.isHidden = true
             }
         }
+        if self.navigationController?.isNavigationBarHidden == false {
+            UIView.animate(withDuration: 0.3) {
+                self.navigationController?.isNavigationBarHidden = true
+            }
+        }
     }
     
     func checkCoordValid(coord: CLLocationCoordinate2D) -> Bool {
@@ -187,12 +192,13 @@ public class FooyoNavigationViewController: UIViewController {
                 })
             } else if start.isLocation() {
                 startItem = FooyoItem.items.first(where: { (item) -> Bool in
-                    debugPrint(parseOptionalString(input: item.category?.name))
-                    debugPrint(parseOptionalString(input: item.levelOneId))
                     let checkOne = parseOptionalString(input: start.category) == parseOptionalString(input: item.category?.name)
                     let checkTwo = parseOptionalString(input: start.levelOneId) == parseOptionalString(input: item.levelOneId)
                     return checkOne && checkTwo
                 })
+            }
+            if startItem == nil {
+                displayAlert(title: "Internal Error", message: "The FooyoIndex given for the startpoint is incorrect.", complete: nil)
             }
         }
         if let end = end {
@@ -210,12 +216,19 @@ public class FooyoNavigationViewController: UIViewController {
                     return checkOne && checkTwo
                 })
             }
+            if endItem == nil {
+                displayAlert(title: "Internal Error", message: "The FooyoIndex given for the startpoint is incorrect.", complete: nil)
+            }
         }
+        
         
         if let end = endItem {
             endLabel.text = end.name
             endItem = end
             endCoord = end.getCoor()
+            if endItem?.name?.lowercased().contains("universal studio") == true {
+                endCoord = CLLocationCoordinate2D(latitude: 1.256455, longitude: 103.821418)
+            }
         } else {
             endLabel.text = "Select A Location..."
             endItem = nil
@@ -224,6 +237,9 @@ public class FooyoNavigationViewController: UIViewController {
         if let start = startItem {
             startLabel.text = start.name
             startCoord = start.getCoor()
+            if startItem?.name?.lowercased().contains("universal studio") == true {
+                startCoord = CLLocationCoordinate2D(latitude: 1.256455, longitude: 103.821418)
+            }
             if endCoord != nil {
                 refreshData()
             }
@@ -264,19 +280,19 @@ public class FooyoNavigationViewController: UIViewController {
         controllerTwo.parentVC = self
         controllerArray.append(controllerTwo)
         
-        //        let controllerThree = ItineraryListViewController(itineraries: Itinerary.past)
+//                let controllerThree = ItineraryListViewController(itineraries: Itinerary.past)
         let controllerThree = RouteTableViewController()
-//        controllerThree.parentVC = self
-        controllerThree.title = "CAR"
+        //        controllerThree.parentVC = self
+        controllerThree.title = "TRANSPORTATION"
         controllerThree.parentVC = self
         controllerArray.append(controllerThree)
         
         let controllerFour = RouteTableViewController()
         //        controllerThree.parentVC = self
-        controllerFour.title = "TRANSPORTATION"
+        controllerFour.title = "CAR"
         controllerFour.parentVC = self
         controllerArray.append(controllerFour)
-        
+
         let parameters: [CAPSPageMenuOption] = [
             CAPSPageMenuOption.scrollMenuBackgroundColor(.white),
             CAPSPageMenuOption.viewBackgroundColor(.white),
@@ -320,11 +336,11 @@ public class FooyoNavigationViewController: UIViewController {
         if let walk = walkingRoutes {
             controllerArray[1].reConfigure(routes: walk)
         }
-        if let car = carRoutes {
-            controllerArray[2].reConfigure(routes: car)
-        }
         if let bus = busRoutes {
-            controllerArray[3].reConfigure(routes: bus)
+            controllerArray[2].reConfigure(routes: bus)
+        }
+        if let car = carRoutes {
+            controllerArray[3].reConfigure(routes: car)
         }
     }
     
@@ -405,6 +421,10 @@ public class FooyoNavigationViewController: UIViewController {
                     each.endItem = end
                 }
             }
+            debugPrint("i am sorting the routes")
+            for each in routes {
+                debugPrint(each.type)
+            }
             walkingRoutes = routes.filter({ (route) -> Bool in
                 return route.type == FooyoConstants.RouteType.Walking.rawValue
             })
@@ -444,11 +464,16 @@ public class FooyoNavigationViewController: UIViewController {
         bigBack.snp.makeConstraints { (make) in
             make.leading.equalToSuperview()
             make.top.equalTo(topLayoutGuide.snp.bottom).offset(Scale.scaleY(y: 10))
-            make.width.height.equalTo(Scale.scaleY(y: 30))
+            make.width.height.equalTo(Scale.scaleY(y: 40))
+//            make.height.equalTo(Scale.scaleY(y: 100))
         }
         backButton.snp.makeConstraints { (make) in
             make.center.equalToSuperview()
             make.width.height.equalTo(Scale.scaleY(y: 16))
+//            make.top.equalTo(Scale.scaleY(y: <#T##CGFloat#>))
+//            make.centerY.equalTo(Scale.scaleY(y: -35))
+//            make.centerY.equalToSuperview()
+//            make.top.equalToSuperview()
         }
         
         switchIcon.snp.makeConstraints { (make) in
@@ -537,6 +562,9 @@ public class FooyoNavigationViewController: UIViewController {
                 endItem = item
                 endCoord = endItem?.getCoor()
                 endLabel.text = endItem?.name
+                if endItem?.name?.lowercased().contains("universal studio") == true {
+                    endCoord = CLLocationCoordinate2D(latitude: 1.256455, longitude: 103.821418)
+                }
                 if startCoord != nil {
                     pagination.reset()
                     refreshData()
@@ -545,6 +573,10 @@ public class FooyoNavigationViewController: UIViewController {
                 startItem = item
                 startCoord = startItem?.getCoor()
                 startLabel.text = startItem?.name
+                if startItem?.name?.lowercased().contains("universal studio") == true {
+                    startCoord = CLLocationCoordinate2D(latitude: 1.256455, longitude: 103.821418)
+                }
+
                 if endCoord != nil {
                     pagination.reset()
                     refreshData()

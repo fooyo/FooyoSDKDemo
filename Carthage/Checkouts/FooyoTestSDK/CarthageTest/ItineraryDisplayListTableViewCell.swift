@@ -10,6 +10,7 @@ import UIKit
 import AlamofireImage
 protocol ItineraryDisplayListTableViewCellDelegate: class {
     func didTapRoute(route: FooyoRoute)
+    func didTapNavigation(item: FooyoItem)
 }
 
 class ItineraryDisplayListTableViewCell: UITableViewCell {
@@ -17,10 +18,12 @@ class ItineraryDisplayListTableViewCell: UITableViewCell {
     weak var delegate: ItineraryDisplayListTableViewCellDelegate?
     
     fileprivate var route: FooyoRoute?
-
+    fileprivate var item: FooyoItem?
+    
     fileprivate var containerView: UIView! = {
         let t = UIView()
         t.backgroundColor = UIColor.ospGrey10
+        t.isUserInteractionEnabled = true
         return t
     }()
     fileprivate var numberLabel: UILabel! = {
@@ -97,6 +100,7 @@ class ItineraryDisplayListTableViewCell: UITableViewCell {
     fileprivate var lowerPart: UIView! = {
         let t = UIView()
         t.backgroundColor = UIColor.ospGrey20
+        t.isUserInteractionEnabled = true
         return t
     }()
     fileprivate var transportationIcon: UIImageView! = {
@@ -110,6 +114,21 @@ class ItineraryDisplayListTableViewCell: UITableViewCell {
         t.font = UIFont.DefaultRegularWithSize(size: Scale.scaleY(y: 11))
         return t
     }()
+    var goBtn: UIView! = {
+        let t = UIView()
+        t.backgroundColor = UIColor.ospSentosaOrange
+        t.layer.cornerRadius = Scale.scaleY(y: 30) / 2
+        t.isUserInteractionEnabled = true
+        return t
+    }()
+    
+    var goBtnInside: UIImageView! = {
+        let t = UIImageView()
+        t.applyBundleImage(name: "basemap_direction")
+        t.contentMode = .scaleAspectFit
+        return t
+    }()
+
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         selectionStyle = .none
@@ -128,12 +147,16 @@ class ItineraryDisplayListTableViewCell: UITableViewCell {
         containerView.addSubview(timeLabel)
         containerView.addSubview(reviewImage)
         containerView.addSubview(reviewLabel)
+        containerView.addSubview(goBtn)
+        goBtn.addSubview(goBtnInside)
         contentView.addSubview(lowerPart)
         lowerPart.addSubview(transportationIcon)
         lowerPart.addSubview(transportationLabel)
         setConstraints()
-//        let gesture = UITapGestureRecognizer(target: self, action: #selector(navHandler))
-//        navView.addGestureRecognizer(gesture)
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(navHandler))
+        lowerPart.addGestureRecognizer(gesture)
+        let gestureTwo = UITapGestureRecognizer(target: self, action: #selector(goHandler))
+        goBtn.addGestureRecognizer(gestureTwo)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -143,6 +166,11 @@ class ItineraryDisplayListTableViewCell: UITableViewCell {
         delegate?.didTapRoute(route: route!)
     }
     
+    func goHandler() {
+        if let item = item {
+            delegate?.didTapNavigation(item: item)
+        }
+    }
     func setConstraints() {
         numberLabel.snp.makeConstraints { (make) in
             make.width.height.equalTo(Scale.scaleY(y: 14))
@@ -218,6 +246,15 @@ class ItineraryDisplayListTableViewCell: UITableViewCell {
             make.centerY.equalToSuperview()
             make.leading.equalTo(avatarView)
         }
+        goBtn.snp.makeConstraints { (make) in
+            make.width.height.equalTo(Scale.scaleY(y: 30))
+            make.centerY.equalToSuperview()
+            make.trailing.equalTo(Scale.scaleX(x: -20))
+        }
+        goBtnInside.snp.makeConstraints { (make) in
+            make.width.height.equalTo(Scale.scaleY(y: 19))
+            make.center.equalToSuperview()
+        }
     }
     
     func configureWith(item: FooyoItem, route: FooyoRoute? = nil, index: Int, isFirst: Bool = false, isLast: Bool = false) {
@@ -232,7 +269,7 @@ class ItineraryDisplayListTableViewCell: UITableViewCell {
         }
         nameLabel.text = item.name
         timeLabel.text = item.getDuration()
-        reviewLabel.text = item.rating
+        reviewLabel.text = item.getRatingStr()
         numberLabel.text = "\(index)"
         if route == nil {
 //            lowerPart.backgroundColor = .white
@@ -266,6 +303,7 @@ class ItineraryDisplayListTableViewCell: UITableViewCell {
             }
         }
         self.route = route
+        self.item = item
     }
 
 }

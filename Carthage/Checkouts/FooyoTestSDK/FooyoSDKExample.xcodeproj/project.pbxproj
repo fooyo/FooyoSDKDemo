@@ -44,10 +44,10 @@
 		852037A21F1D0F6C000D2B7F /* TGPControls.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 852037641F1D023C000D2B7F /* TGPControls.framework */; };
 		852037D91F1DA6F8000D2B7F /* FooyoSDK.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 852037D81F1DA6F8000D2B7F /* FooyoSDK.bundle */; };
 		852037E21F1DE4C2000D2B7F /* FooyoSDK.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 852037D81F1DA6F8000D2B7F /* FooyoSDK.bundle */; };
+		85309BED1F7FF8F400DF3399 /* FontBlaster.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85309BEC1F7FF8F400DF3399 /* FontBlaster.swift */; };
+		85309BEE1F7FF96A00DF3399 /* FontBlaster.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85309BEC1F7FF8F400DF3399 /* FontBlaster.swift */; };
 		853E6F7F1F71793800631A05 /* RAReorderableLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 853E6F7E1F71793800631A05 /* RAReorderableLayout.swift */; };
 		853E6F801F71793F00631A05 /* RAReorderableLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 853E6F7E1F71793800631A05 /* RAReorderableLayout.swift */; };
-		853E6F821F7216FD00631A05 /* DisplayItineraryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 853E6F811F7216FD00631A05 /* DisplayItineraryViewController.swift */; };
-		853E6F831F72186400631A05 /* DisplayItineraryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 853E6F811F7216FD00631A05 /* DisplayItineraryViewController.swift */; };
 		853E6F851F72471A00631A05 /* DisplayItineraryListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 853E6F841F72471A00631A05 /* DisplayItineraryListViewController.swift */; };
 		853E6F871F7249A200631A05 /* ItineraryDisplayListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 853E6F861F7249A200631A05 /* ItineraryDisplayListTableViewCell.swift */; };
 		853E6F881F726A2B00631A05 /* ItineraryDisplayListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 853E6F861F7249A200631A05 /* ItineraryDisplayListTableViewCell.swift */; };
@@ -206,6 +206,12 @@
 		85CDE1DC1F7022F600DEC6AE /* ItinerarySmallTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85CDE1DA1F70217A00DEC6AE /* ItinerarySmallTableViewCell.swift */; };
 		85CDE1DE1F71116B00DEC6AE /* EditItineraryListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85CDE1DD1F71116B00DEC6AE /* EditItineraryListViewController.swift */; };
 		85CDE1DF1F71169000DEC6AE /* EditItineraryListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85CDE1DD1F71116B00DEC6AE /* EditItineraryListViewController.swift */; };
+		85D8C9E11F7B925100C2379F /* NewEditItineraryListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D8C9E01F7B925100C2379F /* NewEditItineraryListViewController.swift */; };
+		85D8C9E31F7B935500C2379F /* ItemListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D8C9E21F7B935500C2379F /* ItemListViewController.swift */; };
+		85D8C9E71F7B93E800C2379F /* ItemSummaryTwoTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D8C9E61F7B93E800C2379F /* ItemSummaryTwoTableViewCell.swift */; };
+		85D8C9E81F7BA5EB00C2379F /* NewEditItineraryListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D8C9E01F7B925100C2379F /* NewEditItineraryListViewController.swift */; };
+		85D8C9E91F7BA60C00C2379F /* ItemListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D8C9E21F7B935500C2379F /* ItemListViewController.swift */; };
+		85D8C9EA1F7BA62300C2379F /* ItemSummaryTwoTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D8C9E61F7B93E800C2379F /* ItemSummaryTwoTableViewCell.swift */; };
 		85DD04521F663C9D005B36C1 /* CategoryTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DD04511F663C9D005B36C1 /* CategoryTableViewCell.swift */; };
 		85DD04531F664519005B36C1 /* CategoryTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DD04511F663C9D005B36C1 /* CategoryTableViewCell.swift */; };
 		85DD04551F68242B005B36C1 /* SearchHistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85DD04541F68242B005B36C1 /* SearchHistoryViewController.swift */; };
@@ -269,8 +275,8 @@
 		8520378A1F1D0E08000D2B7F /* FooyoTestSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FooyoTestSDK.h; sourceTree = "<group>"; };
 		8520378B1F1D0E08000D2B7F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		852037D81F1DA6F8000D2B7F /* FooyoSDK.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = FooyoSDK.bundle; sourceTree = "<group>"; };
+		85309BEC1F7FF8F400DF3399 /* FontBlaster.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FontBlaster.swift; sourceTree = "<group>"; };
 		853E6F7E1F71793800631A05 /* RAReorderableLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RAReorderableLayout.swift; sourceTree = "<group>"; };
-		853E6F811F7216FD00631A05 /* DisplayItineraryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DisplayItineraryViewController.swift; sourceTree = "<group>"; };
 		853E6F841F72471A00631A05 /* DisplayItineraryListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DisplayItineraryListViewController.swift; sourceTree = "<group>"; };
 		853E6F861F7249A200631A05 /* ItineraryDisplayListTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItineraryDisplayListTableViewCell.swift; sourceTree = "<group>"; };
 		854331C71F6E38D200A15F6A /* JVFloatLabeledText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JVFloatLabeledText.framework; path = Carthage/Build/iOS/JVFloatLabeledText.framework; sourceTree = "<group>"; };
@@ -360,6 +366,9 @@
 		85CDE1D71F701C6C00DEC6AE /* ItinerarySummaryMapCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItinerarySummaryMapCollectionViewCell.swift; sourceTree = "<group>"; };
 		85CDE1DA1F70217A00DEC6AE /* ItinerarySmallTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItinerarySmallTableViewCell.swift; sourceTree = "<group>"; };
 		85CDE1DD1F71116B00DEC6AE /* EditItineraryListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditItineraryListViewController.swift; sourceTree = "<group>"; };
+		85D8C9E01F7B925100C2379F /* NewEditItineraryListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewEditItineraryListViewController.swift; sourceTree = "<group>"; };
+		85D8C9E21F7B935500C2379F /* ItemListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemListViewController.swift; sourceTree = "<group>"; };
+		85D8C9E61F7B93E800C2379F /* ItemSummaryTwoTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemSummaryTwoTableViewCell.swift; sourceTree = "<group>"; };
 		85DD04511F663C9D005B36C1 /* CategoryTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryTableViewCell.swift; sourceTree = "<group>"; };
 		85DD04541F68242B005B36C1 /* SearchHistoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchHistoryViewController.swift; sourceTree = "<group>"; };
 		85DD04561F68316C005B36C1 /* ItemSummaryTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemSummaryTableViewCell.swift; sourceTree = "<group>"; };
@@ -565,15 +574,13 @@
 		858C60731F532C9800750BDF /* Plan */ = {
 			isa = PBXGroup;
 			children = (
+				85D8C9E51F7B938F00C2379F /* Create */,
+				85D8C9E41F7B937100C2379F /* My Plan */,
 				854331CA1F6E672600A15F6A /* EditItineraryViewController.swift */,
 				85CDE1DD1F71116B00DEC6AE /* EditItineraryListViewController.swift */,
-				858C60781F537DD100750BDF /* MyItineraryViewController.swift */,
-				858C60761F537DB000750BDF /* ItineraryListViewController.swift */,
-				858C60741F532CBC00750BDF /* CreatePlanViewController.swift */,
+				85D8C9E01F7B925100C2379F /* NewEditItineraryListViewController.swift */,
+				85D8C9E21F7B935500C2379F /* ItemListViewController.swift */,
 				858C60941F53B1A300750BDF /* AddToPlanViewController.swift */,
-				852037671F1D0322000D2B7F /* ChooseThemeViewController.swift */,
-				853E6F811F7216FD00631A05 /* DisplayItineraryViewController.swift */,
-				853E6F841F72471A00631A05 /* DisplayItineraryListViewController.swift */,
 			);
 			name = Plan;
 			sourceTree = "<group>";
@@ -581,8 +588,8 @@
 		858C607A1F53802100750BDF /* PageMenuCodes */ = {
 			isa = PBXGroup;
 			children = (
-				858C607B1F53802100750BDF /* CAPSPageMenu+Options.swift */,
 				858C607C1F53802100750BDF /* CAPSPageMenu+UIConfiguration.swift */,
+				858C607B1F53802100750BDF /* CAPSPageMenu+Options.swift */,
 				858C607D1F53802100750BDF /* CAPSPageMenu+UIGestureRecognizerDelegate.swift */,
 				858C607E1F53802100750BDF /* CAPSPageMenu+UIScrollViewDelegate.swift */,
 				858C607F1F53802100750BDF /* CAPSPageMenu.swift */,
@@ -603,6 +610,7 @@
 				85DD04511F663C9D005B36C1 /* CategoryTableViewCell.swift */,
 				85DD04561F68316C005B36C1 /* ItemSummaryTableViewCell.swift */,
 				856DB2CA1F6843C9004EA0AA /* EmptyTableViewCell.swift */,
+				85D8C9E61F7B93E800C2379F /* ItemSummaryTwoTableViewCell.swift */,
 			);
 			name = Table;
 			sourceTree = "<group>";
@@ -695,6 +703,7 @@
 		85AF46FC1F31D90C002CC6E5 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
+				85309BEC1F7FF8F400DF3399 /* FontBlaster.swift */,
 				852037801F1D07B6000D2B7F /* DateTimeTool.swift */,
 				8520377E1F1D072C000D2B7F /* Constant.swift */,
 				8520376C1F1D0405000D2B7F /* Scale.swift */,
@@ -725,6 +734,25 @@
 				8592E2191F6E20EB00C5093F /* AnimatedTextField.swift */,
 			);
 			name = General;
+			sourceTree = "<group>";
+		};
+		85D8C9E41F7B937100C2379F /* My Plan */ = {
+			isa = PBXGroup;
+			children = (
+				853E6F841F72471A00631A05 /* DisplayItineraryListViewController.swift */,
+				858C60781F537DD100750BDF /* MyItineraryViewController.swift */,
+				858C60761F537DB000750BDF /* ItineraryListViewController.swift */,
+			);
+			name = "My Plan";
+			sourceTree = "<group>";
+		};
+		85D8C9E51F7B938F00C2379F /* Create */ = {
+			isa = PBXGroup;
+			children = (
+				858C60741F532CBC00750BDF /* CreatePlanViewController.swift */,
+				852037671F1D0322000D2B7F /* ChooseThemeViewController.swift */,
+			);
+			name = Create;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -923,7 +951,6 @@
 				856DB2D11F68F29A004EA0AA /* FooyoUser.swift in Sources */,
 				8520376B1F1D0372000D2B7F /* BaseViewControllerTest.swift in Sources */,
 				858C60651F52FBB200750BDF /* FeatureInputTableViewCell.swift in Sources */,
-				853E6F821F7216FD00631A05 /* DisplayItineraryViewController.swift in Sources */,
 				854331CB1F6E672600A15F6A /* EditItineraryViewController.swift in Sources */,
 				85AF46F41F31D78C002CC6E5 /* CustomCalloutViewItinerary.swift in Sources */,
 				858C60621F525D0C00750BDF /* ShowOnMapInputViewController.swift in Sources */,
@@ -940,6 +967,7 @@
 				858C60851F53802100750BDF /* CAPSPageMenu+UIScrollViewDelegate.swift in Sources */,
 				8520377D1F1D06C3000D2B7F /* UIImage-SS.swift in Sources */,
 				852037691F1D0322000D2B7F /* ChooseThemeViewController.swift in Sources */,
+				85D8C9E71F7B93E800C2379F /* ItemSummaryTwoTableViewCell.swift in Sources */,
 				858C605F1F524F3D00750BDF /* FeatureTableViewCell.swift in Sources */,
 				85839F171F6D66EA00944F28 /* Date+Format.swift in Sources */,
 				8520377F1F1D072C000D2B7F /* Constant.swift in Sources */,
@@ -955,6 +983,7 @@
 				85839F161F6D66EA00944F28 /* Date+Components.swift in Sources */,
 				85839F151F6D66EA00944F28 /* Date+Comparators.swift in Sources */,
 				858C60821F53802100750BDF /* CAPSPageMenu+Options.swift in Sources */,
+				85D8C9E11F7B925100C2379F /* NewEditItineraryListViewController.swift in Sources */,
 				85AF46F61F31D78C002CC6E5 /* CustomAnnotationView.swift in Sources */,
 				85839F1C1F6D66EA00944F28 /* Enums.swift in Sources */,
 				85839ECB1F6D490900944F28 /* NavigationItemView.swift in Sources */,
@@ -973,6 +1002,7 @@
 				858C608B1F53811300750BDF /* ItineraryTableViewCell.swift in Sources */,
 				85AF46F91F31D8D4002CC6E5 /* HTTPClient.swift in Sources */,
 				858C60951F53B1A300750BDF /* AddToPlanViewController.swift in Sources */,
+				85D8C9E31F7B935500C2379F /* ItemListViewController.swift in Sources */,
 				85DD04571F68316C005B36C1 /* ItemSummaryTableViewCell.swift in Sources */,
 				85839F191F6D66EA00944F28 /* Date+Manipulations.swift in Sources */,
 				858C60701F530B3000750BDF /* Pagination.swift in Sources */,
@@ -980,6 +1010,7 @@
 				858C608D1F53873B00750BDF /* MainTabViewController.swift in Sources */,
 				852037711F1D0437000D2B7F /* NSobject-SS.swift in Sources */,
 				858C60841F53802100750BDF /* CAPSPageMenu+UIGestureRecognizerDelegate.swift in Sources */,
+				85309BED1F7FF8F400DF3399 /* FontBlaster.swift in Sources */,
 				858C60931F53B05300750BDF /* AddToPlanInputViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -997,18 +1028,20 @@
 				858C609E1F53C87800750BDF /* CAPSPageMenu+Options.swift in Sources */,
 				858C609F1F53C87800750BDF /* CAPSPageMenu+UIConfiguration.swift in Sources */,
 				858C60A01F53C87800750BDF /* CAPSPageMenu+UIGestureRecognizerDelegate.swift in Sources */,
+				85309BEE1F7FF96A00DF3399 /* FontBlaster.swift in Sources */,
 				85839ECC1F6D508500944F28 /* NavigationItemView.swift in Sources */,
 				85CDE1CE1F6FFC8300DEC6AE /* LXReorderableCollectionViewFlowLayout.m in Sources */,
 				858C60A11F53C87800750BDF /* CAPSPageMenu+UIScrollViewDelegate.swift in Sources */,
 				858C60A21F53C87800750BDF /* CAPSPageMenu.swift in Sources */,
 				858C60A31F53C87800750BDF /* CAPSPageMenuConfiguration.swift in Sources */,
+				85D8C9E91F7BA60C00C2379F /* ItemListViewController.swift in Sources */,
 				85CDE1BF1F6FFC5B00DEC6AE /* Date+Comparators.swift in Sources */,
 				858C60A41F53C87800750BDF /* MenuItemView.swift in Sources */,
 				858C60A51F53C87800750BDF /* MyItineraryViewController.swift in Sources */,
+				85D8C9EA1F7BA62300C2379F /* ItemSummaryTwoTableViewCell.swift in Sources */,
 				85CDE1BC1F6FFBFD00DEC6AE /* ItinerarySummaryCollectionViewCell.swift in Sources */,
 				858C60A61F53C87800750BDF /* ItineraryListViewController.swift in Sources */,
 				858C60A71F53C87800750BDF /* CreatePlanViewController.swift in Sources */,
-				853E6F831F72186400631A05 /* DisplayItineraryViewController.swift in Sources */,
 				85CDE1C31F6FFC6500DEC6AE /* Date+Manipulations.swift in Sources */,
 				85CDE1DC1F7022F600DEC6AE /* ItinerarySmallTableViewCell.swift in Sources */,
 				85839EC91F6C1EA500944F28 /* RouteListTableViewCell.swift in Sources */,
@@ -1030,6 +1063,7 @@
 				85CDE1C11F6FFC6000DEC6AE /* Date+Format.swift in Sources */,
 				85CDE1BE1F6FFC5900DEC6AE /* Date+Bundle.swift in Sources */,
 				85CDE1D91F701F2100DEC6AE /* ItinerarySummaryMapCollectionViewCell.swift in Sources */,
+				85D8C9E81F7BA5EB00C2379F /* NewEditItineraryListViewController.swift in Sources */,
 				855DFC2B1F569FF700684194 /* FooyoIndex.swift in Sources */,
 				85A39D321F514FC000BDDD9A /* CustomCalloutView.swift in Sources */,
 				856DB2D21F68F332004EA0AA /* FooyoUser.swift in Sources */,

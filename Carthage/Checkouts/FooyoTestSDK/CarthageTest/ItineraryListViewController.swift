@@ -109,7 +109,7 @@ extension ItineraryListViewController: UITableViewDelegate, UITableViewDataSourc
         tableView.deselectRow(at: indexPath, animated: false)
         if itineraries.count > 0 {
             tableView.deselectRow(at: indexPath, animated: false)
-            let itinerary = itineraries[indexPath.row]
+            let itinerary = itineraries[indexPath.row].makeCopy()
             gotoDisplayItinerary(itinerary: itinerary, parentVC: parentVC)
 //            let vc = EditItineraryViewController(itinerary: itinerary)
 //            vc.hidesBottomBarWhenPushed = true

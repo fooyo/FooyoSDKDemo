@@ -46,7 +46,10 @@ class MainTabViewController: UITabBarController {
             return ExploreViewController()
         case 1:
 //            return FooyoMyPlanViewController(userId: nil)
-            return FooyoMyPlanViewController(userId: ACCNUser.currentUser.userId)
+            let vc = FooyoMyPlanViewController(userId: ACCNUser.currentUser.userId)
+            vc.delegate = self
+            return vc
+            
         case 2:
             let vc = FooyoBaseMapViewController(hideTheDefaultNavigationBar: true)
             vc.delegate = self
@@ -60,9 +63,29 @@ class MainTabViewController: UITabBarController {
 }
 
 extension MainTabViewController: FooyoBaseMapViewControllerDelegate {
-    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex) {
+    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex, isEditingAPlan: Bool) {
+        debugPrint(isEditingAPlan)
         debugPrint(index.category)
         debugPrint(index.levelOneId)
         debugPrint(index.levelTwoId)
+        if isEditingAPlan {
+            FooyoSDKAddToTheEditingPlan(index: index)
+        } else {
+            debugPrint("normall add to plan")
+        }
+    }
+}
+
+extension MainTabViewController: FooyoMyPlanViewControllerDelegate {
+    func fooyoMyPlanViewController(didSelectInformationWindow index: FooyoIndex, isEditingAPlan: Bool) {
+        debugPrint(isEditingAPlan)
+        debugPrint(index.category)
+        debugPrint(index.levelOneId)
+        debugPrint(index.levelTwoId)
+        if isEditingAPlan {
+            FooyoSDKAddToTheEditingPlan(index: index)
+        } else {
+            debugPrint("normall add to plan")
+        }
     }
 }

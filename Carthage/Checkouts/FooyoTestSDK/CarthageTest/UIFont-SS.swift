@@ -10,13 +10,15 @@ import UIKit
 
 extension UIFont {
     class func DefaultRegularWithSize(size: CGFloat) -> UIFont {
-        //        return UIFont(name: "PingFangSC", size: size)!
-        return UIFont.systemFont(ofSize: size)
+                return UIFont(name: "Quicksand-Regular", size: size)!
+//        return UIFont.systemFont(ofSize: size)
     }
     class func DefaultSemiBoldWithSize(size: CGFloat) -> UIFont {
-        return UIFont.systemFont(ofSize: size, weight: UIFontWeightSemibold)
+        return UIFont(name: "Quicksand-Medium", size: size)!
+//        return UIFont.systemFont(ofSize: size, weight: UIFontWeightSemibold)
     }
     class func DefaultBoldWithSize(size: CGFloat) -> UIFont {
-        return UIFont.systemFont(ofSize: size, weight: UIFontWeightBold)
+        return UIFont(name: "Quicksand-Bold", size: size)!
+//        return UIFont.systemFont(ofSize: size, weight: UIFontWeightBold)
     }
 }

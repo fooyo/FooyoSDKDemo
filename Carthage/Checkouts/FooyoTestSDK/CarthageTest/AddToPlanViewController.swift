@@ -8,9 +8,12 @@
 
 import UIKit
 import SVProgressHUD
+public protocol FooyoAddToPlanViewControllerDelegate: class {
+    func fooyoAddToPlanViewController(didSelectInformationWindow index: FooyoIndex, isEditingAPlan: Bool)
+}
 
 public class FooyoAddToPlanViewController: UIViewController {
-    
+    public weak var delegate: FooyoAddToPlanViewControllerDelegate?
     fileprivate var items: [FooyoItem]?
     fileprivate var index: FooyoIndex?
     fileprivate var overlay: UIView! = {
@@ -79,6 +82,15 @@ public class FooyoAddToPlanViewController: UIViewController {
         self.index = index
         FooyoUser.currentUser.userId = userId
         items = FooyoItem.findMatch(index: index)
+//        debugPrint("i am in the init")
+//        debugPrint(index.category)
+//        debugPrint(index.levelOneId)
+//        debugPrint(items)
+//        debugPrint(items?.count)
+//        if items?.count == 0 {
+//            debugPrint("Cannot find any matched location in the database.")
+//            displayAlert(title: "Error", message: "Cannot find any matched location in the database.", complete: nil)
+//        }
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -89,6 +101,10 @@ public class FooyoAddToPlanViewController: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        NotificationCenter.default.addObserver(self, selector: #selector(itinerarySaved(notification:)), name: FooyoConstants.notifications.FooyoSavedItinerary, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(itemSelected(notification:)), name: FooyoConstants.notifications.FooyoAddToPlanItemSelected, object: nil)
+
         applyGeneralVCSettings(vc: self)
         view.backgroundColor = .clear
         view.addSubview(overlay)
@@ -96,6 +112,9 @@ public class FooyoAddToPlanViewController: UIViewController {
         view.addSubview(container)
         container.addSubview(containerOverlay)
         container.addSubview(newBtn)
+        if items == nil {
+            newBtn.isEnabled = false
+        }
         container.addSubview(inforLabel)
         container.addSubview(tableView)
         tableView.delegate = self
@@ -120,8 +139,14 @@ public class FooyoAddToPlanViewController: UIViewController {
                 self.navigationController?.navigationBar.isHidden = true
             }
         }
-    }
+        if self.navigationController?.isNavigationBarHidden == false {
+            UIView.animate(withDuration: 0.3) {
+                self.navigationController?.isNavigationBarHidden = true
+            }
+        }
 
+    }
+    
     func loadData() {
         if let _ = FooyoUser.currentUser.userId {
             if FooyoItinerary.myItineraries == nil {
@@ -144,14 +169,18 @@ public class FooyoAddToPlanViewController: UIViewController {
     
     func setContainer() {
         var gotItineraries = false
-        if FooyoItinerary.todayAndFuture.count > 0 {
+        if FooyoItinerary.todayAndFuture.count > 0 && items != nil {
             gotItineraries = true
         }
         
         if gotItineraries {
             inforLabel.text = "Add To An Existing Plan"
         } else {
-            inforLabel.text = "There Is No Upcoming Plan"
+            if items == nil {
+                inforLabel.text = "Internal Error"
+            } else {
+                inforLabel.text = "There Is No Upcoming Plan"
+            }
         }
         container.snp.remakeConstraints { (make) in
             make.leading.equalTo(Scale.scaleX(x: 20))
@@ -163,15 +192,15 @@ public class FooyoAddToPlanViewController: UIViewController {
             }
             make.bottom.equalTo(crossButton.snp.top).offset(Scale.scaleY(y: -29))
         }
-        containerOverlay.snp.makeConstraints { (make) in
+        containerOverlay.snp.remakeConstraints { (make) in
             make.edges.equalToSuperview()
         }
-        inforLabel.snp.makeConstraints { (make) in
+        inforLabel.snp.remakeConstraints { (make) in
             make.top.equalTo(10)
             make.leading.equalToSuperview()
             make.trailing.equalToSuperview()
         }
-        tableView.snp.makeConstraints { (make) in
+        tableView.snp.remakeConstraints { (make) in
 //            if gotItineraries {
 //            } else {
 //                make.height.equalTo(0)
@@ -182,13 +211,13 @@ public class FooyoAddToPlanViewController: UIViewController {
             make.leading.equalToSuperview()
             make.trailing.equalToSuperview()
         }
-        newBtn.snp.makeConstraints { (make) in
+        newBtn.snp.remakeConstraints { (make) in
             make.height.equalTo(40)
             make.leading.equalTo(Scale.scaleX(x: 20))
             make.trailing.equalTo(Scale.scaleX(x: -20))
             make.bottom.equalTo(Scale.scaleY(y: -10))
         }
-        crossButton.snp.makeConstraints { (make) in
+        crossButton.snp.remakeConstraints { (make) in
             make.height.width.equalTo(Scale.scaleY(y: 40))
             if gotItineraries {
                 make.bottom.equalTo(Scale.scaleY(y: -60))
@@ -209,16 +238,30 @@ public class FooyoAddToPlanViewController: UIViewController {
     }
     func newHandler() {
         let vc = FooyoCreatePlanViewController(userId: FooyoUser.currentUser.userId!)
+        vc.homePage = .FromAddToPlan
         vc.mustGoPlaces = items
         let nav = UINavigationController(rootViewController: vc)
         self.present(nav, animated: true, completion: nil)
+    }
+    func itinerarySaved(notification: Notification) {
+        if let _ = notification.object as? FooyoItinerary {
+            setContainer()
+            self.tableView.reloadData()
+        }
+    }
+    func itemSelected(notification: Notification) {
+        debugPrint("i am receiving")
+        if let item = notification.object as? FooyoItem {
+            debugPrint("i am receiving a fooyo item")
+            delegate?.fooyoAddToPlanViewController(didSelectInformationWindow: item.getFooyoIndex(), isEditingAPlan: true)
+        }
     }
 }
 
 extension FooyoAddToPlanViewController: UITableViewDelegate, UITableViewDataSource {
     
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if FooyoItinerary.todayAndFuture.count > 0 {
+        if FooyoItinerary.todayAndFuture.count > 0 && items != nil {
             return FooyoItinerary.todayAndFuture.count
         } else {
             return 1
@@ -226,9 +269,13 @@ extension FooyoAddToPlanViewController: UITableViewDelegate, UITableViewDataSour
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if FooyoItinerary.todayAndFuture.count == 0 {
+        if FooyoItinerary.todayAndFuture.count == 0 || items == nil {
             let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier, for: indexPath) as! EmptyTableViewCell
-            cell.configureWith("Create a new plan to enjoy your visit.")
+            if items == nil {
+                cell.configureWith("The FooyoIndex given is incorrect.")
+            } else {
+                cell.configureWith("Create a new plan to enjoy your visit.")
+            }
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: ItinerarySmallTableViewCell.reuseIdentifier, for: indexPath)  as! ItinerarySmallTableViewCell
@@ -240,7 +287,7 @@ extension FooyoAddToPlanViewController: UITableViewDelegate, UITableViewDataSour
     }
     
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if FooyoItinerary.todayAndFuture.count == 0 {
+        if FooyoItinerary.todayAndFuture.count == 0 || items == nil  {
             return tableView.frame.height
         } else {
             return Scale.scaleY(y: 130)
@@ -250,19 +297,53 @@ extension FooyoAddToPlanViewController: UITableViewDelegate, UITableViewDataSour
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
         debugPrint(FooyoItinerary.todayAndFuture.count)
-        if FooyoItinerary.todayAndFuture.count != 0 {
-            let plan = FooyoItinerary.todayAndFuture[indexPath.row]
-            if let items = items {
-                plan.items?.append(contentsOf: items)
+        if FooyoItinerary.todayAndFuture.count != 0 && items != nil {
+            let plan = FooyoItinerary.todayAndFuture[indexPath.row].makeCopy()
+            debugPrint("=======")
+            debugPrint(plan.name)
+            debugPrint(plan.items?.count)
+            debugPrint(items?.count)
+            if let planItems = plan.items {
+                if let items = items {
+                    for each in planItems {
+                        for subeach in items {
+                            debugPrint("plan item id: \(each.id), match item id: \(subeach.id)")
+                            if each.id == subeach.id {
+                                displayAlert(title: "Warning", message: "The place is already inside the chosen plan.\nRepeated visiting is not supported in the current version.", complete: nil)
+                                return
+                            }
+                        }
+                    }
+                    plan.items?.append(contentsOf: items)
+                    debugPrint(plan.items?.count)
+                }
             }
-            _ = gotoEditItinerary(itinerary: plan)
+            _ = gotoEditItinerary(itinerary: plan, homePage: FooyoConstants.PageSource.FromAddToPlan)
         }
     }
 }
 
 extension FooyoAddToPlanViewController: ItinerarySmallTableViewCellDelegate {
     func ItinerarySmallTableViewCellDidTapped(itinerary: FooyoItinerary) {
-        _ = gotoEditItinerary(itinerary: itinerary)
+//        _ = gotoEditItinerary(itinerary: itinerary)
+        if FooyoItinerary.todayAndFuture.count != 0 && items != nil {
+//            let plan = FooyoItinerary.todayAndFuture[indexPath.row]
+            if let planItems = itinerary.items {
+                if let items = items {
+                    for each in planItems {
+                        for subeach in items {
+                            debugPrint("plan item id: \(each.id), match item id: \(subeach.id)")
+                            if each.id == subeach.id {
+                                displayAlert(title: "Warning", message: "The place is already inside the chosen plan.\nRepeated visiting is not supported in the current version.", complete: nil)
+                                return
+                            }
+                        }
+                    }
+                    itinerary.items?.append(contentsOf: items)
+                }
+            }
+            _ = gotoEditItinerary(itinerary: itinerary, homePage: FooyoConstants.PageSource.FromAddToPlan)
+        }
     }
 }
 

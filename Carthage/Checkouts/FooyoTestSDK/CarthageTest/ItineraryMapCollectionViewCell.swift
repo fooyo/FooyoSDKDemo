@@ -10,13 +10,14 @@ import UIKit
 import AlamofireImage
 protocol ItineraryMapCollectionViewCellDelegate: class {
     func didTapRoute(route: FooyoRoute)
-    func didTapAdd()
+    func didTapNavigation(item: FooyoItem)
 }
 class ItineraryMapCollectionViewCell: UICollectionViewCell {
     static let reuseIdentifier = "itineraryMapCollectionViewCell"
     weak var delegate: ItineraryMapCollectionViewCellDelegate?
     
     fileprivate var route: FooyoRoute?
+    fileprivate var item: FooyoItem?
     fileprivate var itemContentView: UIView! = {
         let t = UIView()
         t.backgroundColor = .white
@@ -76,6 +77,21 @@ class ItineraryMapCollectionViewCell: UICollectionViewCell {
         return t
     }()
     
+    var goBtn: UIView! = {
+        let t = UIView()
+        t.backgroundColor = UIColor.ospSentosaOrange
+        t.layer.cornerRadius = Scale.scaleY(y: 30) / 2
+        t.isUserInteractionEnabled = true
+        return t
+    }()
+    
+    var goBtnInside: UIImageView! = {
+        let t = UIImageView()
+        t.applyBundleImage(name: "basemap_direction")
+        t.contentMode = .scaleAspectFit
+        return t
+    }()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.backgroundColor = .clear
@@ -90,7 +106,12 @@ class ItineraryMapCollectionViewCell: UICollectionViewCell {
         itemContentView.addSubview(tagLabel)
         itemContentView.addSubview(startLabel)
         itemContentView.addSubview(visitLabel)
+        itemContentView.addSubview(goBtn)
+        goBtn.addSubview(goBtnInside)
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(goHandler))
+        goBtn.addGestureRecognizer(gesture)
         contentView.addSubview(navView)
+        
         navView.addSubview(navBtn)
         navView.addSubview(timeLabel)
         navBtn.addTarget(self, action: #selector(navHandler), for: .touchUpInside)
@@ -101,15 +122,17 @@ class ItineraryMapCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func goHandler() {
+        if let item = self.item {
+            delegate?.didTapNavigation(item: item)
+        }
+    }
     func navHandler() {
         if let route = route {
             delegate?.didTapRoute(route: route)
         }
     }
     
-    func addHandler() {
-        delegate?.didTapAdd()
-    }
     func setConstraints() {
         itemContentView.snp.makeConstraints { (make) in
             make.top.equalToSuperview()
@@ -158,9 +181,21 @@ class ItineraryMapCollectionViewCell: UICollectionViewCell {
             make.centerX.equalTo(navBtn)
             make.bottom.equalToSuperview()
         }
+        goBtn.snp.makeConstraints { (make) in
+            make.height.width.equalTo(Scale.scaleY(y: 30))
+            make.bottom.equalTo(Scale.scaleY(y: -5))
+            make.trailing.equalTo(Scale.scaleX(x: -5))
+        }
+        goBtnInside.snp.makeConstraints { (make) in
+            make.height.width.equalTo(Scale.scaleY(y: 19))
+            make.center.equalToSuperview()
+        }
     }
     
     func configureWith(item: FooyoItem, route: FooyoRoute? = nil, isLowBudgetVisiting: Bool = false) {
+        self.item = item
+        self.route = route
+        
         if let image = item.coverImages {
             let size = CGSize(width: Scale.scaleX(x: 72), height: Scale.scaleY(y: 106))
             avatarView.af_setImage(
@@ -209,6 +244,5 @@ class ItineraryMapCollectionViewCell: UICollectionViewCell {
                 navBtn.setImage(UIImage.getBundleImage(name: "navigation_smallwalk", replaceColor: .white), for: .normal)
             }
         }
-        self.route = route
     }
 }

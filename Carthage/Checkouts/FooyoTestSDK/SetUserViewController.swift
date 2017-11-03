@@ -59,9 +59,15 @@ class SetUserViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
         if self.navigationController?.navigationBar.isHidden == true {
             UIView.animate(withDuration: 0.3) {
                 self.navigationController?.navigationBar.isHidden = false
+            }
+        }
+        if self.navigationController?.isNavigationBarHidden == true {
+            UIView.animate(withDuration: 0.3) {
+                self.navigationController?.isNavigationBarHidden = false
             }
         }
     }

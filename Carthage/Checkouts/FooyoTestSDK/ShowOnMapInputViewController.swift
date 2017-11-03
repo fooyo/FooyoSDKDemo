@@ -70,6 +70,11 @@ class ShowOnMapInputViewController: UIViewController {
                 self.navigationController?.navigationBar.isHidden = false
             }
         }
+        if self.navigationController?.isNavigationBarHidden == true {
+            UIView.animate(withDuration: 0.3) {
+                self.navigationController?.isNavigationBarHidden = false
+            }
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -80,6 +85,25 @@ class ShowOnMapInputViewController: UIViewController {
     
     func btnHandler() {
 //        debugDescription
+        
+        let index = FooyoIndex(category: "Fun Shops")
+//        let index = FooyoIndex(category: "Interactive Trails", levelOneId: "6225")
+        
+        let vc = FooyoBaseMapViewController(index: index, hideTheDefaultNavigationBar: false)
+        let nav = UINavigationController(rootViewController: vc)
+        self.present(nav, animated: true, completion: nil)
+//        self.navigationController?.pushViewController(vc, animated: true)
+//        nav.navigationBar.isHidden = true
+//        nav.modalPresentationStyle = .overFullScreen
+//        
+//        let topController = UIApplication.
+//        topController?.present(nav, animated: true, completion: nil)
+//        self.navigationController?.navigationBar.isTranslucent = true
+//        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+//        self.navigationController?.navigationBar.shadowImage = UIImage()
+//        self.navigationController?.navigationBar.backgroundColor = .clear
+//        self.navigationController?.pushViewController(vc, animated: true)
+        return
         
         if let category = category {
             if category == "" {
@@ -126,7 +150,8 @@ class ShowOnMapInputViewController: UIViewController {
 }
 
 extension ShowOnMapInputViewController: FooyoBaseMapViewControllerDelegate {
-    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex) {
+    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex, isEditingAPlan: Bool) {
+        debugPrint(isEditingAPlan)
         debugPrint(index.category)
         debugPrint(index.levelOneId)
         debugPrint(index.levelTwoId)

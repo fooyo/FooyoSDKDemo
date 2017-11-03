@@ -10,14 +10,19 @@ import UIKit
 import Mapbox
 import AlamofireImage
 import SVProgressHUD
+import Alamofire
 
 public protocol FooyoBaseMapViewControllerDelegate: class {
-    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex)
+    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex, isEditingAPlan: Bool)
 }
+
 //import
 public class FooyoBaseMapViewController: UIViewController {
     public weak var delegate: FooyoBaseMapViewControllerDelegate?
     
+    fileprivate var isNavHidden: Bool?
+    
+    fileprivate var filterBtmSpace = Scale.scaleY(y: 10)
     //MARK: - Variables for LDR Info
     fileprivate var ldrView: UIView! = {
         let t = UIView()
@@ -143,14 +148,16 @@ public class FooyoBaseMapViewController: UIViewController {
 
     //MARK: - Variables for general map
     var hideBar = true
-    var sourcePage = FooyoConstants.PageSource.FromHomeMap
+//    var sourcePage = FooyoConstants.PageSource.FromHomeMap
     
     var items: [FooyoItem]?
     fileprivate var scaled = false
     //MARK: - Variables for MapView
     var mapView: MGLMapView!
     var mapCenter: CLLocationCoordinate2D?
-    
+    //offline
+    var progressView: UIProgressView!
+
     var allAnnotations = [MyCustomPointAnnotation]()
     var searchItem: FooyoItem?
     var searchAnnotation: MyCustomPointAnnotation?
@@ -240,6 +247,7 @@ public class FooyoBaseMapViewController: UIViewController {
         t.backgroundColor = UIColor.ospSentosaGreen
         t.layer.cornerRadius = Scale.scaleY(y: 52) / 2
         t.isUserInteractionEnabled = true
+//        t.isHidden = true
         return t
     }()
     
@@ -360,6 +368,10 @@ public class FooyoBaseMapViewController: UIViewController {
         super.viewDidLoad()
         
         // Do any additional setup after loading the view.
+        if index != nil {
+            setupShowOnMapNavigationBar()
+        }
+        
         applyGeneralVCSettings(vc: self)
         
         NotificationCenter.default.addObserver(self, selector: #selector(displayAlert(notification:)), name: FooyoConstants.notifications.FooyoDisplayAlert, object: nil)
@@ -374,6 +386,8 @@ public class FooyoBaseMapViewController: UIViewController {
         
         loadPlaces()
         loadCategries(withLoading: false)
+        
+    
     }
     
     override public func viewDidAppear(_ animated: Bool) {
@@ -394,14 +408,17 @@ public class FooyoBaseMapViewController: UIViewController {
             if let annotations = mapView.annotations as? [MyCustomPointAnnotation] {
                 let anno = annotations[0]
                 let item = anno.item
-                mapView.setCenter((item?.getCoor())!, zoomLevel: 15, direction: 0, animated: true) {
-                    if self.index?.category != FooyoConstants.CategoryName.Fun.rawValue {
+                if self.index?.category != FooyoConstants.CategoryName.Fun.rawValue {
+                    mapView.setCenter((item?.getCoor())!, zoomLevel: 15, direction: 0, animated: true) {
                         self.mapView.selectAnnotation(anno, animated: true)
                     }
+                } else {
+                    navigationItem.title = self.index?.category
                 }
             }
         }
 
+        isNavHidden = self.navigationController?.navigationBar.isHidden
 //        if self.navigationController?.navigationBar.isHidden == false {
 //            UIView.animate(withDuration: 0.3, animations: { 
 //                self.navigationController?.navigationBar.isHidden = true
@@ -411,19 +428,32 @@ public class FooyoBaseMapViewController: UIViewController {
     
     override public func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        debugPrint("i am appearing")
+        debugPrint(hideBar)
         if hideBar {
-            if self.navigationController?.isNavigationBarHidden == false {
+            if self.navigationController?.navigationBar.isHidden == false {
                 UIView.animate(withDuration: 0.3, animations: {
-                    self.navigationController?.isNavigationBarHidden = true
+                    self.navigationController?.navigationBar.isHidden = true
                 })
+            }
+            if self.navigationController?.isNavigationBarHidden == false {
+                UIView.animate(withDuration: 0.3) {
+                    self.navigationController?.isNavigationBarHidden = true
+                }
             }
         } else {
-            if self.navigationController?.isNavigationBarHidden == true {
+            if self.navigationController?.navigationBar.isHidden == true {
                 UIView.animate(withDuration: 0.3, animations: {
-                    self.navigationController?.isNavigationBarHidden = false
+                    self.navigationController?.navigationBar.isHidden = false
                 })
             }
+            if self.navigationController?.isNavigationBarHidden == true {
+                UIView.animate(withDuration: 0.3) {
+                    self.navigationController?.isNavigationBarHidden = false
+                }
+            }
         }
+        
     }
     
     
@@ -462,12 +492,13 @@ public class FooyoBaseMapViewController: UIViewController {
     }
     
     func ldrGoBtnHandler() {
-        let category = FooyoConstants.CategoryName.Trails.rawValue
+        let category = FooyoConstants.CategoryName.Fun.rawValue
         let one = selectedItem?.levelOneId
         let index = FooyoIndex(category: category, levelOneId: one!)
         let vc = FooyoNavigationViewController(startIndex: nil, endIndex: index)
         vc.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(vc, animated: true)
+        dismissLDRFilter()
     }
     
     func setLDRViewConstraints() {
@@ -578,7 +609,7 @@ public class FooyoBaseMapViewController: UIViewController {
     
     func setupMapView() {
 //        mapView = MGLMapView(frame: view.bounds)
-        mapView = MGLMapView()
+        mapView = MGLMapView(frame: CGRect.zero, styleURL: URL(string: "mapbox://styles/pushian/cj8313byya3lp2so6gvh49efn"))
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
         // Set the map’s center coordinate and zoom level.
@@ -586,6 +617,7 @@ public class FooyoBaseMapViewController: UIViewController {
         mapView.setCenter(mapCenter!, zoomLevel: FooyoConstants.initZoomLevel, animated: false)
 //        fitMap()
         mapView.showsUserLocation = true
+//        mapView.user  
         mapView.delegate = self
         view.addSubview(mapView)
         mapView.snp.makeConstraints { (make) in
@@ -594,6 +626,12 @@ public class FooyoBaseMapViewController: UIViewController {
             make.top.equalToSuperview()
             make.bottom.equalToSuperview()
         }
+        
+        //offline
+        // Setup offline pack notification handlers.
+        NotificationCenter.default.addObserver(self, selector: #selector(offlinePackProgressDidChange), name: NSNotification.Name.MGLOfflinePackProgressChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(offlinePackDidReceiveError), name: NSNotification.Name.MGLOfflinePackError, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(offlinePackDidReceiveMaximumAllowedMapboxTiles), name: NSNotification.Name.MGLOfflinePackMaximumMapboxTilesReached, object: nil)
     }
     
     func setupOtherViews() {
@@ -623,11 +661,15 @@ public class FooyoBaseMapViewController: UIViewController {
 //        view.addSubview(filterView)
         if let vc = self.tabBarController {
             vc.view.addSubview(filterView)
+//            if UITabBar.appearance().isTranslucent == false {
+//                filterBtmSpace = 49 + Scale.scaleY(y: 10)
+//            }
         } else if let vc = self.navigationController {
             vc.view.addSubview(filterView)
         } else {
             view.addSubview(filterView)
         }
+        
         filterView.addSubview(overLay)
         let overLayGesture = UITapGestureRecognizer(target: self, action: #selector(dismissFilter))
         overLay.addGestureRecognizer(overLayGesture)
@@ -794,7 +836,8 @@ public class FooyoBaseMapViewController: UIViewController {
     
     //MARK: Handler
     func ldrHandler(item: FooyoItem) {
-        ldrTitle.text = parseOptionalString(input: item.name) + "\n" + parseOptionalString(input: item.region, defaultValue: "Pending")
+        ldrOverLay.isUserInteractionEnabled = false
+        ldrTitle.text = parseOptionalString(input: item.name) + "\n" + parseOptionalString(input: item.region, defaultValue: "")
         ldrTimeContent.text = item.operation
         ldrBusContent.text = item.gettingThere
         ldrParkContent.text = item.carpark
@@ -802,6 +845,7 @@ public class FooyoBaseMapViewController: UIViewController {
         UIView.animate(withDuration: 0.3) {
             self.ldrView.transform = CGAffineTransform.init(translationX: 0, y: -FooyoConstants.mainHeight)
         }
+        
     }
     
     func dismissLDRFilter() {
@@ -855,9 +899,47 @@ public class FooyoBaseMapViewController: UIViewController {
         mapView.userTrackingMode = .followWithHeading
     }
     func goBtnHandler() {
-        let vc = FooyoNavigationViewController(startIndex: nil, endIndex: nil)
-        vc.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(vc, animated: true)
+        if mapView.annotations != nil {
+            if mapView.annotations?.count == 1 {
+                if let anno = mapView.annotations?[0] as? MyCustomPointAnnotation {
+                    if let item = anno.item {
+                        let index = item.getFooyoIndex()
+                        let vc = FooyoNavigationViewController(startIndex: nil, endIndex: index)
+                        vc.hidesBottomBarWhenPushed = true
+                        self.navigationController?.pushViewController(vc, animated: true)
+                    }
+                }
+            } else {
+                debugPrint(mapView.selectedAnnotations.count)
+                if let annos = mapView.selectedAnnotations as? [MyCustomPointAnnotation] {
+                    if annos.count > 0 {
+                        let anno = annos[0]
+                        if let item = anno.item {
+                            let index = item.getFooyoIndex()
+                            let vc = FooyoNavigationViewController(startIndex: nil, endIndex: index)
+                            vc.hidesBottomBarWhenPushed = true
+                            self.navigationController?.pushViewController(vc, animated: true)
+                        }
+                    } else {
+                        if index != nil {
+                            displayAlert(title: "Reminder", message: "Please select your destination for navigation", complete: nil)
+                        } else {
+                            let vc = FooyoNavigationViewController(startIndex: nil, endIndex: nil)
+                            vc.hidesBottomBarWhenPushed = true
+                            self.navigationController?.pushViewController(vc, animated: true)
+                        }
+                    }
+                } else {
+                    if index != nil {
+                        displayAlert(title: "Reminder", message: "Please select your destination for navigation", complete: nil)
+                    } else {
+                        let vc = FooyoNavigationViewController(startIndex: nil, endIndex: nil)
+                        vc.hidesBottomBarWhenPushed = true
+                        self.navigationController?.pushViewController(vc, animated: true)
+                    }
+                }
+            }
+        }
     }
     
     func crossHandler() {
@@ -917,9 +999,10 @@ public class FooyoBaseMapViewController: UIViewController {
         clearMapView()
         var allAnno = [MyCustomPointAnnotation]()
         if let index = index {
+            
             searchView.isHidden = true
             filterBtn.isHidden = true
-            goBtn.isHidden = true
+//            goBtn.isHidden = true
             if index.isLocation() {
                 allAnno = allAnnotations.filter({ (annotation) -> Bool in
                     if (annotation.item?.category?.name)!.lowercased() == (index.category)!.lowercased() && annotation.item?.levelOneId == index.levelOneId {
@@ -994,6 +1077,30 @@ public class FooyoBaseMapViewController: UIViewController {
             searchIcon.isHidden = true
             reloadMapIcons()
         }
+    }
+    
+    func setupShowOnMapNavigationBar() {
+        let cancelBtn = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(showOnMapCancelHandler))
+        navigationItem.leftBarButtonItem = cancelBtn
+    }
+    
+    func showOnMapCancelHandler() {
+        if isModal() {
+            _ = self.dismiss(animated: true, completion: nil)
+        } else {
+            self.navigationController?.popViewController(animated: true)
+        }
+    }
+    
+    func isModal() -> Bool {
+        if self.presentingViewController != nil {
+            return true
+        } else if self.navigationController?.presentingViewController?.presentedViewController == self.navigationController  {
+            return true
+        } else if self.tabBarController?.presentingViewController is UITabBarController {
+            return true
+        }
+        return false
     }
 }
 
@@ -1071,6 +1178,15 @@ extension FooyoBaseMapViewController: MGLMapViewDelegate {
             // If there’s no reusable annotation view available, initialize a new one.
         }
         return nil
+    }
+    
+    //offline
+    public func mapViewDidFinishLoadingMap(_ mapView: MGLMapView) {
+        // Start downloading tiles and resources for z13-16.
+        if FooyoUser.currentUser.haveCheckedTheOfflineMapWifi && FooyoUser.currentUser.haveCheckedTheOfflineMapData {
+        } else {
+            startOfflinePackDownload()
+        }
     }
     public func mapViewDidFinishRenderingFrame(_ mapView: MGLMapView, fullyRendered: Bool) {
         if let annotations = mapView.annotations {
@@ -1221,7 +1337,7 @@ extension FooyoBaseMapViewController: MGLMapViewDelegate {
                 let category = (item.category?.name)!
                 let levelOneId = (item.levelOneId)!
                 let index = FooyoIndex(category: category, levelOneId: levelOneId)
-                self.delegate?.fooyoBaseMapViewController(didSelectInformationWindow: index)
+                self.delegate?.fooyoBaseMapViewController(didSelectInformationWindow: index, isEditingAPlan: false)
             }
             debugPrint("taped on the cell")
         }
@@ -1277,9 +1393,9 @@ extension FooyoBaseMapViewController: UITableViewDelegate, UITableViewDataSource
             case 0:
                 cell.configureWith(leftIcon: UIImage.getBundleImage(name: "basemap_all"), title: "Show All")
             case FooyoCategory.others.count + 1:
-                cell.configureWith(leftIcon: UIImage.getBundleImage(name: "basemap_all"), title: "Amenities", rightIcon: UIImage.getBundleImage(name: "general_rightarrow"))
+                cell.configureWith(leftIcon: UIImage.getBundleImage(name: "basemap_amenities"), title: "Amenities", rightIcon: UIImage.getBundleImage(name: "general_rightarrow"))
             case FooyoCategory.others.count + 2:
-                cell.configureWith(leftIcon: UIImage.getBundleImage(name: "basemap_all"), title: "Transportations", rightIcon: UIImage.getBundleImage(name: "general_rightarrow"))
+                cell.configureWith(leftIcon: UIImage.getBundleImage(name: "basemap_transportation"), title: "Transportations", rightIcon: UIImage.getBundleImage(name: "general_rightarrow"))
             default:
                 let category = FooyoCategory.others[indexPath.row - 1]
                 cell.configureWith(leftIcon: category.icon, title: category.name, rightIcon: nil)
@@ -1363,4 +1479,132 @@ extension FooyoBaseMapViewController: UITableViewDelegate, UITableViewDataSource
     }
     
     
+}
+
+extension FooyoBaseMapViewController {
+    func startOfflinePackDownload() {
+        // Create a region that includes the current viewport and any tiles needed to view it when zoomed further in.
+        // Because tile count grows exponentially with the maximum zoom level, you should be conservative with your `toZoomLevel` setting.
+        
+        // Store some data for identification purposes alongside the downloaded resources.
+       
+        // Create and register an offline pack with the shared offline storage object.
+        
+//        if NSKeyedArchiver
+        if let packs = MGLOfflineStorage.shared().packs {
+            debugPrint(packs.count)
+            for each in packs {
+//                debugPrint(each.context.wi)
+            }
+            debugPrint("i have so many")
+            if packs.count == 0 {
+                download()
+            }
+        } else {
+            download()
+        }
+        
+    }
+    
+    func download() {
+        if NetworkReachabilityManager()!.isReachableOnEthernetOrWiFi {
+            if FooyoUser.currentUser.haveCheckedTheOfflineMapWifi {
+                return
+            }
+            let alertController = UIAlertController(title: "Reminder", message: "Do you want to download the offline map using WIFI?\nThe package size is around 70.5 MB.", preferredStyle: .alert)
+
+            alertController.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action) in
+                self.realDownload()
+            }))
+            alertController.addAction(UIAlertAction(title: "Cancel", style: .default, handler: nil))
+            present(alertController, animated: true, completion: nil)
+            FooyoUser.currentUser.haveCheckedTheOfflineMapWifi = true
+            
+        } else if NetworkReachabilityManager()!.isReachableOnWWAN {
+            if FooyoUser.currentUser.haveCheckedTheOfflineMapData {
+                return
+            }
+            let alertController = UIAlertController(title: "Reminder", message: "Do you want to download the offline map using Mobile Data?\nThe package size is around 70.5 MB.", preferredStyle: .alert)
+
+            alertController.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action) in
+                self.realDownload()
+            }))
+            alertController.addAction(UIAlertAction(title: "Cancel", style: .default, handler: nil))
+            present(alertController, animated: true, completion: nil)
+            FooyoUser.currentUser.haveCheckedTheOfflineMapData = true
+        }
+        
+        
+
+    }
+    
+    func realDownload() {
+        let bound = MGLCoordinateBounds.init(sw: CLLocationCoordinate2D(latitude: 1.234570, longitude: 103.805291), ne: CLLocationCoordinate2D(latitude: 1.268332, longitude: 103.850052))
+        let region = MGLTilePyramidOfflineRegion(styleURL: mapView.styleURL, bounds: bound, fromZoomLevel: mapView.zoomLevel, toZoomLevel: 16)
+        let userInfo = ["name": "My Offline Pack"]
+        let context = NSKeyedArchiver.archivedData(withRootObject: userInfo)
+        
+        MGLOfflineStorage.shared().addPack(for: region, withContext: context) { (pack, error) in
+            guard error == nil else {
+                // The pack couldn’t be created for some reason.
+                print("Error: \(error?.localizedDescription ?? "unknown error")")
+                return
+            }
+            
+            // Start downloading.
+            pack!.resume()
+        }
+    }
+    // MARK: - MGLOfflinePack notification handlers
+    
+    @objc func offlinePackProgressDidChange(notification: NSNotification) {
+        // Get the offline pack this notification is regarding,
+        // and the associated user info for the pack; in this case, `name = My Offline Pack`
+        if let pack = notification.object as? MGLOfflinePack,
+            let userInfo = NSKeyedUnarchiver.unarchiveObject(with: pack.context) as? [String: String] {
+            let progress = pack.progress
+            // or notification.userInfo![MGLOfflinePackProgressUserInfoKey]!.MGLOfflinePackProgressValue
+            let completedResources = progress.countOfResourcesCompleted
+            let expectedResources = progress.countOfResourcesExpected
+            
+            // Calculate current progress percentage.
+            let progressPercentage = Float(completedResources) / Float(expectedResources)
+            
+            // Setup the progress bar.
+            if progressView == nil {
+                progressView = UIProgressView(progressViewStyle: .default)
+                let frame = view.bounds.size
+                progressView.frame = CGRect(x: frame.width / 4, y: frame.height * 0.75, width: frame.width / 2, height: 30)
+                view.addSubview(progressView)
+            }
+            
+            progressView.progress = progressPercentage
+            
+            // If this pack has finished, print its size and resource count.
+            if completedResources == expectedResources {
+                let byteCount = ByteCountFormatter.string(fromByteCount: Int64(pack.progress.countOfBytesCompleted), countStyle: ByteCountFormatter.CountStyle.memory)
+                print("Offline pack “\(userInfo["name"] ?? "unknown")” completed: \(byteCount), \(completedResources) resources")
+                progressView.isHidden = true
+            } else {
+                // Otherwise, print download/verification progress.
+                print("Offline pack “\(userInfo["name"] ?? "unknown")” has \(completedResources) of \(expectedResources) resources — \(progressPercentage * 100)%.")
+            }
+        }
+    }
+    
+    @objc func offlinePackDidReceiveError(notification: NSNotification) {
+        if let pack = notification.object as? MGLOfflinePack,
+            let userInfo = NSKeyedUnarchiver.unarchiveObject(with: pack.context) as? [String: String],
+            let error = notification.userInfo?[MGLOfflinePackUserInfoKey.error] as? NSError {
+            print("Offline pack “\(userInfo["name"] ?? "unknown")” received error: \(error.localizedFailureReason ?? "unknown error")")
+        }
+    }
+    
+    @objc func offlinePackDidReceiveMaximumAllowedMapboxTiles(notification: NSNotification) {
+        if let pack = notification.object as? MGLOfflinePack,
+            let userInfo = NSKeyedUnarchiver.unarchiveObject(with: pack.context) as? [String: String],
+            let maximumCount = (notification.userInfo?[MGLOfflinePackUserInfoKey.maximumCount] as AnyObject).uint64Value {
+            print("Offline pack “\(userInfo["name"] ?? "unknown")” reached limit of \(maximumCount) tiles.")
+        }
+    }
 }

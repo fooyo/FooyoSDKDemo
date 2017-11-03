@@ -85,12 +85,16 @@ class NavigationInputViewController: UIViewController {
         var startIndex: FooyoIndex?
         var endIndex: FooyoIndex?
         
+//        debugPrint(startCategory)
+//        debugPrint(startLvlOneID)
         if let start = startCategory, let one = startLvlOneID {
             if let two = startLvlTwoID {
                 startIndex = FooyoIndex(category: start, levelOneId: one, levelTwoId: two)
             } else {
                 startIndex = FooyoIndex(category: start, levelOneId: one)
             }
+        } else {
+            startIndex = FooyoIndex(category: "Attractions", levelOneId: "477")
         }
         
         if let end = endCategory, let one = endLvlOneID {
@@ -99,14 +103,21 @@ class NavigationInputViewController: UIViewController {
             } else {
                 endIndex = FooyoIndex(category: end, levelOneId: one)
             }
+        } else {
+            endIndex = FooyoIndex(category: "Attractions", levelOneId: "476")
         }
+        
+        
         let vc = FooyoNavigationViewController(startIndex: startIndex, endIndex: endIndex)
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
     func fieldHandler(sender: UITextField) {
         let tag = sender.tag
-        let text = sender.text!
+        var text: String? = sender.text!
+        if text == "" {
+            text = nil
+        }
         switch tag {
         case 0:
             startCategory = text

@@ -31,6 +31,7 @@ class MainTabViewController: UITabBarController {
         for index in 0..<nameArr.count {
             let rootVc = viewControllerAtIndex(index: index)
             let nav = UINavigationController(rootViewController: rootVc)
+            nav.isNavigationBarHidden = true
             let tabItem = UITabBarItem(title: nameArr[index], image: UIImage(named: "tab\(index + 1)_off"), selectedImage: UIImage(named: "tab\(index + 1)_on"))
             //            tabItem.imageInsets = UIEdgeInsetsMake(6, 0, -6, 0)
             nav.tabBarItem = tabItem
@@ -45,7 +46,10 @@ class MainTabViewController: UITabBarController {
             return ExploreViewController()
         case 1:
 //            return FooyoMyPlanViewController(userId: nil)
-            return FooyoMyPlanViewController(userId: FooyoUser.currentUser.userId)
+            let vc = FooyoMyPlanViewController(userId: FooyoUser.currentUser.userId)
+            vc.delegate = self
+            return vc
+            
         case 2:
             let vc = FooyoBaseMapViewController(hideTheDefaultNavigationBar: true)
             vc.delegate = self
@@ -59,9 +63,29 @@ class MainTabViewController: UITabBarController {
 }
 
 extension MainTabViewController: FooyoBaseMapViewControllerDelegate {
-    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex) {
+    func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex, isEditingAPlan: Bool) {
+        debugPrint(isEditingAPlan)
         debugPrint(index.category)
         debugPrint(index.levelOneId)
         debugPrint(index.levelTwoId)
+        if isEditingAPlan {
+            FooyoSDKAddToTheEditingPlan(index: index)
+        } else {
+            debugPrint("normall add to plan")
+        }
+    }
+}
+
+extension MainTabViewController: FooyoMyPlanViewControllerDelegate {
+    func fooyoMyPlanViewController(didSelectInformationWindow index: FooyoIndex, isEditingAPlan: Bool) {
+        debugPrint(isEditingAPlan)
+        debugPrint(index.category)
+        debugPrint(index.levelOneId)
+        debugPrint(index.levelTwoId)
+        if isEditingAPlan {
+            FooyoSDKAddToTheEditingPlan(index: index)
+        } else {
+            debugPrint("normall add to plan")
+        }
     }
 }

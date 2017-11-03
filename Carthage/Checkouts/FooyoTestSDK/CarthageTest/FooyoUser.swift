@@ -14,6 +14,9 @@ class FooyoUser: NSObject, NSCoding {
     
     var userId: String?
     var searchHistory: [Int]?
+    var haveCheckedTheOfflineMapWifi = false
+    var haveCheckedTheOfflineMapData = false
+
     //
 //    init(json: JSON) {
 //        super.init()
@@ -26,9 +29,11 @@ class FooyoUser: NSObject, NSCoding {
     
     class func awakeCurrentUserFromDefaults() -> Bool {
         let ud = UserDefaults.standard
-        if let data = ud.object(forKey: "current_user") as? NSData {
+        if let data = ud.object(forKey: "current_fooyo_user") as? NSData {
             let u : FooyoUser = NSKeyedUnarchiver.unarchiveObject(with: data as Data) as! FooyoUser
             u.userId = currentUser.userId
+            u.haveCheckedTheOfflineMapData = currentUser.haveCheckedTheOfflineMapData
+            u.haveCheckedTheOfflineMapWifi = currentUser.haveCheckedTheOfflineMapWifi
             currentUser = u
             return true
         }
@@ -38,13 +43,13 @@ class FooyoUser: NSObject, NSCoding {
     func saveToDefaults() {
         let data = NSKeyedArchiver.archivedData(withRootObject: self)
         let ud = UserDefaults.standard
-        ud.set(data, forKey: "current_user")
+        ud.set(data, forKey: "current_fooyo_user")
         ud.synchronize()
     }
     
     class func destoryCurrentUser() {
         let ud = UserDefaults.standard
-        ud.removeObject(forKey: "current_user")
+        ud.removeObject(forKey: "current_fooyo_user")
         ud.synchronize()
     }
     

@@ -22,7 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        Alamofire.DataRequest.addAcceptableImageContentTypes(["image/*"])
 //        Alamofire.DataRequest.addAcceptableImageContentTypes(["image/jpg"])
         FooyoSDKOpenSession()
-        UITabBar.appearance().isTranslucent = false
+        UITabBar.appearance().isTranslucent = true
 
         window = UIWindow(frame: UIScreen.main.bounds)
 //        let vc = ViewController()

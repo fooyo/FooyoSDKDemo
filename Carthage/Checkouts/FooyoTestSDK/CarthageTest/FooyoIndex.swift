@@ -13,16 +13,16 @@ public class FooyoIndex: NSObject {
     public var levelOneId: String?
     public var levelTwoId: String?
     
-    public init(category: String) {
+    public init(category: String?) {
         super.init()
         self.category = category
     }
-    public init(category: String, levelOneId: String) {
+    public init(category: String?, levelOneId: String?) {
         super.init()
         self.category = category
         self.levelOneId = levelOneId
     }
-    public init(category: String, levelOneId: String, levelTwoId: String) {
+    public init(category: String?, levelOneId: String?, levelTwoId: String?) {
         super.init()
         self.category = category
         self.levelOneId = levelOneId

@@ -169,6 +169,7 @@ class FooyoItinerary: BaseModel {
             for index in 0..<myItineraries.count {
                 let iti = myItineraries[index]
                 if iti.id == itineraty.id {
+                    debugPrint("found the same")
                     FooyoItinerary.myItineraries?[index] = itineraty
                     return
                 }

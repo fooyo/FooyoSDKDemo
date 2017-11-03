@@ -45,17 +45,18 @@ extension UIViewController: HttpClientDelegte {
         self.navigationController?.pushViewController(vc, animated: true)
     }
 
-    func gotoEditItinerary(itinerary: FooyoItinerary, newItem: FooyoItem? = nil) -> EditItineraryViewController {
-//        let vc = EditItineraryViewController(itinerary: itinerary, newItem: newItem)
-        let vc = EditItineraryViewController(itinerary: itinerary)
+    func gotoEditItinerary(itinerary: FooyoItinerary, homePage: FooyoConstants.PageSource) -> EditItineraryViewController {
+        let vc = EditItineraryViewController(itinerary: itinerary, homePage: homePage)
         self.navigationController?.pushViewController(vc, animated: true)
         return vc
     }
     
     func gotoDisplayItinerary(itinerary: FooyoItinerary, parentVC: UIViewController? = nil) {
 //        let vc = DisplayItineraryViewController(itinerary: itinerary)
-        let vc = EditItineraryViewController(itinerary: itinerary, isDisplay: true)
+        let vc = EditItineraryViewController(itinerary: itinerary, isDisplay: true, homePage: FooyoConstants.PageSource.FromMyPlan)
         vc.hidesBottomBarWhenPushed = true
+//        let nav = UINavigationController(rootViewController: vc)
+//        self.present(nav, animated: true, completion: nil)
         if let parentVC = parentVC {
             parentVC.navigationController?.pushViewController(vc, animated: true)
         } else {

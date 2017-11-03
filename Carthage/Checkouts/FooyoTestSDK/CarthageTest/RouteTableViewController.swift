@@ -86,7 +86,7 @@ extension RouteTableViewController: UITableViewDelegate, UITableViewDataSource {
             }
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: EmptyTableViewCell.reuseIdentifier) as! EmptyTableViewCell
-            cell.configureWith("Sorry, this feature is currently unavailable.\nBut coming soon!😀")
+            cell.configureWith("")
             return cell
         }
     }

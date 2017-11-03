@@ -48,12 +48,9 @@ struct FooyoConstants {
         static let FooyoSavedItinerary = Notification.Name("FooyoSavedItinerary")
         static let FooyoItineraryDownloaded = Notification.Name("FooyoItineraryDownloaded")
         static let FooyoItineraryAddItem = Notification.Name("FooyoItineraryAddItem")
-
-        static let call = Notification.Name("call")
-        static let message = Notification.Name("message")
-        static let direction = Notification.Name("direction")
-        static let modeSwitch = Notification.Name("mode_switch")
-        
+        static let FooyoAddToPlanItemSelected = Notification.Name("FooyoAddToPlanItemSelected")
+        static let FooyoMyPlanItemSelected = Notification.Name("FooyoMyPlanItemSelected")
+        static let FooyoGetIndexFromBase = Notification.Name("FooyoGetIndexFromBase")
     }
     
     
@@ -83,6 +80,7 @@ struct FooyoConstants {
         case Tram = "Tram"
         case BusA = "Bus A"
         case BusB = "Bus B"
+        case Bus123 = "Bus 123"
         case Drive = "Drive"
     }
     
@@ -93,12 +91,12 @@ struct FooyoConstants {
 
     }
     
-    static let transportationTypes: [FooyoConstants.TransportationType] = [.Foot, .BusA, .BusB, .Drive, .Express, .Tram]
-    static let transportationColors: [UIColor] = [UIColor.walk, UIColor.busA, UIColor.busB, UIColor.drive, UIColor.express, UIColor.tram]
-
+    static let transportationTypes: [FooyoConstants.TransportationType] = [.Foot, .BusA, .BusB, .Bus123, .Express, .Tram]
+    static let transportationColors: [UIColor] = [UIColor.walk, UIColor.busA, UIColor.busB, UIColor.bus123, UIColor.express, UIColor.tram]
+    
     static let coverImageRatio: CGFloat = 0.64
     static let generalErrorMessage: String = "Sorry, there is unexpected error.\nPlease try again later"
-    static let routeNames = [" Walking ", " Bus1 ", " Bus2 ", " Bus3 ", " Express ", " Tram "]
+//    static let routeNames = [" Walking ", " Bus1 ", " Bus2 ", " Bus3 ", " Express ", " Tram "]
 //    static let routeColor = [UIColor.white, UIColor.busOneColor, UIColor.busTwoColor, UIColor.busThreeColor, UIColor.expressColor, UIColor.tramColor]
     static let tripTimeSource = ["Morning", "Afternoon"]
     static let tripDurationSource = ["Half Day", "One Full Day"]
@@ -172,6 +170,8 @@ struct FooyoConstants {
         case FromHomeMap
         case FromItineraryEditMap
         case FromNavigation
+        case FromAddToPlan
+        case FromMyPlan
     }
     
     enum AnnotationId: String {

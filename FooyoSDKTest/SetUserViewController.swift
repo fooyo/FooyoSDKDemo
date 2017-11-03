@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import FooyoTestSDK
 
 class SetUserViewController: UIViewController {
     fileprivate var tableView: UITableView! = {
@@ -75,20 +74,24 @@ class SetUserViewController: UIViewController {
     
     func btnHandler() {
         if let id = id {
-            if id == "" {
-                displayAlert(title: "Reminder", message: "Please give a valid User Id.", complete: nil)
-                return
-            }
             ACCNUser.currentUser.userId = id
             FooyoSDKSignIn(userId: id)
-            //            displayAlert(title: "Done", message: "", complete: nil)
-            displayAlert(title: "Done", message: "User Id is set successfully", complete: { 
+            displayAlert(title: "Done", message: "User Id is set successfully", complete: {
             })
+        } else {
+            ACCNUser.currentUser.userId = "test"
+            FooyoSDKSignIn(userId: "test")
+            displayAlert(title: "Done", message: "User Id is set successfully", complete: {
+            })
+            return
         }
     }
     
     func idChanged(sender: UITextField) {
         self.id = sender.text
+        if self.id == "" {
+            self.id = nil
+        }
     }
 }
 

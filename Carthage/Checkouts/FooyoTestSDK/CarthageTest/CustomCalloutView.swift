@@ -69,7 +69,7 @@ class CustomCalloutView: UIView, MGLCalloutView {
         t.contentMode = .scaleAspectFit
         return t
     }()
-    fileprivate var expandView: UIImageView! = {
+    var expandView: UIImageView! = {
         let t = UIImageView()
         t.applyBundleImage(name: "general_rightarrow")
         t.contentMode = .scaleAspectFit
@@ -130,7 +130,12 @@ class CustomCalloutView: UIView, MGLCalloutView {
             tagLabel.text = rep.item?.getTag()
             switch (rep.item?.category?.name?.lowercased())! {
             case FooyoConstants.CategoryName.Attractions.rawValue.lowercased(), FooyoConstants.CategoryName.Events.rawValue.lowercased(), FooyoConstants.CategoryName.Trails.rawValue.lowercased():
-                reviewLabel.text = parseOptionalString(input: rep.item?.rating, defaultValue: "Pending")
+                reviewLabel.text = rep.item?.getRatingStr()
+                if reviewLabel.text == "" {
+                    reviewView.isHidden = true
+                } else {
+                    reviewView.isHidden = false
+                }
                 expandView.isHidden = false
             case FooyoConstants.CategoryName.Bus.rawValue.lowercased():
                 reviewView.isHidden = true

@@ -68,7 +68,7 @@ class ItinerarySmallTableViewCell: UITableViewCell {
     
     func gestureHandler() {
         if let itinerary = itinerary {
-            delegate?.ItinerarySmallTableViewCellDidTapped(itinerary: itinerary)
+            delegate?.ItinerarySmallTableViewCellDidTapped(itinerary: itinerary.makeCopy())
         }
     }
 

@@ -54,25 +54,25 @@ extension UIColor {
     class var busA: UIColor {
         return UIColor.ospSentosaGreenLightest
     }
-    
     class var busB: UIColor {
         return UIColor.ospSentosaPinkDark
     }
     class var express: UIColor {
         return UIColor.ospSentosaPurpleDark
     }
-    
-    class var drive: UIColor {
-        return UIColor.ospSentosaBlueDarkest
+    class var bus123: UIColor {
+        return UIColor.ospSentosaPinkDark
     }
     class var tram: UIColor {
         return UIColor.ospSentosaRedLightest
     }
-    
     class var walk: UIColor {
         return UIColor.ospSentosaDarkGrey
     }
-    
+    class var drive: UIColor {
+        return UIColor.ospSentosaBlueDarkest
+    }
+
     class var ospSentosaBlue: UIColor {
         return UIColor(red: 0.0, green: 174.0 / 255.0, blue: 239.0 / 255.0, alpha: 1.0)
     }

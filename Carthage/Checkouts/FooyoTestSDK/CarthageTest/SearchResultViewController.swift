@@ -146,13 +146,19 @@ class SearchResultViewController: BaseViewController {
     
     func backHandler() {
 //        _ = self.navigationController?.popViewController(animated: true)
-        _ = self.navigationController?.popToRootViewController(animated: true)
+//        _ = self.navigationController?.popToRootViewController(animated: true)
+        if let sourceVC = sourceVC {
+            _ = self.navigationController?.popToViewController(sourceVC, animated: true)
+        }
     }
     
     func searchHandler() {
-        let vc = SearchHistoryViewController(source: .FromHomeMap)
-        vc.sourceVC = self.sourceVC
-        self.navigationController?.pushViewController(vc, animated: true)
+        if let vc = self.sourceVC {
+            gotoSearchPage(source: self.searchSource, sourceVC: vc)
+        }
+//        let vc = SearchHistoryViewController(source: .FromHomeMap)
+//        vc.sourceVC = self.sourceVC
+//        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     func findMatch() {
@@ -249,14 +255,21 @@ extension SearchResultViewController: UITableViewDelegate, UITableViewDataSource
             
             if searchSource == FooyoConstants.PageSource.FromHomeMap {
                 PostSearchNotification(item: item)
+                _ = self.navigationController?.popToRootViewController(animated: true)
             } else if searchSource == FooyoConstants.PageSource.FromItineraryEditMap {
                 PostItineraryAddItemNotification(item: item)
+                if let sourceVC = sourceVC {
+                    _ = self.navigationController?.popToViewController(sourceVC, animated: true)
+                }
             } else if searchSource == FooyoConstants.PageSource.FromNavigation {
                 PostUpdateNavigationPointNotification(item: item)
+                
+                debugPrint("i am doing from the navigation page")
+                if let sourceVC = sourceVC {
+                    _ = self.navigationController?.popToViewController(sourceVC, animated: true)
+                }
             }
-            if let sourceVC = sourceVC {
-                _ = self.navigationController?.popToViewController(sourceVC, animated: true)
-            }
+           
 
         }
         //        }

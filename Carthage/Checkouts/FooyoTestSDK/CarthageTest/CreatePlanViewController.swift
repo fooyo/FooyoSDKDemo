@@ -20,7 +20,7 @@ public class FooyoCreatePlanViewController: UIViewController {
 
     weak public var delegate: FooyoCreatePlanViewControllerDelegate?
     
-    
+    var homePage: FooyoConstants.PageSource = .FromAddToPlan
     var mustGoPlaces: [FooyoItem]?
     fileprivate var planTitle: String?
     fileprivate var planBudget: Double?
@@ -195,7 +195,7 @@ public class FooyoCreatePlanViewController: UIViewController {
         self.navigationItem.leftBarButtonItem = leftBtn
         self.applyGeneralVCSettings(vc: self)
         NotificationCenter.default.addObserver(self, selector: #selector(displayAlert(notification:)), name: FooyoConstants.notifications.FooyoDisplayAlert, object: nil)
-
+        
         self.navigationItem.title = "Create your day plan"
         view.addSubview(container)
 
@@ -318,7 +318,8 @@ public class FooyoCreatePlanViewController: UIViewController {
 //        FooyoItinerary.newItinerary.budget = 50
 //        FooyoItinerary.newItinerary.tripType = FooyoConstants.tripType.FullDay.rawValue
 //        FooyoItinerary.newItinerary.time = DateTimeTool.fromDateToFormatThree(date: Date())
-        let vc = ChooseThemeViewController()
+//        let vc = ChooseThemeViewController()
+        let vc = EditItineraryViewController(itinerary: FooyoItinerary.newItinerary, homePage: homePage)
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -335,6 +336,7 @@ public class FooyoCreatePlanViewController: UIViewController {
             return
         }, cancel: { ActionStringCancelBlock in return }, origin: view)
         
+        datePicker?.minimumDate = Date()
         let cancel = UIBarButtonItem(title: "Cancel", style: .plain, target: nil, action: nil)
         cancel.setTitleTextAttributes([NSForegroundColorAttributeName: UIColor.ospBlack], for: .normal)
         let done = UIBarButtonItem(title: "Done", style: .done, target: nil, action: nil)

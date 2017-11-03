@@ -67,8 +67,8 @@ Only `Hotspots` of `Non-linear Trails` will have `levelTwoId`. Their `levelOneId
 
 ### Session Activation
 
-```swift
-func FooyoSDKOpenSession()
+```swift 
+FooyoSDKOpenSession()
 ```
 
 `GUIDE` Call this function whenever the app becomes active. All the data required by Fooyo SDK will be loaded at the background.
@@ -76,17 +76,28 @@ func FooyoSDKOpenSession()
 ### User Login
 
 ```swift
-func FooyoSDKSignIn(userId: String)
+FooyoSDKSignIn(userId: String)
 ```
 `GUIDE` Call this function whenever the app achieves the user Id. All the user related data required by Fooyo SDK will be loaded at the background.
 
 ### User Logout
 
 ```swift
-func FooyoSDKSignOut()
+FooyoSDKSignOut()
 ```
 `GUIDE` Call this function whenever the app achieves the user Id. All the user related data locally saved by Fooyo SDK will be removed.
 
+### Add Location To Plan From The Detail Page
+```swift
+FooyoSDKAddToTheEditingPlan(index: FooyoIndex)
+```
+#### When To Call?
+
+- Everytime Fooyo sends a call back function, it will pass back two parameters, one is `FooyoIndex`, and the other is `isEditingAPlan`;
+- When the base system opens the detail page reacting to the call back function, please take both parameters;
+- When the Heart Button is clicked in the detail page:
+    - if the `isEditingAPlan` is false, call the Fooyo SDK function `FooyoAddToPlanViewController(index: FooyoIndex, userId: String)`
+    - if it is true, call the Fooyo SDK function `FooyoSDKAddToTheEditingPlan(index: FooyoIndex)`
 
 ## BaseMap SDK
 
@@ -132,7 +143,8 @@ Delegate Prototal: `FooyoBaseMapViewControllerDelegate`.
 Delegate Function:
 
 ```swift
-func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex) {
+func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex, isEditingAPlan: Bool) {
+        debugPrint(isEditingAPlan)
         debugPrint(index.category)
         debugPrint(index.levelOneId)
         debugPrint(index.levelTwoId)
@@ -141,8 +153,68 @@ func fooyoBaseMapViewController(didSelectInformationWindow index: FooyoIndex) {
 
 This function will be called when the pop-up information window is clicked:
 
-- If the information window of a location/linear trail is clicked, the `category` and the `levelOneId` will be returned;
-- If the information window of a hotspot (of a non-linear trail) is clicked, the `category`, `levelOneId` as well as the `levelTwoId` will all be returned.
+## My Plans SDK
+
+### Initialization
+
+```swift
+let vc = FooyoMyPlanViewController(userId: String?)
+vc.delegate = self
+```
+
+### Delegate Function
+
+Delegate Prototal: `FooyoMyPlanViewControllerDelegate`.
+
+Delegate Function:
+
+```swift
+func fooyoMyPlanViewController(didSelectInformationWindow index: FooyoIndex, isEditingAPlan: Bool) {
+        debugPrint(isEditingAPlan)
+        debugPrint(index.category)
+        debugPrint(index.levelOneId)
+        debugPrint(index.levelTwoId)
+}
+```
+
+## Add To Plan SDK
+
+### Initialization
+
+```swift
+let vc = FooyoAddToPlanViewController(index: FooyoIndex, userId: String)
+let nav = UINavigationController(rootViewController: vc)
+nav.navigationBar.isHidden = true
+nav.modalPresentationStyle = .overFullScreen
+self.present(nav, animated: true, completion: nil)
+```
+
+### SDK Variables
+
+- `index`: FooyoIndex of the location/trail intended to be added to a specific plan (**compulsory**);
+
+- `userId`: Required to fetch the existing plans (**compulsory**);
+
+
+### Delegate Function
+
+Delegate Prototal: `FooyoAddToPlanViewControllerDelegate`.
+
+Delegate Function:
+
+```swift
+func fooyoAddToPlanViewController(didSelectInformationWindow index: FooyoIndex, isEditingAPlan: Bool) {
+        debugPrint(isEditingAPlan)
+        debugPrint(index.category)
+        debugPrint(index.levelOneId)
+        debugPrint(index.levelTwoId)
+}
+```
+
+
+## Upcoming SDK Functions
+
+- To support that the user can open the location detail page within the plan editing pages and add the location into the **currently editing** plan using the "add" button;
 
 ## Navigation SDK
 
@@ -192,35 +264,3 @@ func fooyoCreatePlanViewController(didSaved success: Bool) {
     debugPrint(success)
 }
 ```
-
-## My Plans SDK
-
-### Initialization
-
-```swift
-let vc = FooyoBaseMapViewController(userId: String?)
-```
-
-## Add To Plan SDK
-
-### Initialization
-
-```swift
-let vc = FooyoAddToPlanViewController(index: FooyoIndex, userId: String)
-let nav = UINavigationController(rootViewController: vc)
-nav.navigationBar.isHidden = true
-nav.modalPresentationStyle = .overFullScreen
-self.present(nav, animated: true, completion: nil)
-```
-
-### SDK Variables
-
-- `index`: FooyoIndex of the location/trail intended to be added to a specific plan (**compulsory**);
-
-- `userId`: Required to fetch the existing plans (**compulsory**);
-
-## Upcoming SDK Functions
-
-- To support that the user can open the location detail page within the plan editing pages and add the location into the **currently editing** plan using the "add" button;
-
-
